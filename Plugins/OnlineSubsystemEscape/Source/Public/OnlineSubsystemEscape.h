@@ -4,11 +4,32 @@
 
 #include "CoreMinimal.h"
 #include "OnlineSubsystemImpl.h"
+#include "OnlineSubsystemEscapePackage.h"
+
+class FOnlineIdentityEscape;
+
+typedef TSharedPtr<class FOnlineIdentityEscape, ESPMode::ThreadSafe> FOnlineIdentityEscapePtr;
 
 class ONLINESUBSYSTEMESCAPE_API FOnlineSubsystemEscape :
 	public FOnlineSubsystemImpl
 {
 protected:
+	/** Interface to the profile services */
+	FOnlineIdentityEscapePtr IdentityInterface;
+
+	/** Online async task runnable */
+	class FOnlineAsyncTaskManagerEscape* OnlineAsyncTaskThreadRunnable;
+
+	/** Online async task thread */
+	class FRunnableThread* OnlineAsyncTaskThread;
+
+PACKAGE_SCOPE:
+
+	/** Only the factory makes instances */
+	FOnlineSubsystemEscape()
+	{
+
+	}
 
 public:
 

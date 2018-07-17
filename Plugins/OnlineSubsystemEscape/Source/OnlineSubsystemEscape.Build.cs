@@ -36,8 +36,9 @@ public class OnlineSubsystemEscape : ModuleRules
                 "Core",
                 "CoreUObject",
 				"Engine",
-				"Slate",
+                "Slate",
 				"SlateCore",
+                "Sockets",
                 "OnlineSubsystem"
 			}
 			);

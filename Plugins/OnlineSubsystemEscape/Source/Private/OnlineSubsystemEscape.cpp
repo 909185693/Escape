@@ -2,6 +2,35 @@
 
 #include "OnlineSubsystemEscape.h"
 
+#include "OnlineAsyncTaskManagerEscape.h"
+#include "OnlineIdentityInterfaceEscape.h"
+
+//#ifndef ESCAPE_SUBSYSTEM
+//#define ESCAPE_SUBSYSTEM FName(TEXT("ESCAPE"))
+//#endif
+
+///**
+//* Create the socket subsystem for the given platform service
+//*/
+//FName CreateSteamSocketSubsystem()
+//{
+//	// Create and register our singleton factory with the main online subsystem for easy access
+//	FOnlineSubsystemEscape* SocketSubsystem = FOnlineSubsystemEscape::Create();
+//	FString Error;
+//	if (SocketSubsystem->Init(Error))
+//	{
+//		FSocketSubsystemModule& SSS = FModuleManager::LoadModuleChecked<FSocketSubsystemModule>("Sockets");
+//		SSS.RegisterSocketSubsystem(ESCAPE_SUBSYSTEM, SocketSubsystem, true);
+//		return ESCAPE_SUBSYSTEM;
+//	}
+//	else
+//	{
+//		FSocketSubsystemSteam::Destroy();
+//		return NAME_None;
+//	}
+//}
+
+
 IOnlineSessionPtr FOnlineSubsystemEscape::GetSessionInterface() const
 {
 	return nullptr;
@@ -54,7 +83,7 @@ IOnlineTimePtr FOnlineSubsystemEscape::GetTimeInterface() const
 
 IOnlineIdentityPtr FOnlineSubsystemEscape::GetIdentityInterface() const
 {
-	return nullptr;
+	return IdentityInterface;
 }
 
 IOnlineTitleFilePtr FOnlineSubsystemEscape::GetTitleFileInterface() const

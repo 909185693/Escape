@@ -22,7 +22,7 @@
 	],
 	"LocalizationTargets": [
 		{
-			"Name": "OnlineSubsystemSteam",
+			"Name": "OnlineSubsystemEscape",
 			"LoadingPolicy": "Always"
 		}
 	],

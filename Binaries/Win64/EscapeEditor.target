@@ -2580,21 +2580,6 @@
 			"IsPrecompiled": true
 		},
 		{
-			"Path": "$(EngineDir)/Binaries/Win64/UE4Editor-TextureFormatAndroid.dll",
-			"Type": "DynamicLibrary",
-			"IsPrecompiled": true
-		},
-		{
-			"Path": "$(EngineDir)/Binaries/Win64/UE4Editor-TextureFormatAndroid.pdb",
-			"Type": "SymbolFile",
-			"IsPrecompiled": true
-		},
-		{
-			"Path": "$(EngineDir)/Intermediate/Build/Win64/UE4Editor/Development/UE4Editor-TextureFormatAndroid.lib",
-			"Type": "ImportLibrary",
-			"IsPrecompiled": true
-		},
-		{
 			"Path": "$(EngineDir)/Binaries/Win64/UE4Editor-TargetPlatform.dll",
 			"Type": "DynamicLibrary",
 			"IsPrecompiled": true
