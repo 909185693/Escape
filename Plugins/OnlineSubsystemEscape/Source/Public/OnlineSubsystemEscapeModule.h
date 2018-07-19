@@ -7,6 +7,10 @@
 
 class FOnlineSubsystemEscapeModule : public IModuleInterface
 {
+private:
+	/** Class responsible for creating instance(s) of the subsystem */
+	class FOnlineFactoryEscape* EscapeFactory;
+
 public:
 
 	/** IModuleInterface implementation */

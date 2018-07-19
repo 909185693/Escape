@@ -1,35 +1,13 @@
 // Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 
 #include "OnlineSubsystemEscape.h"
-
+#include "OnlineSubsystemEscapeTypes.h"
 #include "OnlineAsyncTaskManagerEscape.h"
 #include "OnlineIdentityInterfaceEscape.h"
+#include "VoiceInterfaceImpl.h"
+#include "HAL/RunnableThread.h"
 
-//#ifndef ESCAPE_SUBSYSTEM
-//#define ESCAPE_SUBSYSTEM FName(TEXT("ESCAPE"))
-//#endif
-
-///**
-//* Create the socket subsystem for the given platform service
-//*/
-//FName CreateSteamSocketSubsystem()
-//{
-//	// Create and register our singleton factory with the main online subsystem for easy access
-//	FOnlineSubsystemEscape* SocketSubsystem = FOnlineSubsystemEscape::Create();
-//	FString Error;
-//	if (SocketSubsystem->Init(Error))
-//	{
-//		FSocketSubsystemModule& SSS = FModuleManager::LoadModuleChecked<FSocketSubsystemModule>("Sockets");
-//		SSS.RegisterSocketSubsystem(ESCAPE_SUBSYSTEM, SocketSubsystem, true);
-//		return ESCAPE_SUBSYSTEM;
-//	}
-//	else
-//	{
-//		FSocketSubsystemSteam::Destroy();
-//		return NAME_None;
-//	}
-//}
-
+FThreadSafeCounter FOnlineSubsystemEscape::TaskCounter;
 
 IOnlineSessionPtr FOnlineSubsystemEscape::GetSessionInterface() const
 {
@@ -68,7 +46,17 @@ IOnlineLeaderboardsPtr FOnlineSubsystemEscape::GetLeaderboardsInterface() const
 
 IOnlineVoicePtr FOnlineSubsystemEscape::GetVoiceInterface() const
 {
-	return nullptr;
+	if (VoiceInterface.IsValid() && !bVoiceInterfaceInitialized)
+	{
+		if (!VoiceInterface->Init())
+		{
+			VoiceInterface = nullptr;
+		}
+
+		bVoiceInterfaceInitialized = true;
+	}
+
+	return VoiceInterface;
 }
 
 IOnlineExternalUIPtr FOnlineSubsystemEscape::GetExternalUIInterface() const
@@ -158,12 +146,59 @@ bool FOnlineSubsystemEscape::IsLocalPlayer(const FUniqueNetId& UniqueId) const
 
 bool FOnlineSubsystemEscape::Init()
 {
-	return false;
+	OnlineAsyncTaskThreadRunnable = new FOnlineAsyncTaskManagerEscape(this);
+	check(OnlineAsyncTaskThreadRunnable);
+	OnlineAsyncTaskThread = FRunnableThread::Create(OnlineAsyncTaskThreadRunnable, *FString::Printf(TEXT("OnlineAsyncTaskThreadEscape %s(%d)"), *InstanceName.ToString(), TaskCounter.Increment()), 128 * 1024, TPri_Normal);
+	check(OnlineAsyncTaskThread);
+	
+	UE_LOG_ONLINE(Verbose, TEXT("Created thread (ID:%d)."), OnlineAsyncTaskThread->GetThreadID());
+
+	VoiceInterface = MakeShareable(new FOnlineVoiceImpl(this));
+
+	return true;
 }
 
 bool FOnlineSubsystemEscape::Shutdown()
 {
-	return false;
+	UE_LOG_ONLINE(VeryVerbose, TEXT("FOnlineSubsystemEscape::Shutdown()"));
+
+	FOnlineSubsystemImpl::Shutdown();
+
+	if (OnlineAsyncTaskThread)
+	{
+		// Destroy the online async task thread
+		delete OnlineAsyncTaskThread;
+		OnlineAsyncTaskThread = nullptr;
+	}
+
+	if (OnlineAsyncTaskThreadRunnable)
+	{
+		delete OnlineAsyncTaskThreadRunnable;
+		OnlineAsyncTaskThreadRunnable = nullptr;
+	}
+
+	if (VoiceInterface.IsValid() && bVoiceInterfaceInitialized)
+	{
+		VoiceInterface->Shutdown();
+	}
+
+#define DESTRUCT_INTERFACE(Interface) \
+ 	if (Interface.IsValid()) \
+ 	{ \
+ 		ensure(Interface.IsUnique()); \
+ 		Interface = nullptr; \
+ 	}
+
+	// Destruct the interfaces
+	DESTRUCT_INTERFACE(VoiceInterface);
+	//DESTRUCT_INTERFACE(AchievementsInterface);
+	DESTRUCT_INTERFACE(IdentityInterface);
+	//DESTRUCT_INTERFACE(LeaderboardsInterface);
+	//DESTRUCT_INTERFACE(SessionInterface);
+
+#undef DESTRUCT_INTERFACE
+
+	return true;
 }
 
 bool FOnlineSubsystemEscape::Exec(class UWorld* InWorld, const TCHAR* Cmd, FOutputDevice& Ar)
@@ -173,7 +208,7 @@ bool FOnlineSubsystemEscape::Exec(class UWorld* InWorld, const TCHAR* Cmd, FOutp
 
 bool FOnlineSubsystemEscape::IsEnabled() const
 {
-	return false;
+	return true;
 }
 
 FString FOnlineSubsystemEscape::GetAppId() const
@@ -184,4 +219,29 @@ FString FOnlineSubsystemEscape::GetAppId() const
 FText FOnlineSubsystemEscape::GetOnlineServiceName() const
 {
 	return FText::GetEmpty();
+}
+
+bool FOnlineSubsystemEscape::Tick(float DeltaTime)
+{
+	if (!FOnlineSubsystemImpl::Tick(DeltaTime))
+	{
+		return false;
+	}
+
+	if (OnlineAsyncTaskThreadRunnable)
+	{
+		OnlineAsyncTaskThreadRunnable->GameTick();
+	}
+
+	//if (SessionInterface.IsValid())
+	//{
+	//	SessionInterface->Tick(DeltaTime);
+	//}
+
+	if (VoiceInterface.IsValid() && bVoiceInterfaceInitialized)
+	{
+		VoiceInterface->Tick(DeltaTime);
+	}
+
+	return true;
 }

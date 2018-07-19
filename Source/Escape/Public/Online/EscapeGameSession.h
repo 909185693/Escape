@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Online.h"
 #include "GameFramework/GameSession.h"
 #include "EscapeGameSession.generated.h"
 
@@ -14,7 +14,9 @@ class ESCAPE_API AEscapeGameSession : public AGameSession
 {
 	GENERATED_BODY()
 	
-	
-	
-	
+	/**
+	* Called when this instance is starting up as a dedicated server
+	*/
+	virtual void RegisterServer() override;
+		
 };

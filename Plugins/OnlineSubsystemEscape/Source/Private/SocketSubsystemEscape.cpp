@@ -6,6 +6,28 @@
 #include "IPAddress.h"
 #include "OnlineSessionInterface.h"
 #include "SocketSubsystemModule.h"
+#include "OnlineSubsystemEscapeTypes.h"
+
+/**
+* Create the socket subsystem for the given platform service
+*/
+FName CreateSteamSocketSubsystem()
+{
+	// Create and register our singleton factory with the main online subsystem for easy access
+	FSocketSubsystemEscape* SocketSubsystem = FSocketSubsystemEscape::Create();
+	FString Error;
+	if (SocketSubsystem->Init(Error))
+	{
+		FSocketSubsystemModule& SSS = FModuleManager::LoadModuleChecked<FSocketSubsystemModule>("Sockets");
+		SSS.RegisterSocketSubsystem(ESCAPE_SUBSYSTEM, SocketSubsystem, true);
+		return ESCAPE_SUBSYSTEM;
+	}
+	else
+	{
+		FSocketSubsystemEscape::Destroy();
+		return NAME_None;
+	}
+}
 
 
 FSocketSubsystemEscape* FSocketSubsystemEscape::SocketSingleton = nullptr;
@@ -22,6 +44,16 @@ FSocketSubsystemEscape* FSocketSubsystemEscape::Create()
 	}
 
 	return SocketSingleton;
+}
+
+void FSocketSubsystemEscape::Destroy()
+{
+	if (SocketSingleton != NULL)
+	{
+		SocketSingleton->Shutdown();
+		delete SocketSingleton;
+		SocketSingleton = NULL;
+	}
 }
 
 /**

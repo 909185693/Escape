@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Online.h"
 #include "Engine/GameInstance.h"
 #include "EscapeGameInstance.generated.h"
 
@@ -14,7 +14,8 @@ class ESCAPE_API UEscapeGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
 	
-	
-	
-	
+	class AEscapeGameSession* GetGameSession() const;
+
+	virtual void Init() override;
+		
 };

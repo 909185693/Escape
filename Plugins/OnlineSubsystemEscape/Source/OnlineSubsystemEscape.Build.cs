@@ -7,22 +7,10 @@ public class OnlineSubsystemEscape : ModuleRules
 	public OnlineSubsystemEscape(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-		
-		PublicIncludePaths.AddRange(
-			new string[] {
-				"OnlineSubsystemEscape/Public"
-			}
-			);
-				
-		
-		PrivateIncludePaths.AddRange(
-			new string[] {
-				"OnlineSubsystemEscape/Private",
-			}
-			);
-			
-		
-		PublicDependencyModuleNames.AddRange(
+
+        PrivateDefinitions.Add("ONLINESUBSYSTEMESCAPE_PACKAGE=1");
+
+        PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
                 "OnlineSubsystemUtils"

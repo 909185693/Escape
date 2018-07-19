@@ -64,12 +64,12 @@ TSharedPtr<const FUniqueNetId> FOnlineIdentityEscape::CreateUniquePlayerId(const
 */
 FString FOnlineIdentityEscape::GetPlayerNickname(int32 LocalUserNum) const
 {
-	return FString(TEXT(""));
+	return FString(TEXT("EscapeUser"));
 }
 
 FString FOnlineIdentityEscape::GetPlayerNickname(const FUniqueNetId& UserId) const
 {
-	return FString(TEXT(""));
+	return FString(TEXT("EscapeUser"));
 }
 
 /**

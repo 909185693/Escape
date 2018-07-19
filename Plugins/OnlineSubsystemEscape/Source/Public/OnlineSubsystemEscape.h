@@ -7,8 +7,10 @@
 #include "OnlineSubsystemEscapePackage.h"
 
 class FOnlineIdentityEscape;
+class FOnlineVoiceImpl;
 
 typedef TSharedPtr<class FOnlineIdentityEscape, ESPMode::ThreadSafe> FOnlineIdentityEscapePtr;
+typedef TSharedPtr<class FOnlineVoiceImpl, ESPMode::ThreadSafe> FOnlineVoiceImplPtr;
 
 class ONLINESUBSYSTEMESCAPE_API FOnlineSubsystemEscape :
 	public FOnlineSubsystemImpl
@@ -16,6 +18,12 @@ class ONLINESUBSYSTEMESCAPE_API FOnlineSubsystemEscape :
 protected:
 	/** Interface to the profile services */
 	FOnlineIdentityEscapePtr IdentityInterface;
+	
+	/** Interface for voice communication */
+	mutable FOnlineVoiceImplPtr VoiceInterface;
+	
+	/** Interface for voice communication */
+	mutable bool bVoiceInterfaceInitialized;
 
 	/** Online async task runnable */
 	class FOnlineAsyncTaskManagerEscape* OnlineAsyncTaskThreadRunnable;
@@ -23,10 +31,29 @@ protected:
 	/** Online async task thread */
 	class FRunnableThread* OnlineAsyncTaskThread;
 
+	// task counter, used to generate unique thread names for each task
+	static FThreadSafeCounter TaskCounter;
+
 PACKAGE_SCOPE:
 
 	/** Only the factory makes instances */
-	FOnlineSubsystemEscape()
+	FOnlineSubsystemEscape() :
+		bVoiceInterfaceInitialized(false),
+		OnlineAsyncTaskThreadRunnable(nullptr),
+		OnlineAsyncTaskThread(nullptr),
+		IdentityInterface(nullptr),
+		VoiceInterface(nullptr)
+	{
+
+	}
+
+	FOnlineSubsystemEscape(FName InInstanceName) :
+		FOnlineSubsystemImpl(ESCAPE_SUBSYSTEM, InInstanceName),
+		bVoiceInterfaceInitialized(false),
+		OnlineAsyncTaskThreadRunnable(nullptr),
+		OnlineAsyncTaskThread(nullptr),
+		IdentityInterface(nullptr),
+		VoiceInterface(nullptr)
 	{
 
 	}
@@ -70,4 +97,12 @@ public:
 	virtual bool IsEnabled() const override;
 	virtual FString GetAppId() const override;
 	virtual FText GetOnlineServiceName() const override;
+
+	// FTickerObjectBase
+
+	virtual bool Tick(float DeltaTime) override;
+
+	// FOnlineSubsystemNull
 };
+
+typedef TSharedPtr<FOnlineSubsystemEscape, ESPMode::ThreadSafe> FOnlineSubsystemEscapePtr;

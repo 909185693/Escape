@@ -19,26 +19,26 @@ protected:
 	static FSocketSubsystemEscape* SocketSingleton;
 
 	/** Tracks existing Steamworks sockets, for connection failure/timeout resolution */
-	TArray<class FSocketsEscape*> SteamSockets;
+	TArray<class FSocketsEscape*> EscapeSockets;
 
 	/**
-	* Adds a steam socket for tracking
+	* Adds a escape socket for tracking
 	*
 	* @param InSocket	The socket to add for tracking
 	*/
 	void AddSocket(class FSocketsEscape* InSocket)
 	{
-		SteamSockets.Add(InSocket);
+		EscapeSockets.Add(InSocket);
 	}
 
 	/**
-	* Removes a steam socket from tracking
+	* Removes a escape socket from tracking
 	*
 	* @param InSocket	The socket to remove from tracking
 	*/
 	void RemoveSocket(class FSocketsEscape* InSocket)
 	{
-		SteamSockets.RemoveSingleSwap(InSocket);
+		EscapeSockets.RemoveSingleSwap(InSocket);
 	}
 
 PACKAGE_SCOPE:
@@ -51,6 +51,11 @@ PACKAGE_SCOPE:
 	* @return the only instance of this subsystem
 	*/
 	static FSocketSubsystemEscape* Create();
+
+	/**
+	* Performs Windows specific socket clean up
+	*/
+	static void Destroy();
 
 public:
 	FSocketSubsystemEscape() :

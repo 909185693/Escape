@@ -10,5 +10,22 @@
 class FOnlineAsyncTaskManagerEscape :
 	public FOnlineAsyncTaskManager
 {
+protected:
 
+	/** Cached reference to the main online subsystem */
+	class FOnlineSubsystemEscape* EscapeSubsystem;
+
+public:
+
+	FOnlineAsyncTaskManagerEscape(class FOnlineSubsystemEscape* InOnlineSubsystem)
+		: EscapeSubsystem(InOnlineSubsystem)
+	{
+	}
+
+	~FOnlineAsyncTaskManagerEscape()
+	{
+	}
+
+	// FOnlineAsyncTaskManager
+	virtual void OnlineTick() override;
 };
