@@ -3,6 +3,8 @@
 #include "OnlineSubsystemEscape.h"
 #include "OnlineSubsystemEscapeTypes.h"
 #include "OnlineAsyncTaskManagerEscape.h"
+#include "OnlineSessionInterfaceEscape.h"
+#include "OnlineExternalUIEscape.h"
 #include "OnlineIdentityInterfaceEscape.h"
 #include "VoiceInterfaceImpl.h"
 #include "HAL/RunnableThread.h"
@@ -11,7 +13,7 @@ FThreadSafeCounter FOnlineSubsystemEscape::TaskCounter;
 
 IOnlineSessionPtr FOnlineSubsystemEscape::GetSessionInterface() const
 {
-	return nullptr;
+	return SessionInterface;
 }
 
 IOnlineFriendsPtr FOnlineSubsystemEscape::GetFriendsInterface() const
@@ -61,7 +63,7 @@ IOnlineVoicePtr FOnlineSubsystemEscape::GetVoiceInterface() const
 
 IOnlineExternalUIPtr FOnlineSubsystemEscape::GetExternalUIInterface() const
 {
-	return nullptr;
+	return ExternalUIInterface;
 }
 
 IOnlineTimePtr FOnlineSubsystemEscape::GetTimeInterface() const
@@ -153,6 +155,9 @@ bool FOnlineSubsystemEscape::Init()
 	
 	UE_LOG_ONLINE(Verbose, TEXT("Created thread (ID:%d)."), OnlineAsyncTaskThread->GetThreadID());
 
+	SessionInterface = MakeShareable(new FOnlineSessionEscape(this));
+	IdentityInterface = MakeShareable(new FOnlineIdentityEscape(this));
+	ExternalUIInterface = MakeShareable(new FOnlineExternalUIEscape(this));
 	VoiceInterface = MakeShareable(new FOnlineVoiceImpl(this));
 
 	return true;
@@ -190,11 +195,11 @@ bool FOnlineSubsystemEscape::Shutdown()
  	}
 
 	// Destruct the interfaces
-	DESTRUCT_INTERFACE(VoiceInterface);
-	//DESTRUCT_INTERFACE(AchievementsInterface);
+	DESTRUCT_INTERFACE(SessionInterface);
 	DESTRUCT_INTERFACE(IdentityInterface);
+	DESTRUCT_INTERFACE(ExternalUIInterface);
+	DESTRUCT_INTERFACE(VoiceInterface);
 	//DESTRUCT_INTERFACE(LeaderboardsInterface);
-	//DESTRUCT_INTERFACE(SessionInterface);
 
 #undef DESTRUCT_INTERFACE
 
@@ -233,10 +238,10 @@ bool FOnlineSubsystemEscape::Tick(float DeltaTime)
 		OnlineAsyncTaskThreadRunnable->GameTick();
 	}
 
-	//if (SessionInterface.IsValid())
-	//{
-	//	SessionInterface->Tick(DeltaTime);
-	//}
+	if (SessionInterface.IsValid())
+	{
+		SessionInterface->Tick(DeltaTime);
+	}
 
 	if (VoiceInterface.IsValid() && bVoiceInterfaceInitialized)
 	{

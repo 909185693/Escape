@@ -2,7 +2,6 @@
 
 #include "SocketSubsystemEscape.h"
 #include "Misc/ConfigCacheIni.h"
-#include "SocketsEscape.h"
 #include "IPAddress.h"
 #include "OnlineSessionInterface.h"
 #include "SocketSubsystemModule.h"
@@ -87,7 +86,17 @@ void FSocketSubsystemEscape::Shutdown()
 */
 FSocket* FSocketSubsystemEscape::CreateSocket(const FName& SocketType, const FString& SocketDescription, bool bForceUDP)
 {
-	return nullptr;
+	FSocket* NewSocket = NULL;
+
+	ISocketSubsystem* PlatformSocketSub = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM);
+	if (PlatformSocketSub)
+	{
+		NewSocket = PlatformSocketSub->CreateSocket(SocketType, SocketDescription, bForceUDP);
+
+		AddSocket(NewSocket);
+	}
+
+	return NewSocket;
 }
 
 /**
@@ -98,8 +107,13 @@ FSocket* FSocketSubsystemEscape::CreateSocket(const FName& SocketType, const FSt
 void FSocketSubsystemEscape::DestroySocket(FSocket* Socket)
 {
 	// Possible non steam socket here PLATFORM_SOCKETSUBSYSTEM, but its just a pointer compare
-	RemoveSocket((FSocketsEscape*)Socket);
-	delete Socket;
+	RemoveSocket(Socket);
+	
+	ISocketSubsystem* PlatformSocketSub = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM);
+	if (PlatformSocketSub)
+	{
+		PlatformSocketSub->DestroySocket(Socket);
+	}
 }
 
 /**

@@ -11,9 +11,16 @@
 class FOnlineIdentityEscape :
 	public IOnlineIdentity
 {
-public:
+PACKAGE_SCOPE:
+	explicit FOnlineIdentityEscape(FOnlineSubsystemEscape* InSubsystem) :
+	  EscapeSubsystem(InSubsystem)
+	{
+
+	}
 
 	virtual ~FOnlineIdentityEscape() {};
+
+public:
 
 	// IOnlineIdentity
 
@@ -34,6 +41,10 @@ public:
 	virtual void GetUserPrivilege(const FUniqueNetId& UserId, EUserPrivileges::Type Privilege, const FOnGetUserPrivilegeCompleteDelegate& Delegate) override;
 	virtual FPlatformUserId GetPlatformUserIdFromUniqueNetId(const FUniqueNetId& UniqueNetId) const override;
 	virtual FString GetAuthType() const override;
+
+private:
+	/** Cached pointer to owning subsystem */
+	FOnlineSubsystemEscape* EscapeSubsystem;
 };
 
 typedef TSharedPtr<FOnlineIdentityEscape, ESPMode::ThreadSafe> FOnlineIdentityEscapePtr;

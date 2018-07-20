@@ -14,6 +14,14 @@
 #define ESCAPE_URL_PREFIX TEXT("escape.")
 #endif
 
+#ifndef ESCAPE_SOCKET_TYPE_CLIENT
+#define ESCAPE_SOCKET_TYPE_CLIENT FName(TEXT("EscapeSocketClient"))
+#endif
+
+#ifndef ESCAPE_SOCKET_TYPE_SERVER
+#define ESCAPE_SOCKET_TYPE_SERVER FName(TEXT("EscapeSocketServer"))
+#endif
+
 class FOnlineSubsystemEscape;
 
 // from OnlineSubsystemTypes.h

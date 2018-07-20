@@ -5,7 +5,6 @@
 #include "OnlineSubsystem.h"
 #include "SocketSubsystem.h"
 #include "SocketSubsystemEscape.h"
-#include "SocketsEscape.h"
 #include "EscapeNetDriver.h"
 #include "OnlineSubsystemEscapeTypes.h"
 

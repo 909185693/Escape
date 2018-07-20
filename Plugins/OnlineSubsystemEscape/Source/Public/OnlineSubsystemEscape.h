@@ -6,19 +6,29 @@
 #include "OnlineSubsystemImpl.h"
 #include "OnlineSubsystemEscapePackage.h"
 
+class FOnlineSessionEscape;
 class FOnlineIdentityEscape;
+class FOnlineExternalUIEscape;
 class FOnlineVoiceImpl;
 
+typedef TSharedPtr<class FOnlineSessionEscape, ESPMode::ThreadSafe> FOnlineSessionEscapePtr;
 typedef TSharedPtr<class FOnlineIdentityEscape, ESPMode::ThreadSafe> FOnlineIdentityEscapePtr;
+typedef TSharedPtr<class FOnlineExternalUIEscape, ESPMode::ThreadSafe> FOnlineExternalUIEscapePtr;
 typedef TSharedPtr<class FOnlineVoiceImpl, ESPMode::ThreadSafe> FOnlineVoiceImplPtr;
 
 class ONLINESUBSYSTEMESCAPE_API FOnlineSubsystemEscape :
 	public FOnlineSubsystemImpl
 {
 protected:
+	/** Interface to online session */
+	FOnlineSessionEscapePtr SessionInterface;
+
 	/** Interface to the profile services */
 	FOnlineIdentityEscapePtr IdentityInterface;
 	
+	/** Interface to implementation of the external ui */
+	FOnlineExternalUIEscapePtr ExternalUIInterface;
+
 	/** Interface for voice communication */
 	mutable FOnlineVoiceImplPtr VoiceInterface;
 	
@@ -41,7 +51,9 @@ PACKAGE_SCOPE:
 		bVoiceInterfaceInitialized(false),
 		OnlineAsyncTaskThreadRunnable(nullptr),
 		OnlineAsyncTaskThread(nullptr),
+		SessionInterface(nullptr),
 		IdentityInterface(nullptr),
+		ExternalUIInterface(nullptr),
 		VoiceInterface(nullptr)
 	{
 
@@ -52,7 +64,9 @@ PACKAGE_SCOPE:
 		bVoiceInterfaceInitialized(false),
 		OnlineAsyncTaskThreadRunnable(nullptr),
 		OnlineAsyncTaskThread(nullptr),
+		SessionInterface(nullptr),
 		IdentityInterface(nullptr),
+		ExternalUIInterface(nullptr),
 		VoiceInterface(nullptr)
 	{
 

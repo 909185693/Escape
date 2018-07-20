@@ -3,18 +3,19 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/Engine.h"
+#include "Engine/GameEngine.h"
 #include "EscapeEngine.generated.h"
 
 /**
  * 
  */
-UCLASS()
-class ESCAPE_API UEscapeEngine : public UEngine
+UCLASS(config=Engine, transient)
+class ESCAPE_API UEscapeEngine : public UGameEngine
 {
 	GENERATED_BODY()
 	
-	
+	/* Hook up specific callbacks */
+	virtual void Init(IEngineLoop* InEngineLoop) override;
 	
 	
 };

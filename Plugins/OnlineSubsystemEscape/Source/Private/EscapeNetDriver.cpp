@@ -4,7 +4,6 @@
 #include "OnlineSubsystemNames.h"
 #include "OnlineSubsystem.h"
 #include "SocketSubsystem.h"
-#include "SocketsEscape.h"
 #include "EscapeNetConnection.h"
 #include "OnlineSubsystemEscapeTypes.h"
 
@@ -90,7 +89,7 @@ bool UEscapeNetDriver::InitConnect(FNetworkNotify* InNotify, const FURL& Connect
 		// If we are opening a Steam URL, create a Steam client socket
 		if (ConnectURL.Host.StartsWith(ESCAPE_URL_PREFIX))
 		{
-			Socket = SteamSockets->CreateSocket(FName(TEXT("EscapeClientSocket")), TEXT("Unreal client (Escape)"));
+			Socket = SteamSockets->CreateSocket(ESCAPE_SOCKET_TYPE_CLIENT, TEXT("Unreal client (Escape)"));
 		}
 		else
 		{

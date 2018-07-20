@@ -19,14 +19,14 @@ protected:
 	static FSocketSubsystemEscape* SocketSingleton;
 
 	/** Tracks existing Steamworks sockets, for connection failure/timeout resolution */
-	TArray<class FSocketsEscape*> EscapeSockets;
+	TArray<class FSocket*> EscapeSockets;
 
 	/**
 	* Adds a escape socket for tracking
 	*
 	* @param InSocket	The socket to add for tracking
 	*/
-	void AddSocket(class FSocketsEscape* InSocket)
+	void AddSocket(class FSocket* InSocket)
 	{
 		EscapeSockets.Add(InSocket);
 	}
@@ -36,7 +36,7 @@ protected:
 	*
 	* @param InSocket	The socket to remove from tracking
 	*/
-	void RemoveSocket(class FSocketsEscape* InSocket)
+	void RemoveSocket(class FSocket* InSocket)
 	{
 		EscapeSockets.RemoveSingleSwap(InSocket);
 	}
