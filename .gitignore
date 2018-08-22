@@ -37,7 +37,17 @@
 *.hotreload
 
 # Folders
+.vs
 DerivedDataCache
 Intermediate
 Saved
-.vs
+Build
+Releases
+Binaries/Android
+Binaries/Win64
+Content/AdvancedLocomotionV3
+Content/ParagonCountess
+Content/ParagonFengMao
+Content/ParagonShinbi
+Content/Collections
+Content/Developers

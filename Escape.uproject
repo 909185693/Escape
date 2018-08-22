@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "4.20",
+	"EngineAssociation": "{B41ABEBD-423D-6753-5277-ECA1F27ADA9C}",
 	"Category": "",
 	"Description": "",
 	"Modules": [
@@ -16,6 +16,14 @@
 	"Plugins": [
 		{
 			"Name": "OnlineFramework",
+			"Enabled": true
+		},
+		{
+			"Name": "OnlineSubsystemEscape",
+			"Enabled": true
+		},
+		{
+			"Name": "Crasheye",
 			"Enabled": true
 		}
 	]

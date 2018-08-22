@@ -19,6 +19,7 @@ public class Escape : ModuleRules
         });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {
+            "Crasheye",
             "OnlineSubsystemEscape"
         });
 

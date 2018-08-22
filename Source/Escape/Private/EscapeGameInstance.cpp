@@ -1,6 +1,7 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2018 by January. All Rights Reserved.
 
 #include "EscapeGameInstance.h"
+#include "CrasheyeHelper.h"
 
 
 class AEscapeGameSession* UEscapeGameInstance::GetGameSession() const
@@ -17,6 +18,9 @@ void UEscapeGameInstance::Init()
 	check(OnlineSub);
 	const auto IdentityInterface = OnlineSub->GetIdentityInterface();
 	check(IdentityInterface.IsValid());
+
+	UCrasheyeHelper::CrasheyeSetUserIdentifier(TEXT("TestCrasheye"));
+	UCrasheyeHelper::CrasheyeSetAppVersion(TEXT("1.0.0"));
 
 	UE_LOG(LogTemp, Log, TEXT("OnlineSub [%s] IdentityInterface [%s]"), *OnlineSub->GetSubsystemName().ToString(), *IdentityInterface->GetPlayerNickname(0));
 }
