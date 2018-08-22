@@ -16,6 +16,7 @@ public class Crasheye : ModuleRules
 
         PrivateIncludePaths.AddRange(
             new string[] {
+                "Crasheye/Private",
 				// ... add other private include paths required here ...
 			}
             );
