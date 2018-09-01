@@ -7,15 +7,12 @@
 #include "AnimNotify_ResetCombo.generated.h"
 
 
-/**
- * 
- */
 UCLASS()
 class UAnimNotify_ResetCombo : public UAnimNotify
 {
 	GENERATED_BODY()
 	
-	
+	virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) override;
 	
 	
 };

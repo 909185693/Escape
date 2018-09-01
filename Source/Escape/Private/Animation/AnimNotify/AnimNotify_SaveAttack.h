@@ -6,15 +6,12 @@
 #include "Animation/AnimNotifies/AnimNotify.h"
 #include "AnimNotify_SaveAttack.generated.h"
 
-/**
- * 
- */
+
 UCLASS()
 class UAnimNotify_SaveAttack : public UAnimNotify
 {
 	GENERATED_BODY()
-	
-	
-	
-	
+
+	virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) override;
+		
 };
