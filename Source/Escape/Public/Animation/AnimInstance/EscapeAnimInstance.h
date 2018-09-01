@@ -28,9 +28,13 @@ protected:
 	AEscapeCharacter* Owner;
 
 protected:
-	/** 角色速度 */
+	/** 角色运动速度 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (ClampMin = "0"))
 	float Speed;
+
+	/** 角色运动方向 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (ClampMin = "-180", ClampMax = "180"))
+	float Direction;
 	
 	
 };

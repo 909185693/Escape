@@ -6,34 +6,40 @@
 #include "GameFramework/Character.h"
 #include "EscapeCharacter.generated.h"
 
+
 UCLASS()
 class ESCAPE_API AEscapeCharacter : public ACharacter
 {
-	GENERATED_BODY()
-
-public:
-	// Sets default values for this character's properties
-	AEscapeCharacter();
+	GENERATED_UCLASS_BODY()
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
+public:
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	/** Assault Counter */
+	UPROPERTY(Transient)
+	uint8 AttackCount;
 
 	/**
-	* Make the character jump on the next update.
-	* If you want your character to jump according to the time that the jump key is held,
-	* then you can set JumpKeyHoldTime to some non-zero value. Make sure in this case to
-	* call StopJumping() when you want the jump's z-velocity to stop being applied (such
-	* as on a button up event), otherwise the character will carry on receiving the
-	* velocity until JumpKeyHoldTime is reached.
+	* Called via input to character attack
 	*/
-	virtual void Jump() override;
-	
+	UFUNCTION(BlueprintCallable, Category="EscapeCharacter")
+	virtual void Attack();
+
+	/**
+	* Called via input to character stop attacking
+	*/
+	UFUNCTION(BlueprintCallable, Category="EscapeCharacter")
+	virtual void StopAttacking();
+
+private:
+	/** Camera boom positioning the camera behind the character */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class USpringArmComponent* CameraBoom;
+
+	/** Follow camera */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class UCameraComponent* FollowCamera;
 };

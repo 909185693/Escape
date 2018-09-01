@@ -12,10 +12,9 @@
 UCLASS()
 class ESCAPE_API AEscapeGameModeBase : public AGameModeBase
 {
-	GENERATED_BODY()
+	GENERATED_UCLASS_BODY()
 	
 	/** Returns game session class to use */
 	virtual TSubclassOf<AGameSession> GetGameSessionClass() const override;
-	
-	
+		
 };

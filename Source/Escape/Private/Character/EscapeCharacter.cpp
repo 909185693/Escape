@@ -1,45 +1,53 @@
 // Copyright 2018 by January. All Rights Reserved.
 
 #include "EscapeCharacter.h"
-#include "PostProcessAnimInstance.h"
+#include "EscapeCharacterMovementComponent.h"
+#include "Camera/CameraComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 
 
-// Sets default values
-AEscapeCharacter::AEscapeCharacter()
+AEscapeCharacter::AEscapeCharacter(const class FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UEscapeCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	// ÉãÏñ»ú¸Ë
+	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
+	if (CameraBoom != nullptr)
+	{
+		CameraBoom->SetupAttachment(RootComponent);
+		CameraBoom->bUsePawnControlRotation = true;
+		CameraBoom->CameraLagSpeed = 5.f;
+		CameraBoom->CameraLagMaxDistance = 15.f;
+	}
 
+	// ÉãÏñ»ú¸úËæ
+	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
+	if (FollowCamera != nullptr)
+	{
+		FollowCamera->SetupAttachment(CameraBoom);
+		FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+	}
+
+	PrimaryActorTick.bCanEverTick = true;
 }
 
-// Called when the game starts or when spawned
 void AEscapeCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
-// Called every frame
 void AEscapeCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 }
 
-// Called to bind functionality to input
-void AEscapeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void AEscapeCharacter::Attack()
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-
 
 }
 
-void AEscapeCharacter::Jump()
+void AEscapeCharacter::StopAttacking()
 {
-	USkeletalMeshComponent* Mesh = GetMesh();
-	UPostProcessAnimInstance* AnimInstance = Mesh ? Cast<UPostProcessAnimInstance>(Mesh->GetAnimInstance()) : nullptr;
 
-	AnimInstance->PlaySlotAnimationAsDynamicMontage(nullptr, NAME_None);
-	AnimInstance->NativeUpdateAnimation(0.f);
 }

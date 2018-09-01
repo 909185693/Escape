@@ -2,7 +2,22 @@
 
 #include "EscapeGameModeBase.h"
 #include "EscapeGameSession.h"
+#include "EscapePlayerController.h"
 
+
+AEscapeGameModeBase::AEscapeGameModeBase(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	// 设置默认角色蓝图
+	static ConstructorHelpers::FClassFinder<APawn> DefaultPawnClassFinder(TEXT("/Game/Blueprints/Character/EscapeCharacter_Player"));
+	if (DefaultPawnClassFinder.Succeeded())
+	{
+		DefaultPawnClass = DefaultPawnClassFinder.Class;
+	}
+
+	// 设置角色控制蓝图
+	PlayerControllerClass = AEscapePlayerController::StaticClass();
+}
 
 /** Returns game session class to use */
 TSubclassOf<AGameSession> AEscapeGameModeBase::GetGameSessionClass() const

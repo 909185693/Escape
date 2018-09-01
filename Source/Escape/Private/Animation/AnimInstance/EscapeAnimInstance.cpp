@@ -29,6 +29,6 @@ void UEscapeAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		return;
 	}
 
-	Speed = Owner->GetVelocity().Size();
+	Speed = Owner->GetVelocity().Size2D();
 }
 
