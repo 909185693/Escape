@@ -2,12 +2,14 @@
 
 #include "EscapeAnimInstance.h"
 #include "Character/EscapeCharacter.h"
-#include "GameFramework/CharacterMovementComponent.h"
+#include "EscapeCharacterMovementComponent.h"
 
 
 UEscapeAnimInstance::UEscapeAnimInstance(const class FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 	, Speed(0.f)
+	, Direction(0.f)
+	, bIsFalling(false)
 {
 
 }
@@ -18,17 +20,25 @@ void UEscapeAnimInstance::NativeInitializeAnimation()
 
 	class USkeletalMeshComponent* OwnerComponent = GetSkelMeshComponent();
 	Owner = OwnerComponent ? Cast<AEscapeCharacter>(OwnerComponent->GetOwner()) : nullptr;
+	CharacterMovement = Owner ? Cast<UEscapeCharacterMovementComponent>(Owner->GetCharacterMovement()) : nullptr;
 }
 
 void UEscapeAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
 
-	if (Owner == nullptr)
+	if (Owner != nullptr)
 	{
-		return;
+		Speed = Owner->GetVelocity().Size2D();
+
+		LookOffset = (Owner->GetBaseAimRotation() - Owner->GetActorRotation()).GetNormalized();
 	}
 
-	Speed = Owner->GetVelocity().Size2D();
+	if (CharacterMovement != nullptr)
+	{
+		bIsFalling = CharacterMovement->IsFalling();
+
+		bIsAccelerating = CharacterMovement->GetCurrentAcceleration().SizeSquared() > 0.f;
+	}
 }
 

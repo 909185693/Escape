@@ -25,7 +25,10 @@ class ESCAPE_API UEscapeAnimInstance : public UAnimInstance
 	
 protected:
 	UPROPERTY(Transient, BlueprintReadOnly)
-	AEscapeCharacter* Owner;
+	class AEscapeCharacter* Owner;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	class UEscapeCharacterMovementComponent* CharacterMovement;
 
 protected:
 	/** 角色运动速度 */
@@ -36,5 +39,16 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (ClampMin = "-180", ClampMax = "180"))
 	float Direction;
 	
-	
+	/** 角色下降 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	bool bIsFalling;
+
+	/** 角色加速 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	bool bIsAccelerating;
+
+	/** 视角偏移 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	FRotator LookOffset;
+
 };

@@ -57,21 +57,21 @@ void AEscapeCharacter::Attack()
 			PlayAnimMontage(ComboTable[AttackCount].Montage, AttackSpeed);
 		}
 
-		if (Role != ROLE_SimulatedProxy)
-		{
-			bIsAttacking = true;
-
-			AttackCount = ++AttackCount % ComboTable.Num();
-		}
-
 		if (Role == ROLE_AutonomousProxy)
 		{
-			ServerAttack();
+			ServerAttack(AttackCount);
 		}
 
 		if (Role == ROLE_Authority)
 		{
 			BroadcastAttack(AttackCount);
+		}
+
+		if (IsLocallyControlled())
+		{
+			bIsAttacking = true;
+
+			AttackCount = ++AttackCount % ComboTable.Num();
 		}
 	}
 	else
@@ -106,13 +106,15 @@ void AEscapeCharacter::ResetCombo()
 	bIsAttacking = false;
 }
 
-bool AEscapeCharacter::ServerAttack_Validate()
+bool AEscapeCharacter::ServerAttack_Validate(uint8 Count)
 {
 	return true;
 }
 
-void AEscapeCharacter::ServerAttack_Implementation()
+void AEscapeCharacter::ServerAttack_Implementation(uint8 Count)
 {
+	AttackCount = Count;
+
 	Attack();
 }
 
@@ -124,6 +126,52 @@ void AEscapeCharacter::BroadcastAttack_Implementation(uint8 Count)
 
 		Attack();
 	}
+}
+
+void AEscapeCharacter::ManagerCharactorRotation(float DeltaSeconds)
+{
+	UEscapeCharacterMovementComponent* EscapeCharacterMovement = Cast<UEscapeCharacterMovementComponent>(GetCharacterMovement());
+	if (EscapeCharacterMovement != nullptr)
+	{
+		if (EscapeCharacterMovement->IsMovingOnGround())
+		{
+
+		}
+	}
+}
+
+void AEscapeCharacter::SetCharactorRotation(const FRotator& NewTargetRotation, bool bInterp, float InterpSpeed)
+{
+	TargetRotation = NewTargetRotation;
+
+	if (bInterp)
+	{
+		const float DeltaSeconds = GetWorld()->GetDeltaSeconds();
+
+		FMath::RInterpTo(CharacterRotation, TargetRotation, DeltaSeconds, InterpSpeed);
+	}
+	else
+	{
+		CharacterRotation = NewTargetRotation;
+	}
+
+	SetActorRotation(CharacterRotation);
+
+	if (Role == ROLE_AutonomousProxy)
+	{
+		ServerSetCharactorRotation(TargetRotation, CharacterRotation);
+	}
+}
+
+bool AEscapeCharacter::ServerSetCharactorRotation_Validate(const FRotator& NewTargetRotation, const FRotator& NewCharactorRotation)
+{
+	return true;
+}
+
+void AEscapeCharacter::ServerSetCharactorRotation_Implementation(const FRotator& NewTargetRotation, const FRotator& NewCharactorRotation)
+{
+	TargetRotation = NewTargetRotation;
+	CharacterRotation = NewCharactorRotation;
 }
 
 //void AEscapeCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const

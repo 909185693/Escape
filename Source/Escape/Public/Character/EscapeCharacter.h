@@ -71,7 +71,7 @@ public:
 
 protected:
 	UFUNCTION(Server, WithValidation, Reliable)
-	void ServerAttack();
+	void ServerAttack(uint8 Count);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void BroadcastAttack(uint8 Count);
@@ -87,4 +87,25 @@ private:
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
+
+public:
+	UPROPERTY()
+	bool bIsMoving;
+
+	UPROPERTY()
+	FRotator CharacterRotation;
+
+	UPROPERTY()
+	FRotator TargetRotation;
+
+	UPROPERTY()
+	FRotator LastVelocityRotation;
+
+protected:
+	void ManagerCharactorRotation(float DeltaSeconds);
+
+	void SetCharactorRotation(const FRotator& NewTargetRotation, bool bInterp = false, float InterpSpeed = 0.f);
+
+	UFUNCTION(Server, WithValidation, Reliable)
+	void ServerSetCharactorRotation(const FRotator& NewTargetRotation, const FRotator& NewCharactorRotation);
 };
