@@ -93,16 +93,22 @@ public:
 	bool bIsMoving;
 
 	UPROPERTY()
-	FRotator CharacterRotation;
+	FRotator TargetRotation;
 
 	UPROPERTY()
-	FRotator TargetRotation;
+	FRotator CharacterRotation;
 
 	UPROPERTY()
 	FRotator LastVelocityRotation;
 
+	UPROPERTY()
+	bool bTurnInPlace;
+
+	UPROPERTY(EditAnywhere, Category = "Animation")
+	float TurnInPlaceDelay;
+
 protected:
-	void ManagerCharactorRotation(float DeltaSeconds);
+	void ManagerCharactorRotation(float DeltaTime);
 
 	void SetCharactorRotation(const FRotator& NewTargetRotation, bool bInterp = false, float InterpSpeed = 0.f);
 

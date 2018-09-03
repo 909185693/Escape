@@ -51,4 +51,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	FRotator LookOffset;
 
+	/** Ðý×ªÆ«ÒÆ Yaw */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	FRotator RotationOffsetYaw;
 };

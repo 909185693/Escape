@@ -5,11 +5,13 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 
 AEscapeCharacter::AEscapeCharacter(const class FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UEscapeCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
-	, AttackSpeed (1.f)
+	, AttackSpeed(1.f)
+	, TurnInPlaceDelay(0.f)
 {
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.f);
 
@@ -40,12 +42,17 @@ void AEscapeCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	const FRotator& ActorRotation = GetActorRotation();
+
+	TargetRotation = ActorRotation;
+	CharacterRotation = ActorRotation;
 }
 
 void AEscapeCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	ManagerCharactorRotation(DeltaTime);
 }
 
 void AEscapeCharacter::Attack()
@@ -128,14 +135,36 @@ void AEscapeCharacter::BroadcastAttack_Implementation(uint8 Count)
 	}
 }
 
-void AEscapeCharacter::ManagerCharactorRotation(float DeltaSeconds)
+void AEscapeCharacter::ManagerCharactorRotation(float DeltaTime)
 {
+	if (Role == ROLE_SimulatedProxy)
+	{
+		return;
+	}
+
 	UEscapeCharacterMovementComponent* EscapeCharacterMovement = Cast<UEscapeCharacterMovementComponent>(GetCharacterMovement());
 	if (EscapeCharacterMovement != nullptr)
 	{
 		if (EscapeCharacterMovement->IsMovingOnGround())
 		{
+			if (EscapeCharacterMovement->GetCurrentAcceleration().SizeSquared() > 0.f)
+			{
+				const FRotator& NewTatgetRotation = FRotator(0.f, GetControlRotation().Yaw, 0.f).GetNormalized();
 
+				SetCharactorRotation(NewTatgetRotation, true, 15.f);
+			}
+			else
+			{
+				class UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+				if (AnimInstance != nullptr)
+				{
+					const float DistanceCurve = 0.f;
+					if (AnimInstance->GetCurveValue(FName("DistanceCurve"), DistanceCurve))
+					{
+
+					}
+				}
+			}
 		}
 	}
 }
@@ -148,7 +177,7 @@ void AEscapeCharacter::SetCharactorRotation(const FRotator& NewTargetRotation, b
 	{
 		const float DeltaSeconds = GetWorld()->GetDeltaSeconds();
 
-		FMath::RInterpTo(CharacterRotation, TargetRotation, DeltaSeconds, InterpSpeed);
+		CharacterRotation = FMath::RInterpTo(CharacterRotation, TargetRotation, DeltaSeconds, InterpSpeed);
 	}
 	else
 	{
@@ -157,10 +186,10 @@ void AEscapeCharacter::SetCharactorRotation(const FRotator& NewTargetRotation, b
 
 	SetActorRotation(CharacterRotation);
 
-	if (Role == ROLE_AutonomousProxy)
-	{
-		ServerSetCharactorRotation(TargetRotation, CharacterRotation);
-	}
+	//if (Role == ROLE_AutonomousProxy)
+	//{
+	//	ServerSetCharactorRotation(TargetRotation, CharacterRotation);
+	//}
 }
 
 bool AEscapeCharacter::ServerSetCharactorRotation_Validate(const FRotator& NewTargetRotation, const FRotator& NewCharactorRotation)
