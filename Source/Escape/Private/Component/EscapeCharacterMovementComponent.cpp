@@ -6,7 +6,7 @@
 UEscapeCharacterMovementComponent::UEscapeCharacterMovementComponent(const class FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	JumpZVelocity = 600.f;
+	JumpZVelocity = 480.f;
 	MaxAcceleration = 1024.f;
 	AirControl = 0.2f;
 	RotationRate = FRotator(0.f, 0.f, 0.f);

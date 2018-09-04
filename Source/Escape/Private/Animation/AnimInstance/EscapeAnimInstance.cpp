@@ -1,7 +1,6 @@
 // Copyright 2018 by January. All Rights Reserved.
 
 #include "EscapeAnimInstance.h"
-#include "Character/EscapeCharacter.h"
 #include "EscapeCharacterMovementComponent.h"
 
 
@@ -31,11 +30,24 @@ void UEscapeAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	{
 		Speed = Owner->GetVelocity().Size2D();
 
+
+		// 设置角色运动方向
+		const FRotator ActorRotator = Owner->GetActorRotation();
+		FQuat AQuat = FQuat(Owner->LastVelocityRotation);
+		FQuat BQuat = FQuat(ActorRotator.GetInverse());
+		const FRotator ComposeRotator = FRotator(BQuat*AQuat);
+
+		Direction = ComposeRotator.Yaw > 180.f ? ComposeRotator.Yaw - 360.f : ComposeRotator.Yaw;
+
+		CardinalDirection = Owner->ConvertDirection(Direction);
+
 		LookOffset = (Owner->GetBaseAimRotation() - Owner->GetActorRotation()).GetNormalized();
 	}
 
 	if (CharacterMovement != nullptr)
 	{
+		MovementMode = CharacterMovement->MovementMode;
+
 		bIsFalling = CharacterMovement->IsFalling();
 
 		bIsAccelerating = CharacterMovement->GetCurrentAcceleration().SizeSquared() > 0.f;
