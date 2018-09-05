@@ -19,7 +19,6 @@ AEscapeCharacter::AEscapeCharacter(const class FObjectInitializer& ObjectInitial
 	, TurnInPlaceDelay(0.f)
 {
 	GetMesh()->MeshComponentUpdateFlag = EMeshComponentUpdateFlag::AlwaysTickPoseAndRefreshBones;
-	GetMesh()->bEnableUpdateRateOptimizations = true;
 
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.f);
 
