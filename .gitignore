@@ -7,6 +7,7 @@
 *.o
 *.obj
 *.sln
+*.lnk
 
 # Precompiled Headers
 *.gch
@@ -44,12 +45,5 @@ Saved
 Build
 Releases
 Binaries/Android
-Binaries/Win64
-Content/AdvancedLocomotionV3
-Content/ImpactEffects
-Content/ParagonCountess
-Content/ParagonFengMao
-Content/ParagonShinbi
-Content/ParagonKwang
 Content/Collections
 Content/Developers

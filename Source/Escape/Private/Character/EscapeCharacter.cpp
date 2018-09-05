@@ -18,7 +18,8 @@ AEscapeCharacter::AEscapeCharacter(const class FObjectInitializer& ObjectInitial
 	, AttackSpeed(1.f)
 	, TurnInPlaceDelay(0.f)
 {
-	GetMesh()->MeshComponentUpdateFlag = EMeshComponentUpdateFlag::OnlyTickMontagesWhenNotRendered;
+	GetMesh()->MeshComponentUpdateFlag = EMeshComponentUpdateFlag::AlwaysTickPoseAndRefreshBones;
+	GetMesh()->bEnableUpdateRateOptimizations = true;
 
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.f);
 
@@ -158,11 +159,6 @@ void AEscapeCharacter::Attack()
 	}
 }
 
-void AEscapeCharacter::StopAttacking()
-{
-
-}
-
 void AEscapeCharacter::ComboAttackSave()
 {
 	if (bSaveAttack)
@@ -194,7 +190,12 @@ void AEscapeCharacter::DamagedClear()
 void AEscapeCharacter::DamageCheck(float DeltaTime)
 {
 	const FVector& TraceStart = LastWeaponLocation;
-	const FVector& TraceEnd = WeaponCapsule->GetComponentLocation();
+	const FVector& TraceEnd = GetMesh()->GetSocketLocation(FName(TEXT("weapon_r")));
+
+	if (Role == ROLE_Authority)
+	{
+		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("TraceEnd [%s] DeltaTime[%0.2f]"), *TraceEnd.ToCompactString(), DeltaTime), true, false, FLinearColor::White, 10.f);
+	}	
 
 	FCollisionQueryParams CollisionQueryParams;
 	CollisionQueryParams.bReturnPhysicalMaterial = true;
@@ -208,7 +209,7 @@ void AEscapeCharacter::DamageCheck(float DeltaTime)
 		AActor* HitActor = HitResult.GetActor();
 		if (HitActor != nullptr && !DamagedActors.Contains(HitActor))
 		{
-			CustomTimeDilation = 0.001f;
+			CustomTimeDilation = 0.00001f;
 
 			DamagedActors.AddUnique(HitActor);
 

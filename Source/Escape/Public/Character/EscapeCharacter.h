@@ -53,6 +53,7 @@ protected:
 	 */
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
+	/** Broadcast play hit */
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void PlayHit(float DamageAmount, APawn* InstigatorPawn, AActor* DamageCauser, const FHitResult& HiResult);
 
@@ -84,38 +85,32 @@ public:
 	bool bIsAttacking;
 
 	/**
-	* Called via input to character attack
-	*/
+	 * Called via input to character attack
+	 */
 	UFUNCTION(BlueprintCallable, Category="Attack")
 	virtual void Attack();
 
 	/**
-	* Called via input to character stop attacking
-	*/
-	UFUNCTION(BlueprintCallable, Category="Attack")
-	virtual void StopAttacking();
-
-	/**
-	* Called via notify character combo attack save
-	*/
+	 * Called via notify character combo attack save
+	 */
 	UFUNCTION(BlueprintCallable, Category="Attack")
 	virtual void ComboAttackSave();
 
 	/**
-	* Called via notify character reset combo
-	*/
+	 * Called via notify character reset combo
+	 */
 	UFUNCTION(BlueprintCallable, Category="Attack")
 	virtual void ResetCombo();
 
 	/**
-	* Called via notify character damage clear
-	*/
+	 * Called via notify character damage clear
+	 */
 	UFUNCTION(BlueprintCallable, Category="Attack")
 	virtual void DamagedClear();
 
 	/**
-	* Tick damage chekc when attack state
-	*/
+	 * Tick damage chekc when attack state
+	 */
 	UFUNCTION(BlueprintCallable, Category="Attack")
 	virtual void DamageCheck(float DeltaTime);
 

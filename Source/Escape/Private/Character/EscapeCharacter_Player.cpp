@@ -14,6 +14,16 @@ AEscapeCharacter_Player::AEscapeCharacter_Player(const class FObjectInitializer&
 
 }
 
+void AEscapeCharacter_Player::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (IsLocallyControlled() && bAttackPressed)
+	{
+		Attack();
+	}
+}
+
 namespace EscapeInputBindings
 {
 	void InitializeDefaultPawnInputBindings()
@@ -43,6 +53,8 @@ namespace EscapeInputBindings
 
 			UPlayerInput::AddEngineDefinedActionMapping(FInputActionKeyMapping("Jump", EKeys::SpaceBar));
 			UPlayerInput::AddEngineDefinedActionMapping(FInputActionKeyMapping("Attack", EKeys::LeftMouseButton));
+			UPlayerInput::AddEngineDefinedActionMapping(FInputActionKeyMapping("Attack", EKeys::TouchKeys[0]));
+			UPlayerInput::AddEngineDefinedActionMapping(FInputActionKeyMapping("Attack", EKeys::TouchKeys[1]));
 		}
 	}
 }
@@ -58,8 +70,8 @@ void AEscapeCharacter_Player::SetupPlayerInputComponent(UInputComponent* PlayerI
 		PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 		PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
-		PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &AEscapeCharacter::Attack);
-		PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &AEscapeCharacter::StopAttacking);
+		PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &AEscapeCharacter_Player::StartAttack);
+		PlayerInputComponent->BindAction("Attack", IE_Released, this, &AEscapeCharacter_Player::StopAttacking);
 
 		PlayerInputComponent->BindAxis("MoveForward", this, &AEscapeCharacter_Player::MoveForward);
 		PlayerInputComponent->BindAxis("MoveRight", this, &AEscapeCharacter_Player::MoveRight);
@@ -112,4 +124,14 @@ void AEscapeCharacter_Player::LookUpAtRate(float Rate)
 {
 	// calculate delta for this frame from the rate information
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds() * CustomTimeDilation);
+}
+
+void AEscapeCharacter_Player::StartAttack()
+{
+	bAttackPressed = true;
+}
+
+void AEscapeCharacter_Player::StopAttacking()
+{
+	bAttackPressed = false;
 }
