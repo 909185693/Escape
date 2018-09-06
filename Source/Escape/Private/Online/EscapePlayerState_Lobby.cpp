@@ -5,5 +5,5 @@
 
 bool AEscapePlayerState_Lobby::IsNetRelevantFor(const AActor* RealViewer, const AActor* ViewTarget, const FVector& SrcLocation) const
 {
-	return this == RealViewer;
+	return GetOwner() == RealViewer;
 }

@@ -14,7 +14,9 @@ class ESCAPE_API AEscapePlayerController_Lobby : public AEscapePlayerController
 {
 	GENERATED_BODY()
 	
+	UFUNCTION(Exec)
+	void StartGame();
 	
-	
-	
+	UFUNCTION(Server, Reliable, WithValidation)
+	void JionGameRoom();
 };

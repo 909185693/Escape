@@ -12,10 +12,11 @@
 UCLASS()
 class ESCAPE_API UEscapeGameInstance : public UGameInstance
 {
-	GENERATED_BODY()
+	GENERATED_UCLASS_BODY()
 	
 	class AEscapeGameSession* GetGameSession() const;
 
-	virtual void Init() override;
+	virtual void OnStart() override;
 		
+	virtual void InitializeGameInstance();
 };

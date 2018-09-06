@@ -6,6 +6,9 @@
 #include "Engine/GameEngine.h"
 #include "EscapeEngine.generated.h"
 
+
+class UEscapeGameInstance;
+
 /**
  * 
  */
@@ -17,5 +20,5 @@ class ESCAPE_API UEscapeEngine : public UGameEngine
 	/* Hook up specific callbacks */
 	virtual void Init(IEngineLoop* InEngineLoop) override;
 	
-	
+	TArray<UEscapeGameInstance*> EscapeGameInstances;
 };
