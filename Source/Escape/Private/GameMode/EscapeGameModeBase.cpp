@@ -22,8 +22,6 @@ AEscapeGameModeBase::AEscapeGameModeBase(const FObjectInitializer& ObjectInitial
 void AEscapeGameModeBase::StartPlay()
 {
 	Super::StartPlay();
-	
-	UE_LOG(LogTemp, Warning, TEXT("GameMode[%s] => TypedOuter [%s] Owner[%s]"), *GetNameSafe(this), *GetNameSafe(GetTypedOuter<ULevel>()), *GetNameSafe(GetOwner()));
 }
 
 /** Returns game session class to use */

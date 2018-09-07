@@ -13,7 +13,8 @@ AEscapeCharacter_Lobby::AEscapeCharacter_Lobby()
 
 bool AEscapeCharacter_Lobby::IsNetRelevantFor(const AActor* RealViewer, const AActor* ViewTarget, const FVector& SrcLocation) const
 {
-	return Controller == RealViewer;
+	return Super::IsNetRelevantFor(RealViewer, ViewTarget, SrcLocation);
+	//return Controller == RealViewer;
 }
 
 // Called when the game starts or when spawned

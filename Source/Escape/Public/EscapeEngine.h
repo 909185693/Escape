@@ -19,6 +19,7 @@ class ESCAPE_API UEscapeEngine : public UGameEngine
 	
 	/* Hook up specific callbacks */
 	virtual void Init(IEngineLoop* InEngineLoop) override;
-	
+	virtual void Start() override;
+
 	TArray<UEscapeGameInstance*> EscapeGameInstances;
 };
