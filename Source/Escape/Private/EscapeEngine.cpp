@@ -21,6 +21,6 @@ void UEscapeEngine::Init(IEngineLoop* InEngineLoop)
 
 	EscapeGameInstances.Add(NewGameInstance);
 
-	NewGameInstance->InitializeGameInstance();
+	NewGameInstance->InitializeGameInstance(8899);
 }
 

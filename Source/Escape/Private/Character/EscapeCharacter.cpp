@@ -145,7 +145,7 @@ void AEscapeCharacter::Attack()
 			BroadcastAttack(AttackCount);
 		}
 
-		if (IsLocallyControlled())
+		if (IsLocallyControlled() && ComboTable.Num() > 0)
 		{
 			bIsAttacking = true;
 
@@ -188,6 +188,11 @@ void AEscapeCharacter::DamagedClear()
 
 void AEscapeCharacter::DamageCheck(float DeltaTime)
 {
+	if (GetMesh()->SkeletalMesh == nullptr)
+	{
+		return;
+	}
+
 	const FVector& TraceStart = LastWeaponLocation;
 	const FVector& TraceEnd = GetMesh()->GetSocketLocation(FName(TEXT("weapon_r")));
 

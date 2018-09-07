@@ -33,11 +33,11 @@ void UEscapeGameInstance::OnStart()
 	UE_LOG(LogTemp, Log, TEXT("OnlineSub [%s] IdentityInterface [%s]"), *OnlineSub->GetSubsystemName().ToString(), *IdentityInterface->GetPlayerNickname(0));
 }
 
-void UEscapeGameInstance::InitializeGameInstance()
+void UEscapeGameInstance::InitializeGameInstance(int32 Port)
 {
 	FURL URL;
 	URL.Protocol = TEXT("unreal");
-	URL.Port = 8899;
+	URL.Port = Port;
 	URL.Op.Add(TEXT("Name=Player"));
 	URL.Op.Add(TEXT("Game=Game"));
 	URL.Map = TEXT("/Game/Maps/EscapeMap");

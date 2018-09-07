@@ -18,5 +18,5 @@ class ESCAPE_API UEscapeGameInstance : public UGameInstance
 
 	virtual void OnStart() override;
 		
-	virtual void InitializeGameInstance();
+	virtual void InitializeGameInstance(int32 Port);
 };
