@@ -19,9 +19,6 @@ class UEscapeNetDriver : public UIpNetDriver
 {
 	GENERATED_UCLASS_BODY()
 
-	/** Should this net driver behave as a passthrough to normal IP */
-	bool bIsPassthrough;
-
 	//~ Begin UObject Interface
 	virtual void PostInitProperties() override;
 	//~ End UObject Interface
@@ -35,7 +32,7 @@ class UEscapeNetDriver : public UIpNetDriver
 	virtual bool InitListen(FNetworkNotify* InNotify, FURL& ListenURL, bool bReuseAddressAndPort, FString& Error) override;
 	virtual void Shutdown() override;
 	virtual bool IsNetResourceValid() override;
-
+	virtual FSocket* CreateSocket() override;
 	//~ End UIpNetDriver Interface
 
 };

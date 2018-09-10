@@ -6,12 +6,18 @@
 #include "SocketSubsystem.h"
 #include "EscapeNetConnection.h"
 #include "OnlineSubsystemEscapeTypes.h"
+#include "Sockets/Public/Sockets.h"
 
+
+#define ServerSocketReceiveBufferBytes 0x20000
+#define ServerSocketSendBufferBytes 0x20000
+#define ClientSocketReceiveBufferBytes 0x8000
+#define ClientSocketSendBufferBytes 0x8000
 
 UEscapeNetDriver::UEscapeNetDriver(const FObjectInitializer& ObjectInitializer) :
-	Super(ObjectInitializer),
-	bIsPassthrough(false)
+	Super(ObjectInitializer)
 {
+
 }
 
 void UEscapeNetDriver::PostInitProperties()
@@ -37,47 +43,59 @@ bool UEscapeNetDriver::IsAvailable() const
 
 ISocketSubsystem* UEscapeNetDriver::GetSocketSubsystem()
 {
-	return ISocketSubsystem::Get(bIsPassthrough ? PLATFORM_SOCKETSUBSYSTEM : ESCAPE_SUBSYSTEM);
+	return ISocketSubsystem::Get(ESCAPE_SUBSYSTEM);
 }
 
 bool UEscapeNetDriver::InitBase(bool bInitAsClient, FNetworkNotify* InNotify, const FURL& URL, bool bReuseAddressAndPort, FString& Error)
 {
-	if (bIsPassthrough)
-	{
-		return UIpNetDriver::InitBase(bInitAsClient, InNotify, URL, bReuseAddressAndPort, Error);
-	}
-
-	// Skip UIpNetDriver implementation
-	if (!UNetDriver::InitBase(bInitAsClient, InNotify, URL, bReuseAddressAndPort, Error))
-	{
-		return false;
-	}
-
 	ISocketSubsystem* SocketSubsystem = GetSocketSubsystem();
 	if (SocketSubsystem == NULL)
 	{
 		UE_LOG(LogNet, Warning, TEXT("Unable to find socket subsystem"));
-		Error = TEXT("Unable to find socket subsystem");
+		return false;
+	}
+	// Derived types may have already allocated a socket
+
+	// Create the socket that we will use to communicate with
+	Socket = CreateSocket();
+
+	if (Socket == NULL)
+	{
+		Socket = 0;
+		Error = FString::Printf(TEXT("WinSock: socket failed (%i)"), (int32)SocketSubsystem->GetLastErrorCode());
 		return false;
 	}
 
-	if(Socket == NULL)
+	if (Socket->SetReuseAddr(bReuseAddressAndPort) == false)
 	{
-		Socket = 0;
-		Error = FString::Printf( TEXT("SteamSockets: socket failed (%i)"), (int32)SocketSubsystem->GetLastErrorCode() );
-		return false;
+		UE_LOG(LogNet, Log, TEXT("setsockopt with SO_REUSEADDR failed"));
 	}
+
+	if (Socket->SetRecvErr() == false)
+	{
+		UE_LOG(LogNet, Log, TEXT("setsockopt with IP_RECVERR failed"));
+	}
+
+	// Increase socket queue size, because we are polling rather than threading
+	// and thus we rely on the OS socket to buffer a lot of data.
+	int32 RecvSize = bInitAsClient ? ClientSocketReceiveBufferBytes : ServerSocketReceiveBufferBytes;
+	int32 SendSize = bInitAsClient ? ClientSocketSendBufferBytes : ServerSocketSendBufferBytes;
+	Socket->SetReceiveBufferSize(RecvSize, RecvSize);
+	Socket->SetSendBufferSize(SendSize, SendSize);
+	UE_LOG(LogInit, Log, TEXT("%s: Socket queue %i / %i"), SocketSubsystem->GetSocketAPIName(), RecvSize, SendSize);
 
 	// Bind socket to our port.
 	LocalAddr = SocketSubsystem->GetLocalBindAddr(*GLog);
 
-	// Set the Steam channel (port) to communicate on (both Client/Server communicate on same "channel")
-	LocalAddr->SetPort(URL.Port);
+	LocalAddr->SetPort(bInitAsClient ? GetClientPort() : URL.Port);
 
-	int32 AttemptPort = LocalAddr->GetPort();
-	int32 BoundPort = SocketSubsystem->BindNextPort(Socket, *LocalAddr, MaxPortCountToTry + 1, 1);
-	UE_LOG(LogNet, Display, TEXT("%s bound to port %d"), *GetName(), BoundPort);
-	// Success.
+	if (Socket->SetNonBlocking() == false)
+	{
+		Error = FString::Printf(TEXT("%s: SetNonBlocking failed (%i)"), SocketSubsystem->GetSocketAPIName(),
+			(int32)SocketSubsystem->GetLastErrorCode());
+		return false;
+	}
+
 	return true;
 }
 
@@ -91,10 +109,6 @@ bool UEscapeNetDriver::InitConnect(FNetworkNotify* InNotify, const FURL& Connect
 		{
 			Socket = SteamSockets->CreateSocket(ESCAPE_SOCKET_TYPE_CLIENT, TEXT("Unreal client (Escape)"));
 		}
-		else
-		{
-			bIsPassthrough = true;
-		}
 	}
 
 	return Super::InitConnect(InNotify, ConnectURL, Error);
@@ -102,7 +116,7 @@ bool UEscapeNetDriver::InitConnect(FNetworkNotify* InNotify, const FURL& Connect
 
 bool UEscapeNetDriver::InitListen(FNetworkNotify* InNotify, FURL& ListenURL, bool bReuseAddressAndPort, FString& Error)
 {
-	return false;
+	return Super::InitListen(InNotify, ListenURL, bReuseAddressAndPort, Error);
 }
 
 void UEscapeNetDriver::Shutdown()
@@ -113,4 +127,18 @@ void UEscapeNetDriver::Shutdown()
 bool UEscapeNetDriver::IsNetResourceValid()
 {
 	return false;
+}
+
+FSocket* UEscapeNetDriver::CreateSocket()
+{
+	// Create UDP socket and enable broadcasting.
+	ISocketSubsystem* SocketSubsystem = GetSocketSubsystem();
+
+	if (SocketSubsystem == NULL)
+	{
+		UE_LOG(LogNet, Warning, TEXT("UIpNetDriver::CreateSocket: Unable to find socket subsystem"));
+		return NULL;
+	}
+
+	return SocketSubsystem->CreateSocket(NAME_Stream, TEXT("Escape"));
 }

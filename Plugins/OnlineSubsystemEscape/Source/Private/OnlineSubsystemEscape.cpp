@@ -160,6 +160,8 @@ bool FOnlineSubsystemEscape::Init()
 	ExternalUIInterface = MakeShareable(new FOnlineExternalUIEscape(this));
 	VoiceInterface = MakeShareable(new FOnlineVoiceImpl(this));
 
+	CreateSteamSocketSubsystem();
+
 	return true;
 }
 

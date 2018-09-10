@@ -146,8 +146,7 @@ bool FSocketSubsystemEscape::GetHostName(FString& HostName)
 */
 TSharedRef<FInternetAddr> FSocketSubsystemEscape::CreateInternetAddr(uint32 Address, uint32 Port)
 {
-	FInternetAddr* InternetAddr = nullptr;
-	return MakeShareable(InternetAddr);
+	return ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->CreateInternetAddr();;
 }
 
 /**
@@ -182,15 +181,6 @@ ESocketErrors FSocketSubsystemEscape::TranslateErrorCode(int32 Code)
 {
 	// @TODO ONLINE - This needs to be filled in (at present it is 1:1)
 	return (ESocketErrors)LastSocketError;
-}
-
-/**
-*	Get local IP to bind to
-*/
-TSharedRef<FInternetAddr> FSocketSubsystemEscape::GetLocalBindAddr(FOutputDevice& Out)
-{
-	FInternetAddr* InternetAddr = nullptr;
-	return MakeShareable(InternetAddr);
 }
 
 bool FSocketSubsystemEscape::Tick(float DeltaTime)

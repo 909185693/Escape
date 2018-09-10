@@ -175,14 +175,14 @@ public:
 	}
 
 	/**
-	*	Get local IP to bind to
-	*/
-	virtual TSharedRef<FInternetAddr> GetLocalBindAddr(FOutputDevice& Out) override;
-
-	/**
 	* Chance for the socket subsystem to get some time
 	*
 	* @param DeltaTime time since last tick
 	*/
 	virtual bool Tick(float DeltaTime) override;
 };
+
+/**
+ * Create the socket subsystem for the given platform service
+ */
+FName CreateSteamSocketSubsystem();

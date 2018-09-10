@@ -16,18 +16,8 @@ void UEscapeEngine::Start()
 {
 	Super::Start();
 
-	for (FNetDriverDefinition& Definition : NetDriverDefinitions)
-	{
-		UE_LOG(LogTemp, Log, TEXT("DefName [%s] DriverClassName[%s] DriverClassNameFallback[%s]"), *Definition.DefName.ToString(), *Definition.DriverClassName.ToString(), *Definition.DriverClassNameFallback.ToString());
-	}
-
-	for (int32 Port = 8200; Port < 8202 && IsRunningDedicatedServer(); Port++)
-	{
-		UEscapeGameInstance* NewGameInstance = NewObject<UEscapeGameInstance>(this, UEscapeGameInstance::StaticClass());
-		check(NewGameInstance);
-
-		EscapeGameInstances.Add(NewGameInstance);
-
-		NewGameInstance->InitializeGameInstance(Port);
-	}
+	//for (FNetDriverDefinition& Definition : NetDriverDefinitions)
+	//{
+	//	UE_LOG(LogTemp, Log, TEXT("DefName [%s] DriverClassName[%s] DriverClassNameFallback[%s]"), *Definition.DefName.ToString(), *Definition.DriverClassName.ToString(), *Definition.DriverClassNameFallback.ToString());
+	//}
 }

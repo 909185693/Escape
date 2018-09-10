@@ -22,10 +22,6 @@ class UEscapeNetConnection : public UIpConnection
 	virtual void CleanUp() override;
 	//~ End UIpConnection Interface
 
-	/** Is this net connection passthrough to IpConnection */
-	UPROPERTY()
-	bool bIsPassthrough;
-
 	/** Access for monitoring / cleanup */
 	friend class FSocketSubsystemEscape;
 };
