@@ -3,9 +3,6 @@
 #include "EscapeGameInstance.h"
 #include "CrasheyeHelper.h"
 #include "EscapeEngine.h"
-#include "ShaderCompiler.h"
-#include "NetworkProfiler.h"
-#include "ThreadHeartBeat.h"
 
 
 UEscapeGameInstance::UEscapeGameInstance(const class FObjectInitializer& ObjectInitializer)
@@ -35,10 +32,4 @@ void UEscapeGameInstance::OnStart()
 
 	UE_LOG(LogTemp, Log, TEXT("OnlineSub [%s] IdentityInterface [%s]"), *OnlineSub->GetSubsystemName().ToString(), *IdentityInterface->GetPlayerNickname(0));
 }
-
-void UEscapeGameInstance::InitializeGameInstance(int32 Port)
-{
-
-}
-
 

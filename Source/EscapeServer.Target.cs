@@ -3,11 +3,11 @@
 using UnrealBuildTool;
 using System.Collections.Generic;
 
-public class EscapeTarget : TargetRules
+public class EscapeServerTarget : TargetRules
 {
-	public EscapeTarget(TargetInfo Target) : base(Target)
+	public EscapeServerTarget(TargetInfo Target) : base(Target)
 	{
-		Type = TargetType.Game;
+		Type = TargetType.Server;
 
         bUsesSteam = true;
 

@@ -16,8 +16,8 @@ void UEscapeEngine::Start()
 {
 	Super::Start();
 
-	//for (FNetDriverDefinition& Definition : NetDriverDefinitions)
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("DefName [%s] DriverClassName[%s] DriverClassNameFallback[%s]"), *Definition.DefName.ToString(), *Definition.DriverClassName.ToString(), *Definition.DriverClassNameFallback.ToString());
-	//}
+	for (FNetDriverDefinition& Definition : NetDriverDefinitions)
+	{
+		UE_LOG(LogTemp, Log, TEXT("DefName [%s] DriverClassName[%s] DriverClassNameFallback[%s]"), *Definition.DefName.ToString(), *Definition.DriverClassName.ToString(), *Definition.DriverClassNameFallback.ToString());
+	}
 }

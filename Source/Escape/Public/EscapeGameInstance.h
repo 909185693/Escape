@@ -17,6 +17,4 @@ class ESCAPE_API UEscapeGameInstance : public UGameInstance
 	class AEscapeGameSession* GetGameSession() const;
 
 	virtual void OnStart() override;
-		
-	virtual void InitializeGameInstance(int32 Port);
 };

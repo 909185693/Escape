@@ -10,16 +10,9 @@
  * 
  */
 UCLASS()
-class ESCAPE_API AEscapeGameModeBase : public AGameModeBase, public FNetworkNotify
+class ESCAPE_API AEscapeGameModeBase : public AGameModeBase
 {
 	GENERATED_UCLASS_BODY()
-	
-	/** The NAME_EscapeNetDriver game connection(s) for client/server communication */
-	UPROPERTY(Transient)
-	class UNetDriver* NetDriver;
-
-	// Start listening for connections.
-	virtual bool Listen(FURL& InURL);
 
 	/**
 	 * Initialize the game.
@@ -34,12 +27,5 @@ class ESCAPE_API AEscapeGameModeBase : public AGameModeBase, public FNetworkNoti
 
 	/** Returns game session class to use */
 	virtual TSubclassOf<AGameSession> GetGameSessionClass() const override;
-
-	//~ Begin FNetworkNotify Interface
-	virtual EAcceptConnection::Type NotifyAcceptingConnection() override;
-	virtual void NotifyAcceptedConnection(class UNetConnection* Connection) override;
-	virtual bool NotifyAcceptingChannel(class UChannel* Channel) override;
-	virtual void NotifyControlMessage(UNetConnection* Connection, uint8 MessageType, class FInBunch& Bunch) override;
-	//~ End FNetworkNotify Interface
 		
 };
