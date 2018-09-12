@@ -109,6 +109,18 @@ public:
 	}
 };
 
+enum ELoginCode
+{
+	USER_LOGIN = 10000,
+};
+
+struct FDataHeader
+{
+	ELoginCode Code;
+
+	int32 Size;
+};
+
 struct FUserLogin
 {
 	char UserName[20];

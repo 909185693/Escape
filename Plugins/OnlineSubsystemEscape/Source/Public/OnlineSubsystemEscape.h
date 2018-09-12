@@ -142,4 +142,6 @@ public:
 
 };
 
+void SendTo(FSocket* Socket, ELoginCode Code, int32 DataSize, void* Data);
+
 typedef TSharedPtr<FOnlineSubsystemEscape, ESPMode::ThreadSafe> FOnlineSubsystemEscapePtr;

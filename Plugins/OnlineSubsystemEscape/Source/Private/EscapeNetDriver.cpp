@@ -89,20 +89,11 @@ bool UEscapeNetDriver::InitConnect(FNetworkNotify* InNotify, const FURL& Connect
 			return false;
 		}
 
-		int32 Size = sizeof(FUserLogin) + sizeof(int32);
-		void* Data = FMemory::Malloc(Size);
-		
-		int32* DataSize = (int32*)Data;
-		*DataSize = sizeof(FUserLogin);
+		FUserLogin UserLogin;
+		FPlatformString::Strcpy(UserLogin.UserName, 9, "909185693");
+		FPlatformString::Strcpy(UserLogin.PassWord, 9, "123456789");
 
-		FUserLogin* UserLogin = (FUserLogin*)(DataSize + 1);
-		FPlatformString::Strcpy(UserLogin->UserName, 9, "909185693");
-		FPlatformString::Strcpy(UserLogin->PassWord, 9, "123456789");
-
-		int32 BytesSent = 0;
-		OnlineSubsystem->Socket->Send((uint8*)Data, Size, BytesSent);
-
-		FMemory::Free(Data);
+		SendTo(OnlineSubsystem->Socket, ELoginCode::USER_LOGIN, sizeof(FUserLogin), &UserLogin);
 	}
 
 	return bResult;

@@ -293,9 +293,9 @@ void FOnlineSubsystemEscape::RunLogic()
 			{
 				if (BytesRead == 0)
 				{
-					int32* DataSize = (int32*)DataRef;
+					FDataHeader* DataHeader = (FDataHeader*)DataRef;
 
-					FUserLogin* UserLogin = (FUserLogin*)(DataSize + 1);
+					FUserLogin* UserLogin = (FUserLogin*)(DataHeader + 1);
 
 					UE_LOG(LogNet, Log, TEXT("Recv : UserName[%s] PassWord[%s]"), ANSI_TO_TCHAR(UserLogin->UserName), ANSI_TO_TCHAR(UserLogin->PassWord));
 
@@ -330,4 +330,21 @@ bool FOnlineSubsystemEscape::IsLogicServer()
 void FOnlineSubsystemEscape::SetLogicServer(bool bLogicServer)
 {
 	bIsLogicServer = bLogicServer;
+}
+
+void SendTo(FSocket* Socket, ELoginCode Code, int32 DataSize, void* Data)
+{
+	int32 Count = DataSize + sizeof(FDataHeader);
+	void* SendData = FMemory::Malloc(Count);
+
+	FDataHeader* DataHeader = (FDataHeader*)SendData;
+	DataHeader->Code = Code;
+	DataHeader->Size = DataSize;
+
+	FMemory::Memcpy((void*)(DataHeader + 1), Data, DataSize);
+
+	int32 BytesSent = 0;
+	Socket->Send((uint8*)SendData, Count, BytesSent);
+
+	FMemory::Free(SendData);
 }
