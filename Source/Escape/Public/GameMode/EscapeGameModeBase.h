@@ -13,6 +13,7 @@ UCLASS()
 class ESCAPE_API AEscapeGameModeBase : public AGameModeBase
 {
 	GENERATED_UCLASS_BODY()
+<<<<<<< HEAD
 
 	/**
 	 * Initialize the game.
@@ -22,6 +23,9 @@ class ESCAPE_API AEscapeGameModeBase : public AGameModeBase
 	 */
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 
+=======
+	
+>>>>>>> parent of f085c69... Socket
 	/** Transitions to calls BeginPlay on actors. */
 	virtual void StartPlay() override;
 

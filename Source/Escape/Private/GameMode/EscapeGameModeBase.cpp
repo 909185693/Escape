@@ -1,10 +1,8 @@
 // Copyright 2018 by January. All Rights Reserved.
 
 #include "EscapeGameModeBase.h"
-#include "Escape.h"
 #include "EscapeGameSession.h"
 #include "EscapePlayerController.h"
-#include "Engine/NetworkDelegates.h"
 
 
 AEscapeGameModeBase::AEscapeGameModeBase(const FObjectInitializer& ObjectInitializer)
@@ -21,11 +19,14 @@ AEscapeGameModeBase::AEscapeGameModeBase(const FObjectInitializer& ObjectInitial
 	PlayerControllerClass = AEscapePlayerController::StaticClass();
 }
 
+<<<<<<< HEAD
 void AEscapeGameModeBase::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
 {
 	Super::InitGame(MapName, Options, ErrorMessage);
 }
 
+=======
+>>>>>>> parent of f085c69... Socket
 void AEscapeGameModeBase::StartPlay()
 {
 	Super::StartPlay();
@@ -35,4 +36,9 @@ void AEscapeGameModeBase::StartPlay()
 TSubclassOf<AGameSession> AEscapeGameModeBase::GetGameSessionClass() const
 {
 	return AEscapeGameSession::StaticClass();
+<<<<<<< HEAD
 }
+=======
+}
+
+>>>>>>> parent of f085c69... Socket
