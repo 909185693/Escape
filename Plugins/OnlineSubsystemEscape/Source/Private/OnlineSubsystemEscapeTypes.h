@@ -109,10 +109,8 @@ public:
 	}
 };
 
-
-
 struct FUserLogin
 {
 	char UserName[20];
 	char PassWord[20];
-}
+};

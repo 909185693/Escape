@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "OnlineSubsystemImpl.h"
+#include "OnlineSubsystemEscapeTypes.h"
 #include "OnlineSubsystemEscapePackage.h"
 #include "Sockets/Public/Sockets.h"
 

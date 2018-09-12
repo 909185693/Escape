@@ -1,7 +1,6 @@
-// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
+﻿// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 
 #include "OnlineSubsystemEscape.h"
-#include "OnlineSubsystemEscapeTypes.h"
 #include "OnlineAsyncTaskManagerEscape.h"
 #include "OnlineSessionInterfaceEscape.h"
 #include "OnlineExternalUIEscape.h"
@@ -266,7 +265,7 @@ void FOnlineSubsystemEscape::RunLogic()
 		TSharedPtr<FInternetAddr> InternetAddr = SocketSubsystem->CreateInternetAddr();
 
 		ClientSocket->GetAddress(*InternetAddr);
-
+		
 		UE_LOG(LogNet, Log, TEXT("Accept : socket addr[%s]"), *(InternetAddr->ToString(true)));
 	}
 
@@ -294,7 +293,13 @@ void FOnlineSubsystemEscape::RunLogic()
 			{
 				if (BytesRead == 0)
 				{
-					UE_LOG(LogNet, Log, TEXT("Recv : Data[%s]"), *FString((char*)DataRef));
+					int32* DataSize = (int32*)DataRef;
+
+					FUserLogin* UserLogin = (FUserLogin*)(DataSize + 1);
+
+					UE_LOG(LogNet, Log, TEXT("Recv : UserName[%s] PassWord[%s]"), ANSI_TO_TCHAR(UserLogin->UserName), ANSI_TO_TCHAR(UserLogin->PassWord));
+
+					//UE_LOG(LogNet, Log, TEXT("Recv : Data[%s]"), *FString((char*)DataRef));
 					break;
 				}
 			}
@@ -309,6 +314,7 @@ void FOnlineSubsystemEscape::RunLogic()
 				ESocketErrors Error = SocketSubsystem->GetLastErrorCode();
 
 				UE_LOG(LogNet, Log, TEXT("SocketError : addr[%s] error[%d]"), *(InternetAddr->ToString(true)), (int32)Error);
+				
 				break;
 			}
 		}

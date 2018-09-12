@@ -1,10 +1,9 @@
-// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
+﻿// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 
 #include "EscapeNetDriver.h"
 #include "OnlineSubsystemNames.h"
 #include "OnlineSubsystem.h"
 #include "SocketSubsystem.h"
-#include "EscapeNetConnection.h"
 #include "OnlineSubsystemEscape.h"
 #include "OnlineSubsystemEscapeTypes.h"
 
@@ -89,6 +88,21 @@ bool UEscapeNetDriver::InitConnect(FNetworkNotify* InNotify, const FURL& Connect
 			UE_LOG(LogNet, Warning, TEXT("Connect to escape logic server failed. HostAddr [%s]"), *HostAddr->ToString(true));
 			return false;
 		}
+
+		int32 Size = sizeof(FUserLogin) + sizeof(int32);
+		void* Data = FMemory::Malloc(Size);
+		
+		int32* DataSize = (int32*)Data;
+		*DataSize = sizeof(FUserLogin);
+
+		FUserLogin* UserLogin = (FUserLogin*)(DataSize + 1);
+		FPlatformString::Strcpy(UserLogin->UserName, 9, "909185693");
+		FPlatformString::Strcpy(UserLogin->PassWord, 9, "123456789");
+
+		int32 BytesSent = 0;
+		OnlineSubsystem->Socket->Send((uint8*)Data, Size, BytesSent);
+
+		FMemory::Free(Data);
 	}
 
 	return bResult;
