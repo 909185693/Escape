@@ -4,7 +4,6 @@
 #include "OnlineSubsystemNames.h"
 #include "OnlineSubsystem.h"
 #include "SocketSubsystem.h"
-#include "SocketSubsystemEscape.h"
 #include "EscapeNetDriver.h"
 #include "OnlineSubsystemEscapeTypes.h"
 
@@ -22,11 +21,11 @@ void UEscapeNetConnection::InitLocalConnection(UNetDriver* InDriver, class FSock
 	Super::InitLocalConnection(InDriver, InSocket, InURL, InState, InMaxPacket, InPacketOverhead);
 	if (!bIsPassthrough && RemoteAddr.IsValid())
 	{
-		FSocketSubsystemEscape* SocketSubsystem = (FSocketSubsystemEscape*)ISocketSubsystem::Get(ESCAPE_SUBSYSTEM);
-		if (SocketSubsystem)
-		{
-			//SocketSubsystem->RegisterConnection(this);
-		}
+		//FSocketSubsystemEscape* SocketSubsystem = (FSocketSubsystemEscape*)ISocketSubsystem::Get(ESCAPE_SUBSYSTEM);
+		//if (SocketSubsystem)
+		//{
+		//	//SocketSubsystem->RegisterConnection(this);
+		//}
 	}
 }
 
@@ -37,11 +36,11 @@ void UEscapeNetConnection::InitRemoteConnection(UNetDriver* InDriver, class FSoc
 	Super::InitRemoteConnection(InDriver, InSocket, InURL, InRemoteAddr, InState, InMaxPacket, InPacketOverhead);
 	if (!bIsPassthrough && RemoteAddr.IsValid())
 	{
-		FSocketSubsystemEscape* SocketSubsystem = (FSocketSubsystemEscape*)ISocketSubsystem::Get(ESCAPE_SUBSYSTEM);
-		if (SocketSubsystem)
-		{
-			//SocketSubsystem->RegisterConnection(this);
-		}
+		//FSocketSubsystemEscape* SocketSubsystem = (FSocketSubsystemEscape*)ISocketSubsystem::Get(ESCAPE_SUBSYSTEM);
+		//if (SocketSubsystem)
+		//{
+		//	//SocketSubsystem->RegisterConnection(this);
+		//}
 	}
 }
 

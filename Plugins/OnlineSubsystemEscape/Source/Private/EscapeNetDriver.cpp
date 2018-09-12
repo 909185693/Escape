@@ -5,6 +5,7 @@
 #include "OnlineSubsystem.h"
 #include "SocketSubsystem.h"
 #include "EscapeNetConnection.h"
+#include "OnlineSubsystemEscape.h"
 #include "OnlineSubsystemEscapeTypes.h"
 
 
@@ -19,98 +20,119 @@ void UEscapeNetDriver::PostInitProperties()
 	Super::PostInitProperties();
 }
 
-bool UEscapeNetDriver::IsAvailable() const
+void UEscapeNetDriver::TickDispatch(float DeltaTime)
 {
-	// Net driver won't work if the online and socket subsystems don't exist
-	IOnlineSubsystem* EscapeSubsystem = IOnlineSubsystem::Get(ESCAPE_SUBSYSTEM);
-	if (EscapeSubsystem)
-	{
-		ISocketSubsystem* EscapeSockets = ISocketSubsystem::Get(ESCAPE_SUBSYSTEM);
-		if (EscapeSockets)
-		{
-			return true;
-		}
-	}
-
-	return false;
-}
-
-ISocketSubsystem* UEscapeNetDriver::GetSocketSubsystem()
-{
-	return ISocketSubsystem::Get(bIsPassthrough ? PLATFORM_SOCKETSUBSYSTEM : ESCAPE_SUBSYSTEM);
+	Super::TickDispatch(DeltaTime);
 }
 
 bool UEscapeNetDriver::InitBase(bool bInitAsClient, FNetworkNotify* InNotify, const FURL& URL, bool bReuseAddressAndPort, FString& Error)
 {
-	if (bIsPassthrough)
+	bool bResult = Super::InitBase(bInitAsClient, InNotify, URL, bReuseAddressAndPort, Error);
+
+	if (bResult)
 	{
-		return UIpNetDriver::InitBase(bInitAsClient, InNotify, URL, bReuseAddressAndPort, Error);
+		ISocketSubsystem* SocketSubsystem = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM);
+		if (SocketSubsystem == nullptr)
+		{
+			UE_LOG(LogNet, Warning, TEXT("Unable to find socket subsystem"));
+			return false;
+		}
+
+		FOnlineSubsystemEscape* OnlineSubsystem = (FOnlineSubsystemEscape*)IOnlineSubsystem::Get(ESCAPE_SUBSYSTEM);
+		if (OnlineSubsystem == nullptr)
+		{
+			UE_LOG(LogNet, Warning, TEXT("Unable to find online subsystem"));
+			return false;
+		}
+
+		OnlineSubsystem->Socket = SocketSubsystem->CreateSocket(NAME_Stream, ESCAPE_SUBSYSTEM);
+		OnlineSubsystem->Socket->SetNonBlocking();
+
+		if (OnlineSubsystem->Socket == nullptr)
+		{
+			OnlineSubsystem->Socket = 0;
+			Error = FString::Printf(TEXT("WinSock: socket failed (%i)"), (int32)SocketSubsystem->GetLastErrorCode());
+			return false;
+		}
 	}
 
-	// Skip UIpNetDriver implementation
-	if (!UNetDriver::InitBase(bInitAsClient, InNotify, URL, bReuseAddressAndPort, Error))
-	{
-		return false;
-	}
-
-	ISocketSubsystem* SocketSubsystem = GetSocketSubsystem();
-	if (SocketSubsystem == NULL)
-	{
-		UE_LOG(LogNet, Warning, TEXT("Unable to find socket subsystem"));
-		Error = TEXT("Unable to find socket subsystem");
-		return false;
-	}
-
-	if(Socket == NULL)
-	{
-		Socket = 0;
-		Error = FString::Printf( TEXT("SteamSockets: socket failed (%i)"), (int32)SocketSubsystem->GetLastErrorCode() );
-		return false;
-	}
-
-	// Bind socket to our port.
-	LocalAddr = SocketSubsystem->GetLocalBindAddr(*GLog);
-
-	// Set the Steam channel (port) to communicate on (both Client/Server communicate on same "channel")
-	LocalAddr->SetPort(URL.Port);
-
-	int32 AttemptPort = LocalAddr->GetPort();
-	int32 BoundPort = SocketSubsystem->BindNextPort(Socket, *LocalAddr, MaxPortCountToTry + 1, 1);
-	UE_LOG(LogNet, Display, TEXT("%s bound to port %d"), *GetName(), BoundPort);
-	// Success.
-	return true;
+	return bResult;
 }
 
 bool UEscapeNetDriver::InitConnect(FNetworkNotify* InNotify, const FURL& ConnectURL, FString& Error)
 {
-	ISocketSubsystem* SteamSockets = ISocketSubsystem::Get(ESCAPE_SUBSYSTEM);
-	if (SteamSockets)
+	bool bResult = Super::InitConnect(InNotify, ConnectURL, Error);
+
+	if (bResult)
 	{
-		// If we are opening a Steam URL, create a Steam client socket
-		if (ConnectURL.Host.StartsWith(ESCAPE_URL_PREFIX))
+		ISocketSubsystem* SocketSubsystem = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM);
+		if (SocketSubsystem == nullptr)
 		{
-			Socket = SteamSockets->CreateSocket(ESCAPE_SOCKET_TYPE_CLIENT, TEXT("Unreal client (Escape)"));
+			UE_LOG(LogNet, Warning, TEXT("Unable to find socket subsystem"));
+			return false;
 		}
-		else
+
+		TSharedPtr<FInternetAddr> HostAddr = SocketSubsystem->CreateInternetAddr();
+		bool bIsValid = false;
+		HostAddr->SetIp(*ConnectURL.Host, bIsValid);
+		HostAddr->SetPort(EscapeServerPort);
+
+		FOnlineSubsystemEscape* OnlineSubsystem = (FOnlineSubsystemEscape*)IOnlineSubsystem::Get(ESCAPE_SUBSYSTEM);
+		if (OnlineSubsystem == nullptr)
 		{
-			bIsPassthrough = true;
+			UE_LOG(LogNet, Warning, TEXT("Unable to find online subsystem"));
+			return false;
+		}
+
+		if (!OnlineSubsystem->Socket->Connect(*HostAddr))
+		{
+			UE_LOG(LogNet, Warning, TEXT("Connect to escape logic server failed. HostAddr [%s]"), *HostAddr->ToString(true));
+			return false;
 		}
 	}
 
-	return Super::InitConnect(InNotify, ConnectURL, Error);
+	return bResult;
 }
 
 bool UEscapeNetDriver::InitListen(FNetworkNotify* InNotify, FURL& ListenURL, bool bReuseAddressAndPort, FString& Error)
 {
-	return false;
+	bool bResult = Super::InitListen(InNotify, ListenURL, bReuseAddressAndPort, Error);
+
+#if ESCAPE_BUILD_LOGINSERVER
+	if (bResult && ListenURL.HasOption(TEXT("IsLogicServer")))
+	{
+		TSharedRef<FInternetAddr> InternetAddr = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->CreateInternetAddr();
+		InternetAddr->SetPort(EscapeServerPort);
+		
+		FOnlineSubsystemEscape* OnlineSubsystem = (FOnlineSubsystemEscape*)IOnlineSubsystem::Get(ESCAPE_SUBSYSTEM);
+		if (OnlineSubsystem == nullptr)
+		{
+			UE_LOG(LogNet, Warning, TEXT("Unable to find online subsystem"));
+			return false;
+		}
+		check(OnlineSubsystem->Socket);
+		if (!OnlineSubsystem->Socket->Bind(InternetAddr.Get()))
+		{
+			Error = FString::Printf(TEXT("Failed to bind EscapeSocket on port[%d]"), EscapeServerPort);
+			return false;
+		}
+
+		if (!OnlineSubsystem->Socket->Listen(EscapeMaxBackLog))
+		{
+			Error = FString::Printf(TEXT("Failed to listen EscapeSocket on port[%d]"), EscapeServerPort);
+			return false;
+		}
+
+		OnlineSubsystem->SetLogicServer(true);
+
+		UE_LOG(LogNet, Log, TEXT("EscapeSocket listening on port %i"), EscapeServerPort);
+	}
+#endif
+
+	return bResult;
 }
 
 void UEscapeNetDriver::Shutdown()
 {
 	Super::Shutdown();
-}
-
-bool UEscapeNetDriver::IsNetResourceValid()
-{
-	return false;
 }

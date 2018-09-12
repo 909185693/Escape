@@ -2,6 +2,6 @@
 	"BuildId": "b8463846-fbe7-4915-b8c0-ef674c5acb98",
 	"Modules": 
 	{
-		"Crasheye": "UE4Editor-Crasheye.dll"
+		"OnlineSubsystemEscape": "UE4Editor-OnlineSubsystemEscape.dll"
 	}
 }

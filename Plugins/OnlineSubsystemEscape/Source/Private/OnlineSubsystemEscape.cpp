@@ -152,7 +152,7 @@ bool FOnlineSubsystemEscape::Init()
 	check(OnlineAsyncTaskThreadRunnable);
 	OnlineAsyncTaskThread = FRunnableThread::Create(OnlineAsyncTaskThreadRunnable, *FString::Printf(TEXT("OnlineAsyncTaskThreadEscape %s(%d)"), *InstanceName.ToString(), TaskCounter.Increment()), 128 * 1024, TPri_Normal);
 	check(OnlineAsyncTaskThread);
-	
+
 	UE_LOG_ONLINE(Verbose, TEXT("Created thread (ID:%d)."), OnlineAsyncTaskThread->GetThreadID());
 
 	SessionInterface = MakeShareable(new FOnlineSessionEscape(this));
@@ -249,4 +249,79 @@ bool FOnlineSubsystemEscape::Tick(float DeltaTime)
 	}
 
 	return true;
+}
+
+#if ESCAPE_BUILD_LOGINSERVER
+void FOnlineSubsystemEscape::RunLogic()
+{
+	ISocketSubsystem* SocketSubsystem = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM);
+	check(SocketSubsystem);
+
+	check(Socket);
+	FSocket* ClientSocket = Socket->Accept(ESCAPE_SUBSYSTEM);
+	if (ClientSocket != nullptr)
+	{
+		ClientsSocket.Add(ClientSocket);
+
+		TSharedPtr<FInternetAddr> InternetAddr = SocketSubsystem->CreateInternetAddr();
+
+		ClientSocket->GetAddress(*InternetAddr);
+
+		UE_LOG(LogNet, Log, TEXT("Accept : socket addr[%s]"), *(InternetAddr->ToString(true)));
+	}
+
+	FTimespan WaitTime(2000);
+
+	for (FSocket* ClientSocket : ClientsSocket)
+	{
+		int32 BytesRead = 0;
+		uint8 Data[MAX_PACKET_SIZE];
+		uint8* DataRef = Data;
+
+		if (!ClientSocket->Wait(ESocketWaitConditions::WaitForRead, WaitTime))
+		{
+			continue;
+		}
+
+		while (ClientSocket != nullptr)
+		{
+			bool bOk = false;
+			{
+				bOk = ClientSocket->Recv(Data, sizeof(Data), BytesRead);
+			}
+
+			if (bOk)
+			{
+				if (BytesRead == 0)
+				{
+					UE_LOG(LogNet, Log, TEXT("Recv : Data[%s]"), *FString((char*)DataRef));
+					break;
+				}
+			}
+			else
+			{
+				ClientsSocket.Remove(ClientSocket);
+
+				TSharedPtr<FInternetAddr> InternetAddr = SocketSubsystem->CreateInternetAddr();
+
+				ClientSocket->GetAddress(*InternetAddr);
+
+				ESocketErrors Error = SocketSubsystem->GetLastErrorCode();
+
+				UE_LOG(LogNet, Log, TEXT("SocketError : addr[%s] error[%d]"), *(InternetAddr->ToString(true)), (int32)Error);
+				break;
+			}
+		}
+	}
+}
+#endif
+
+bool FOnlineSubsystemEscape::IsLogicServer()
+{
+	return bIsLogicServer;
+}
+
+void FOnlineSubsystemEscape::SetLogicServer(bool bLogicServer)
+{
+	bIsLogicServer = bLogicServer;
 }
