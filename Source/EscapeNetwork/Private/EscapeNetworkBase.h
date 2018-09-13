@@ -18,8 +18,6 @@ struct FMessageCallback
 {
 	ELogicCode Code;
 
-	EErrorCode Error;
-
 	FMessageDelegate MessageDelegate;
 };
 
@@ -40,11 +38,14 @@ class UEscapeNetworkBase : public UObject
 	virtual void SetNetworkNotify(FEscapeNetworkNotify* NetworkNotify);
 
 	template <typename UserClass>
-	inline void AddMessageCallback(UserClass* InUserObject, void(UserClass::*)(void*, EErrorCode))
+	using FMessageCallbackTwoParamsPtr = void(UserClass::*)(void*, EErrorCode);
+
+	template <typename UserClass>
+	inline void AddMessageCallback(ELogicCode Code, UserClass* InUserObject, FMessageCallbackTwoParamsPtr<UserClass> InFunc)
 	{
 		FMessageCallback MessageCallback;
-		//MessageCallback.MessageDelegate.BindUObject(InUserObject, InFunc);
-
+		MessageCallback.Code = Code;
+		MessageCallback.MessageDelegate.BindUObject(InUserObject, InFunc);
 		MessageCallbacks.Add(MessageCallback);
 	}
 

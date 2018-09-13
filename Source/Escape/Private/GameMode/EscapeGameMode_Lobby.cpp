@@ -29,18 +29,6 @@ AEscapeGameMode_Lobby::AEscapeGameMode_Lobby(const FObjectInitializer& ObjectIni
 	PlayerControllerClass = AEscapePlayerController_Lobby::StaticClass();
 }
 
-template <typename UserClass>
-typedef void(UserClass::MessageCallbackPtr*)(void*, EErrorCode);
-
-template <typename UserClass>
-inline void AddMessageCallback2(UserClass* InUserObject, MessageCallbackPtr InFunc)
-{
-	//FMessageCallback MessageCallback;
-	////MessageCallback.MessageDelegate.BindUObject(InUserObject, InFunc);
-
-	//MessageCallbacks.Add(MessageCallback);
-}
-
 void AEscapeGameMode_Lobby::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
 {
 	Super::InitGame(MapName, Options, ErrorMessage);
@@ -68,6 +56,7 @@ void AEscapeGameMode_Lobby::InitGame(const FString& MapName, const FString& Opti
 
 		UEscapeMessageContrller* EscapeMessageContrller = NewObject<UEscapeMessageContrller>(GetTransientPackage(), UEscapeMessageContrller::StaticClass());
 
-		EscapeServer->AddMessageCallback(EscapeMessageContrller, &UEscapeMessageContrller::UserLoginCallback);
+		EscapeServer->AddMessageCallback(ELogicCode::USER_LOGIN, EscapeMessageContrller, &UEscapeMessageContrller::UserLoginCallback);
+		EscapeServer->AddMessageCallback(ELogicCode::USER_LOGIN, EscapeMessageContrller, &UEscapeMessageContrller::ConnectionCallback);
 	}
 }

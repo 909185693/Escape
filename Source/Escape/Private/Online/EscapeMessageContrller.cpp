@@ -9,12 +9,7 @@ UEscapeMessageContrller::UEscapeMessageContrller(const FObjectInitializer& Objec
 
 }
 
-void UEscapeMessageContrller::NotifyConnectionSuccess()
-{
-
-}
-
-void UEscapeMessageContrller::NotifyConnectionFailed()
+void UEscapeMessageContrller::ConnectionCallback(void* Data, EErrorCode Error)
 {
 
 }

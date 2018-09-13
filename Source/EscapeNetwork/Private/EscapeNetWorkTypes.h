@@ -2,11 +2,12 @@
 
 enum ELogicCode
 {
-
+	USER_LOGIN
 };
 
 enum EErrorCode
 {
+	NONE,
 	INVALID_DATA,
 	NETWORK_ERROR
 };

@@ -12,8 +12,6 @@ class ESCAPE_API UEscapeMessageContrller : public UObject
 {
 	GENERATED_UCLASS_BODY()
 	
-	virtual void NotifyConnectionSuccess();
-	virtual void NotifyConnectionFailed();
-
+	virtual void ConnectionCallback(void* Data, EErrorCode Error);
 	virtual void UserLoginCallback(void* Data, EErrorCode Error);
 };
