@@ -2,6 +2,7 @@
 	"BuildId": "b8463846-fbe7-4915-b8c0-ef674c5acb98",
 	"Modules": 
 	{
-		"Escape": "UE4Editor-Escape.dll"
+		"Escape": "UE4Editor-Escape.dll",
+		"EscapeNetwork": "UE4Editor-EscapeNetwork.dll"
 	}
 }

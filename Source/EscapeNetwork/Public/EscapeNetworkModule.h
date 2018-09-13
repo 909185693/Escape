@@ -5,12 +5,10 @@
 #include "CoreMinimal.h"
 #include "ModuleManager.h"
 
-class FOnlineSubsystemEscapeModule : public IModuleInterface
-{
-private:
-	/** Class responsible for creating instance(s) of the subsystem */
-	class FOnlineFactoryEscape* EscapeFactory;
+DECLARE_LOG_CATEGORY_EXTERN(LogEscapeNetwork, Log, All);
 
+class FEscapeNetworkModuleModule : public IModuleInterface
+{
 public:
 
 	/** IModuleInterface implementation */

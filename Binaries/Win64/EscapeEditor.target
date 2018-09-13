@@ -128,14 +128,6 @@
 			"Type": "SymbolFile"
 		},
 		{
-			"Path": "$(ProjectDir)/Plugins/OnlineSubsystemEscape/Binaries/Win64/UE4Editor-OnlineSubsystemEscape.dll",
-			"Type": "DynamicLibrary"
-		},
-		{
-			"Path": "$(ProjectDir)/Plugins/OnlineSubsystemEscape/Binaries/Win64/UE4Editor-OnlineSubsystemEscape.pdb",
-			"Type": "SymbolFile"
-		},
-		{
 			"Path": "$(EngineDir)/Plugins/2D/Paper2D/Binaries/Win64/UE4Editor-Paper2D.dll",
 			"Type": "DynamicLibrary"
 		},
@@ -3488,6 +3480,14 @@
 			"Type": "SymbolFile"
 		},
 		{
+			"Path": "$(ProjectDir)/Binaries/Win64/UE4Editor-EscapeNetwork.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(ProjectDir)/Binaries/Win64/UE4Editor-EscapeNetwork.pdb",
+			"Type": "SymbolFile"
+		},
+		{
 			"Path": "$(EngineDir)/Binaries/Win64/UE4Editor.version",
 			"Type": "BuildResource"
 		},
@@ -3509,10 +3509,6 @@
 		},
 		{
 			"Path": "$(ProjectDir)/Plugins/Crasheye/Binaries/Win64/UE4Editor.modules",
-			"Type": "RequiredResource"
-		},
-		{
-			"Path": "$(ProjectDir)/Plugins/OnlineSubsystemEscape/Binaries/Win64/UE4Editor.modules",
 			"Type": "RequiredResource"
 		},
 		{
@@ -3815,10 +3811,6 @@
 		},
 		{
 			"Path": "$(ProjectDir)/Plugins/Crasheye/Crasheye.uplugin",
-			"Type": "UFS"
-		},
-		{
-			"Path": "$(ProjectDir)/Plugins/OnlineSubsystemEscape/OnlineSubsystemEscape.uplugin",
 			"Type": "UFS"
 		},
 		{

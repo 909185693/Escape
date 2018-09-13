@@ -2,21 +2,31 @@
 
 using UnrealBuildTool;
 
-public class OnlineSubsystemEscape : ModuleRules
+public class EscapeNetwork : ModuleRules
 {
-	public OnlineSubsystemEscape(ReadOnlyTargetRules Target) : base(Target)
+	public EscapeNetwork(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        PrivateDefinitions.Add("ONLINESUBSYSTEMESCAPE_PACKAGE=1");
+        PublicIncludePaths.AddRange(
+            new string[] {
+                "EscapeNetwork/Public",
+                "EscapeNetwork/Classes"
+            }
+        );
+
+        PrivateIncludePaths.AddRange(
+            new string[] {
+                "EscapeNetwork/Private",
+			}
+        );
 
         PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
-                "OnlineSubsystemUtils"
+
 			}
-			);
-			
+		);
 		
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
@@ -24,19 +34,16 @@ public class OnlineSubsystemEscape : ModuleRules
                 "Core",
                 "CoreUObject",
 				"Engine",
-                "Slate",
-				"SlateCore",
                 "Sockets",
                 "OnlineSubsystem"
-			}
-			);
-		
+            }
+		);
 		
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[]
 			{
 				
 			}
-			);
+		);
 	}
 }

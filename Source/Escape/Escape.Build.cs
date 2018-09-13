@@ -20,7 +20,8 @@ public class Escape : ModuleRules
         });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {
-            "Crasheye"
+            "Crasheye",
+            "EscapeNetwork"
         });
 
 		// Uncomment if you are using Slate UI
