@@ -9,7 +9,7 @@ public class EscapeClientTarget : TargetRules
 	{
 		Type = TargetType.Client;
 
-        bUsesSteam = true;
+        //bUsesSteam = true;
 
         ExtraModuleNames.AddRange( new string[] { "Escape" } );
 	}
