@@ -85,6 +85,10 @@ bool UEscapeNetworkBase::SendTo(FSocket* SendSocket, ELogicCode Code, int32 Data
 static const FTimespan WaitTime(2000);
 bool UEscapeNetworkBase::RecvFrom(FSocket* RecvSocket, void*& OutData, ELogicCode& OutCode, EErrorCode& OutError)
 {
+	OutCode = ELogicCode::INVALID;
+
+	OutError = EErrorCode::NONE;
+
 	if (!RecvSocket->Wait(ESocketWaitConditions::WaitForRead, WaitTime))
 	{
 		return false;
@@ -121,9 +125,11 @@ bool UEscapeNetworkBase::RecvFrom(FSocket* RecvSocket, void*& OutData, ELogicCod
 				OutData = RecvData;
 				OutCode = DataHander->Code;
 				OutError = DataHander->Error;
+
+				return true;
 			}
 		}
-
+		
 		OutError = EErrorCode::NETWORK_ERROR;
 
 		return false;
