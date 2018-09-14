@@ -47,15 +47,13 @@ void UEscapeServer::Process()
 	check(SocketSubsystem);
 
 	check(Socket);
-	FSocket* AcceptSocket = Socket->Accept(TEXT("ESCAPENETWORK"));
+
+	TSharedPtr<FInternetAddr> InternetAddr = SocketSubsystem->CreateInternetAddr();
+	FSocket* AcceptSocket = Socket->Accept(*InternetAddr, TEXT("ESCAPENETWORK"));
 	if (AcceptSocket != nullptr)
 	{
 		ClientsSocket.Add(FEscapeSocket(AcceptSocket));
-
-		TSharedPtr<FInternetAddr> InternetAddr = SocketSubsystem->CreateInternetAddr();
-
-		AcceptSocket->GetAddress(*InternetAddr);
-
+		
 		UE_LOG(LogEscapeNetwork, Log, TEXT("Accept : socket addr[%s]"), *(InternetAddr->ToString(true)));
 	}
 

@@ -113,8 +113,6 @@ void UEscapeClient::Process()
 			if (bSeriousError)
 			{
 				bIsConnected = false;
-
-				Socket->Close();
 			}
 		}
 	}
@@ -135,6 +133,21 @@ void UEscapeClient::Send(ELogicCode Code, int32 DataSize, void* Data)
 void UEscapeClient::Reconnect()
 {
 	bShouldConnected = true;
+
+	if (Socket != nullptr)
+	{
+		Socket->Close();
+
+		SocketSubsystem->DestroySocket(Socket);
+
+		Socket = nullptr;
+	}
+
+	FString Error;
+	if (!InitBase(Error))
+	{
+		UE_LOG(LogEscapeNetwork, Warning, TEXT("EscapeClient : %s"), *Error);
+	}
 }
 
 void UEscapeClient::AddMessage(void* Data, ELogicCode Code, EErrorCode Error)

@@ -98,8 +98,6 @@ bool UEscapeNetworkBase::RecvFrom(FSocket* RecvSocket, void*& OutData, ELogicCod
 
 	FDataHeader* DataHander = (FDataHeader*)HeaderData;
 
-	UE_LOG(LogEscapeNetwork, Log, TEXT("Code [%d] Error[%d] Size[%d] Valid[%s]"), DataHander->Code, DataHander->Error, DataHander->Size, ANSI_TO_TCHAR(DataHander->Valid));
-
 	if (HeaderSize != BytesRead || !DataHander->IsValid())
 	{
 		OutError = EErrorCode::INVALID_DATA;
@@ -118,7 +116,7 @@ bool UEscapeNetworkBase::RecvFrom(FSocket* RecvSocket, void*& OutData, ELogicCod
 
 		if (bOk)
 		{
-			if (BytesRead == 0)
+			if (BytesRead == 0 || BytesRead == DataHander->Size)
 			{
 				OutData = RecvData;
 				OutCode = DataHander->Code;
