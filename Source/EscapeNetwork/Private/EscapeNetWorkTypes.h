@@ -1,22 +1,35 @@
 // Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 
-enum ELogicCode
+#pragma once
+
+
+enum ELogicCode : uint16
 {
-	USER_LOGIN
+#ifndef DEFINE_LOGIC_CODE
+#define DEFINE_LOGIC_CODE(Name, Value, Desc) \
+Name = Value,
+#endif //DEFINE_LOGIC_CODE
+#include "EscapeLogicCode.h"
+#undef DEFINE_LOGIC_CODE
 };
 
-enum EErrorCode
+enum EErrorCode : uint16
 {
-	NONE,
-	INVALID_DATA,
-	NETWORK_ERROR
+#ifndef DEFINE_ERROR_CODE
+#define DEFINE_ERROR_CODE(Name, Value, Desc) \
+Name = Value,
+#endif //DEFINE_ERROR_CODE
+#include "EscapeErrorCode.h"
+#undef DEFINE_ERROR_CODE
 };
+
 
 struct FDataHeader
 {
 	ELogicCode	Code;
 	EErrorCode	Error;
 	int32		Size;
+	char		Valid[6];
 
 	bool IsValid() const
 	{
@@ -28,6 +41,23 @@ struct FDataHeader
 			Valid[5] == 'E';
 	};
 
-private:
-	char	Valid[6] = {'E', 'S', 'C', 'A', 'P', 'E'};
+	void Init(ELogicCode InCode, EErrorCode InError, int32 InSize)
+	{
+		Valid[0] = 'E';
+		Valid[1] = 'S';
+		Valid[2] = 'C';
+		Valid[3] = 'A';
+		Valid[4] = 'P';
+		Valid[5] = 'E';
+
+		Code = InCode;
+		Error = InError;
+		Size = InSize;
+	}
+};
+
+struct FUserLogin
+{
+	char Username[20];
+	char Password[20];
 };

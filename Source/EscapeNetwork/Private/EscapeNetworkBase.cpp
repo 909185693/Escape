@@ -14,13 +14,19 @@ UEscapeNetworkBase::UEscapeNetworkBase(const FObjectInitializer& ObjectInitializ
 
 }
 
-bool UEscapeNetworkBase::Run()
+bool UEscapeNetworkBase::Register(UEscapeEngine* InEngine)
 {
 	FString Error;
 	if (!InitBase(Error))
 	{
 		UE_LOG(LogEscapeNetwork, Warning, TEXT("EscapeServer : %s"), *Error);
 		return false;
+	}
+
+	Engine = InEngine;
+	if (Engine != nullptr)
+	{
+		TickDispatchDelegateHandle = Engine->OnTickDispatch().AddUObject(this, &UEscapeNetworkBase::TickDispatch);
 	}
 
 	OnlineAsyncTaskThreadRunnable = new FEscapeOnlineAsyncTaskManager(this);
@@ -64,8 +70,7 @@ bool UEscapeNetworkBase::SendTo(FSocket* SendSocket, ELogicCode Code, int32 Data
 	void* SendData = FMemory::Malloc(Count);
 
 	FDataHeader* DataHeader = (FDataHeader*)SendData;
-	DataHeader->Code = Code;
-	DataHeader->Size = DataSize;
+	DataHeader->Init(Code, EErrorCode::NONE, DataSize);
 
 	FMemory::Memcpy((void*)(DataHeader + 1), Data, DataSize);
 
@@ -78,7 +83,7 @@ bool UEscapeNetworkBase::SendTo(FSocket* SendSocket, ELogicCode Code, int32 Data
 }
 
 static const FTimespan WaitTime(2000);
-bool UEscapeNetworkBase::RecvFrom(FSocket* RecvSocket, void* OutData, ELogicCode& OutCode, EErrorCode& OutError)
+bool UEscapeNetworkBase::RecvFrom(FSocket* RecvSocket, void*& OutData, ELogicCode& OutCode, EErrorCode& OutError)
 {
 	if (!RecvSocket->Wait(ESocketWaitConditions::WaitForRead, WaitTime))
 	{
@@ -92,6 +97,8 @@ bool UEscapeNetworkBase::RecvFrom(FSocket* RecvSocket, void* OutData, ELogicCode
 	RecvSocket->Recv(HeaderData, HeaderSize, BytesRead);
 
 	FDataHeader* DataHander = (FDataHeader*)HeaderData;
+
+	UE_LOG(LogEscapeNetwork, Log, TEXT("Code [%d] Error[%d] Size[%d] Valid[%s]"), DataHander->Code, DataHander->Error, DataHander->Size, ANSI_TO_TCHAR(DataHander->Valid));
 
 	if (HeaderSize != BytesRead || !DataHander->IsValid())
 	{
@@ -127,21 +134,19 @@ bool UEscapeNetworkBase::RecvFrom(FSocket* RecvSocket, void* OutData, ELogicCode
 	return true;
 }
 
-void UEscapeNetworkBase::SetNetworkNotify(FEscapeNetworkNotify* NetworkNotify)
+UEscapeEngine* UEscapeNetworkBase::GetEngine() const
 {
-
+	return Engine;
 }
-
-//void UEscapeNetworkBase::AddMessageCallback(UObject* Object, )
-//{
-//	FMessageCallback MessageCallback;
-//
-//	MessageCallback.MessageDelegate.BindUObject(this, )
-//}
 
 void UEscapeNetworkBase::BeginDestroy()
 {
 	Super::BeginDestroy();
+
+	if (Engine != nullptr)
+	{
+		Engine->OnTickDispatch().Remove(TickDispatchDelegateHandle);
+	}
 
 	if (OnlineAsyncTaskThread)
 	{
@@ -162,5 +167,5 @@ void UEscapeNetworkBase::BeginDestroy()
 		Socket = nullptr;
 	}
 
-	MessageCallbacks.Empty();
+	MessagesCallback.Empty();
 }

@@ -2,19 +2,15 @@
 
 #include "EscapeGameMode_Lobby.h"
 #include "Escape.h"
+#include "EscapeNetwork.h"
 #include "EscapePlayerState_Lobby.h"
 #include "EscapePlayerController_Lobby.h"
-#include "EscapeMessageContrller.h"
-
-#include "EscapeServer.h"
-#include "EscapeClient.h"
 
 
 AEscapeGameMode_Lobby::AEscapeGameMode_Lobby(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
+	, EscapeServerClassName(TEXT("/Script/EscapeNetwork.EscapeServer"))
 {
-	EscapeServerClassName = TEXT("/Script/EscapeNetwork.EscapeServer");
-
 	// 设置默认角色类
 	static ConstructorHelpers::FClassFinder<APawn> DefaultPawnClassFinder(TEXT("/Game/Blueprints/Character/EscapeCharacter_Lobby"));
 	if (DefaultPawnClassFinder.Succeeded())
@@ -46,17 +42,12 @@ void AEscapeGameMode_Lobby::InitGame(const FString& MapName, const FString& Opti
 
 			if (EscapeServer != nullptr)
 			{
-				EscapeServer->Run();
+				EscapeServer->Register(Cast<UEscapeEngine>(GetGameInstance()->GetEngine()));
 			}
 		}
 		else
 		{
 			UE_LOG(LogEscape, Error, TEXT("Failed to load class '%s'"), *EscapeServerClassName);
 		}
-
-		UEscapeMessageContrller* EscapeMessageContrller = NewObject<UEscapeMessageContrller>(GetTransientPackage(), UEscapeMessageContrller::StaticClass());
-
-		EscapeServer->AddMessageCallback(ELogicCode::USER_LOGIN, EscapeMessageContrller, &UEscapeMessageContrller::UserLoginCallback);
-		EscapeServer->AddMessageCallback(ELogicCode::USER_LOGIN, EscapeMessageContrller, &UEscapeMessageContrller::ConnectionCallback);
 	}
 }

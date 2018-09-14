@@ -13,9 +13,11 @@ UEscapeClient::UEscapeClient(const FObjectInitializer& ObjectInitializer)
 
 }
 
-bool UEscapeClient::Run()
+bool UEscapeClient::Register(UEscapeEngine* InEngine)
 {
-	return bShouldConnected = Super::Run();
+	bShouldConnected = Super::Register(InEngine);
+	
+	return bShouldConnected;
 }
 
 void UEscapeClient::TickDispatch(float DeltaTime)
@@ -29,14 +31,44 @@ void UEscapeClient::TickDispatch(float DeltaTime)
 			HostAddr->SetIp(*ServerIP, bIsValid);
 			HostAddr->SetPort(ServerPort);
 
-			if (Socket->Connect(*HostAddr))
+			switch (Socket->GetConnectionState())
 			{
+			case ESocketConnectionState::SCS_NotConnected:
+			case ESocketConnectionState::SCS_ConnectionError:
+				Socket->Connect(*HostAddr);
+				if (++ConnectCount > MaxConnectCount)
+				{
+					ConnectCount = 0;
+
+					bShouldConnected = false;
+
+					AddMessage(nullptr, ELogicCode::CONNECTION, NETWORK_ERROR);
+				}
+				break;
+			case ESocketConnectionState::SCS_Connected:
+				ConnectCount = 0;
 				bIsConnected = true;
-			}
-			else if (++ConnectCount > MaxConnectCount)
-			{
 				bShouldConnected = false;
+				AddMessage(nullptr, ELogicCode::CONNECTION, EErrorCode::NONE);
+				break;
 			}
+		}
+
+		if (!MessageQueue.IsEmpty())
+		{
+			FMessageData MessageData;
+
+			MessageQueue.Dequeue(MessageData);
+
+			for (FMessageCallback& Callback : MessagesCallback)
+			{
+				if (Callback.Code == MessageData.Code)
+				{
+					Callback.MessageDelegate.ExecuteIfBound(MessageData.Data, MessageData.Error);
+				}
+			}
+
+			FMemory::Free(MessageData.Data);
 		}
 	}
 }
@@ -59,29 +91,55 @@ void UEscapeClient::Process()
 			if (Error == INVALID_DATA)
 			{
 				bSeriousError = true;
+
+				AddMessage(nullptr, ELogicCode::CONNECTION, INVALID_DATA);
 			}
 			else if (Error == NETWORK_ERROR)
 			{
 				if (++ConnectCount > MaxConnectCount)
 				{
 					bSeriousError = true;
+
+					AddMessage(nullptr, ELogicCode::CONNECTION, NETWORK_ERROR);
 				}
 			}
 			else
 			{
 				ConnectCount = 0;
 
-				FMemory::Free(Data);
-
-				UE_LOG(LogEscapeNetwork, Log, TEXT("EscapeClient £ºRecv => Code[%d] Error[%d]"), Code, Error);
+				AddMessage(Data, Code, Error);
 			}
 
 			if (bSeriousError)
 			{
 				bIsConnected = false;
 
-				UE_LOG(LogEscapeNetwork, Log, TEXT("EscapeClient £ºnet error => Code[%d] Error[%d]"), Code, Error);
+				Socket->Close();
 			}
 		}
 	}
+}
+
+void UEscapeClient::Send(ELogicCode Code, int32 DataSize, void* Data)
+{
+	if (bIsConnected)
+	{
+		check(Socket);
+		if (!SendTo(Socket, Code, DataSize, Data))
+		{
+			AddMessage(nullptr, ELogicCode::CONNECTION, EErrorCode::NETWORK_ERROR);
+		}
+	}
+}
+
+void UEscapeClient::Reconnect()
+{
+	bShouldConnected = true;
+}
+
+void UEscapeClient::AddMessage(void* Data, ELogicCode Code, EErrorCode Error)
+{
+	MessageQueue.Enqueue(FMessageData(Data, Code, Error));
+
+	UE_LOG(LogEscapeNetwork, Log, TEXT("EscapeClient : Recv => Code[%d] Error[%d]"), Code, Error);
 }

@@ -1,0 +1,8 @@
+// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
+
+#pragma once
+
+DEFINE_ERROR_CODE(NONE, 0, "")
+DEFINE_ERROR_CODE(NETWORK_ERROR, 6, "")
+DEFINE_ERROR_CODE(INVALID_DATA, 400, "非法数据")
+DEFINE_ERROR_CODE(UNKNOWN_ERROR, 404, "未知错误")

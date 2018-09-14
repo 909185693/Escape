@@ -38,7 +38,7 @@ class ESCAPENETWORK_API UEscapeServer : public UEscapeNetworkBase
 {
 	GENERATED_UCLASS_BODY()
 
-	virtual bool Run() override;
+	virtual bool Register(UEscapeEngine* InEngine) override;
 	virtual void TickDispatch(float DeltaTime) override;
 	virtual void Process() override;
 

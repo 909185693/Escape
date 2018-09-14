@@ -11,9 +11,9 @@ UEscapeServer::UEscapeServer(const FObjectInitializer& ObjectInitializer)
 
 }
 
-bool UEscapeServer::Run()
+bool UEscapeServer::Register(UEscapeEngine* InEngine)
 {
-	if (Super::Run())
+	if (Super::Register(InEngine))
 	{
 		TSharedRef<FInternetAddr> InternetAddr = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->CreateInternetAddr();
 		InternetAddr->SetPort(ListenPort);
@@ -90,7 +90,7 @@ void UEscapeServer::Process()
 
 				FMemory::Free(Data);
 
-				UE_LOG(LogEscapeNetwork, Log, TEXT("EscapeServer £ºRecv => Code[%d] Error[%d]"), Code, Error);
+				UE_LOG(LogEscapeNetwork, Log, TEXT("EscapeServer : Recv => Code[%d] Error[%d]"), Code, Error);
 			}
 
 			if (bSeriousError)
@@ -101,7 +101,7 @@ void UEscapeServer::Process()
 
 				It.RemoveCurrent();
 
-				UE_LOG(LogEscapeNetwork, Log, TEXT("EscapeServer £ºnet error => Code[%d] Error[%d]"), Code, Error);
+				UE_LOG(LogEscapeNetwork, Log, TEXT("EscapeServer : net error => Code[%d] Error[%d]"), Code, Error);
 			}
 		}
 	}

@@ -4,6 +4,17 @@
 #include "EscapeGameInstance.h"
 
 
+AEscapePlayerController_Lobby::AEscapePlayerController_Lobby(const FObjectInitializer& ObjectInitializer) :
+	Super(ObjectInitializer)
+{
+	// 设置默认角色类
+	static ConstructorHelpers::FClassFinder<UUserWidget> UserWidgetClassFinder(TEXT("/Game/Blueprints/UMG/Lobby/UserLogin"));
+	if (UserWidgetClassFinder.Succeeded())
+	{
+		UserWidgetClass = UserWidgetClassFinder.Class;
+	}
+}
+
 void AEscapePlayerController_Lobby::StartGame()
 {
 	JionGameRoom();
@@ -17,5 +28,10 @@ bool AEscapePlayerController_Lobby::JionGameRoom_Validate()
 void AEscapePlayerController_Lobby::JionGameRoom_Implementation()
 {
 
+}
+
+void AEscapePlayerController_Lobby::BeginPlay()
+{
+	Super::BeginPlay();
 }
 

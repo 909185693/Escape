@@ -6,9 +6,9 @@
 #include "Engine/GameInstance.h"
 #include "EscapeGameInstance.generated.h"
 
-/**
- * 
- */
+
+class UEscapeClient;
+
 UCLASS()
 class ESCAPE_API UEscapeGameInstance : public UGameInstance
 {
@@ -16,5 +16,19 @@ class ESCAPE_API UEscapeGameInstance : public UGameInstance
 	
 	class AEscapeGameSession* GetGameSession() const;
 
+	virtual void Init() override;
 	virtual void OnStart() override;
+	
+	/// UEscapeGameInstance
+	class UEscapeClient* GetEscapeClient() const;
+
+protected:
+	UPROPERTY(Transient)
+	UEscapeClient* EscapeClient;
+
+	UPROPERTY(Config)
+	FString EscapeClientClassName;
+
+	UPROPERTY(Config)
+	TSubclassOf<UEscapeClient> EscapeClientClass;
 };

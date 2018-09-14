@@ -20,6 +20,14 @@ class ESCAPE_API UEscapeEngine : public UGameEngine
 	/* Hook up specific callbacks */
 	virtual void Init(IEngineLoop* InEngineLoop) override;
 	virtual void Start() override;
+	virtual void Tick(float DeltaSeconds, bool bIdleMode) override;
+	
+protected:
+	/** Event to gather up all net drivers and call TickDispatch at once */
+	DECLARE_EVENT_OneParam(UEscapeEngine, FOnEscapeEngineTickEvent, float)
+	FOnEscapeEngineTickEvent TickDispatchEvent;
 
-	TArray<UEscapeGameInstance*> EscapeGameInstances;
+public:
+	/** Get the event that broadcasts TickDispatch */
+	FOnEscapeEngineTickEvent& OnTickDispatch() { return TickDispatchEvent; }
 };

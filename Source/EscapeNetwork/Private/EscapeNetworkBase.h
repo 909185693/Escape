@@ -7,6 +7,7 @@
 #include "IPAddress.h"
 #include "OnlineSubsystem.h"
 #include "SocketSubsystem.h"
+#include "EscapeEngine.h"
 #include "EscapeNetworkTypes.h"
 #include "EscapeNetworkModule.h"
 #include "EscapeNetworkBase.generated.h"
@@ -29,13 +30,13 @@ class UEscapeNetworkBase : public UObject
 {
 	GENERATED_UCLASS_BODY()
 
-	virtual bool Run();
+	virtual bool Register(UEscapeEngine* InEngine);
 	virtual bool InitBase(FString& Error);
 	virtual bool SendTo(FSocket* Socket, ELogicCode Code, int32 DataSize, void* Data);
-	virtual bool RecvFrom(FSocket* Socket, void* OutData, ELogicCode& OutCode, EErrorCode& OutError);
+	virtual bool RecvFrom(FSocket* Socket, void*& OutData, ELogicCode& OutCode, EErrorCode& OutError);
 	virtual void TickDispatch(float DeltaTime) PURE_VIRTUAL(UEscapeNetworkBase::TickDispatch, );
 	virtual void Process() PURE_VIRTUAL(UEscapeNetworkBase::Process, );
-	virtual void SetNetworkNotify(FEscapeNetworkNotify* NetworkNotify);
+	virtual class UEscapeEngine* GetEngine() const;
 
 	template <typename UserClass>
 	using FMessageCallbackTwoParamsPtr = void(UserClass::*)(void*, EErrorCode);
@@ -46,13 +47,16 @@ class UEscapeNetworkBase : public UObject
 		FMessageCallback MessageCallback;
 		MessageCallback.Code = Code;
 		MessageCallback.MessageDelegate.BindUObject(InUserObject, InFunc);
-		MessageCallbacks.Add(MessageCallback);
+		MessagesCallback.Add(MessageCallback);
 	}
 
 	/// UObject 
 	virtual void BeginDestroy() override;
 
 protected:
+	UPROPERTY(Transient)
+	UEscapeEngine* Engine;
+	
 	FSocket* Socket;
 
 	ISocketSubsystem* SocketSubsystem;
@@ -63,5 +67,8 @@ protected:
 	/** Online async task thread */
 	class FRunnableThread* OnlineAsyncTaskThread;
 
-	TArray<FMessageCallback> MessageCallbacks;
+	/** Handles to various registered delegates */
+	FDelegateHandle TickDispatchDelegateHandle;
+
+	TArray<FMessageCallback> MessagesCallback;
 };

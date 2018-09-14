@@ -8,7 +8,6 @@
 
 
 class UEscapeServer;
-class UEscapeClient;
 
 /**
  * 
@@ -34,10 +33,5 @@ protected:
 	TSubclassOf<UEscapeServer> EscapeServerClass;
 
 	UPROPERTY(Config)
-	FString EscapeServerClassName;
-
-	UPROPERTY(Config)
-	TSubclassOf<UEscapeClient> EscapeClientClass;
-	
-	
+	FString EscapeServerClassName;	
 };

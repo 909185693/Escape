@@ -6,14 +6,48 @@
 #include "EscapeClient.generated.h"
 
 
+struct FMessageData
+{
+public:
+	FMessageData(void* InData, ELogicCode InCode, EErrorCode InError)
+		: Data(InData)
+		, Code(InCode)
+		, Error(InError)
+	{
+
+	}
+
+	FMessageData()
+		: Data(nullptr)
+		, Code(ELogicCode::INVALID)
+		, Error(EErrorCode::NONE)
+	{
+
+	}
+
+	void* Data;
+
+	ELogicCode Code;
+
+	EErrorCode Error;
+};
+
 UCLASS(Transient, config = Engine)
-class UEscapeClient : public UEscapeNetworkBase
+class ESCAPENETWORK_API UEscapeClient : public UEscapeNetworkBase
 {
 	GENERATED_UCLASS_BODY()
 
-	virtual bool Run() override;
-	virtual void TickDispatch(float DeltaTime) override;
+	virtual bool Register(UEscapeEngine* InEngine) override;
 	virtual void Process() override;
+
+	/// EscapeClient
+public:
+	virtual void TickDispatch(float DeltaTime) override;
+	virtual void Send(ELogicCode Code, int32 DataSize, void* Data);
+	virtual void Reconnect();
+
+protected:
+	virtual void AddMessage(void* Data, ELogicCode Code, EErrorCode Error);
 
 protected:
 	UPROPERTY(Config)
@@ -30,4 +64,6 @@ protected:
 	bool bShouldConnected;
 
 	bool bIsConnected;
+
+	TQueue<FMessageData, EQueueMode::Mpsc> MessageQueue;
 };

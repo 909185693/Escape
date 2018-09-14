@@ -21,3 +21,10 @@ void UEscapeEngine::Start()
 		UE_LOG(LogTemp, Log, TEXT("DefName [%s] DriverClassName[%s] DriverClassNameFallback[%s]"), *Definition.DefName.ToString(), *Definition.DriverClassName.ToString(), *Definition.DriverClassNameFallback.ToString());
 	}
 }
+
+void UEscapeEngine::Tick(float DeltaSeconds, bool bIdleMode)
+{
+	Super::Tick(DeltaSeconds, bIdleMode);
+
+	OnTickDispatch().Broadcast(DeltaSeconds);
+}
