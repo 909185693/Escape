@@ -6,6 +6,38 @@
 #include "EscapeLobbyWidget.generated.h"
 
 
+UENUM(BlueprintType)
+enum EUserLogin
+{
+	Login_Success,
+	Login_NetworkError,
+	Login_PasswordError,
+	Login_NoneError,
+};
+
+USTRUCT(BlueprintType)
+struct FEscapeUser
+{
+	GENERATED_USTRUCT_BODY()
+
+	FEscapeUser()
+	{
+		FMemory::Memzero(this, sizeof(FEscapeUser));
+	}
+
+	FEscapeUser(FUser& User)
+		: ID(User.ID)
+		, Nickname(User.Nickname)
+	{
+
+	}
+
+	UPROPERTY(BlueprintReadOnly)
+	int32 ID;
+
+	UPROPERTY(BlueprintReadOnly)
+	FString Nickname;
+};
 
 UCLASS()
 class ESCAPE_API UEscapeLobbyWidget : public UEscapeWidget
@@ -13,13 +45,13 @@ class ESCAPE_API UEscapeLobbyWidget : public UEscapeWidget
 	GENERATED_UCLASS_BODY()
 	
 protected:
-	UFUNCTION(BlueprintCallable, Category = "UserLogin")
+	UFUNCTION(BlueprintCallable, Category = "Lobby")
 	void UserLogin(const FText& Username, const FText& Password);
 
-	UFUNCTION(BlueprintCallable, Category = "MatchGame")
+	UFUNCTION(BlueprintCallable, Category = "Lobby")
 	void MatchGame();
 
-	UFUNCTION(BlueprintCallable, Category = "MatchGame")
+	UFUNCTION(BlueprintCallable, Category = "Lobby")
 	void Invitation(const int32 UserID);
 
 protected:
@@ -29,7 +61,7 @@ protected:
 	void NotifyUserLogin(void* Data, EErrorCode Error);
 
 	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "NotifyUserLogin"))
-	void ReceiveNotifyUserLogin(bool bSuccess);
+	void ReceiveNotifyUserLogin(EUserLogin NotifyCode, FEscapeUser EscapeUser);
 
 	/// ∆•≈‰”Œœ∑
 	void NotifyMatchGame(void* Data, EErrorCode Error);
@@ -40,6 +72,6 @@ protected:
 	/// —˚«Î
 	void NotifyInvitation(void* Data, EErrorCode Error);
 
-	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "NotifyMatchGame"))
+	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "NotifyInvitation"))
 	void ReceiveNotifyInvitation(bool bSuccess);
 };

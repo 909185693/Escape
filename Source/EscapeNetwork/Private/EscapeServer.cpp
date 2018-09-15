@@ -73,14 +73,14 @@ void UEscapeServer::Process()
 	FSocket* AcceptSocket = Socket->Accept(TEXT("ESCAPENETWORK"));
 	if (AcceptSocket != nullptr)
 	{
-		ClientsSocket.Add(FEscapeSocket(AcceptSocket));
+		Connections.Add(MakeShareable(new FConnection(AcceptSocket)));
 	}
 
 	// 消息接收
-	TArray<FEscapeSocket>::TIterator It(ClientsSocket);
+	TArray<TSharedPtr<FConnection>>::TIterator It(Connections);
 	for (; It; ++It)
 	{
-		FEscapeSocket& ClientSocket = *It;
+		FConnection& Connection = **It;
 
 		void* Data = nullptr;
 
@@ -88,7 +88,7 @@ void UEscapeServer::Process()
 
 		EErrorCode Error;
 
-		if (RecvFrom(*ClientSocket, Data, Code, Error))
+		if (RecvFrom(*Connection, Data, Code, Error))
 		{
 			bool bSeriousError = false;
 			if (Error == INVALID_DATA)
@@ -97,16 +97,16 @@ void UEscapeServer::Process()
 			}
 			else if (Error == NETWORK_ERROR)
 			{
-				if (++ClientSocket.NetworkErrorCount > MaxNetworkErrorCount)
+				if (++Connection.NetworkErrorCount > MaxNetworkErrorCount)
 				{
 					bSeriousError = true;
 				}
 			}
 			else
 			{
-				ClientSocket.NetworkErrorCount = 0;
+				Connection.NetworkErrorCount = 0;
 
-				ExecuteMessageCallback(*ClientSocket, Code, Error, Data);
+				ExecuteMessageCallback(Connection, Code, Error, Data);
 
 				FMemory::Free(Data);
 
@@ -115,9 +115,9 @@ void UEscapeServer::Process()
 
 			if (bSeriousError)
 			{
-				ClientSocket->Close();
+				Connection->Close();
 
-				SocketSubsystem->DestroySocket(*ClientSocket);
+				SocketSubsystem->DestroySocket(*Connection);
 
 				It.RemoveCurrent();
 

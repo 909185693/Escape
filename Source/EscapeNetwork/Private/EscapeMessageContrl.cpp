@@ -27,7 +27,7 @@ void UEscapeMessageContrl::BeginDestroy()
 	Super::BeginDestroy();
 }
 
-void UEscapeMessageContrl::NotifyUserLogin(FSocket* Socket, void* Data, EErrorCode Error)
+void UEscapeMessageContrl::NotifyUserLogin(FConnection& Connection, void* Data, EErrorCode Error)
 {
 	FUserLogin* UserLogin = (FUserLogin*)Data;
 	if (UserLogin != nullptr)
@@ -35,24 +35,24 @@ void UEscapeMessageContrl::NotifyUserLogin(FSocket* Socket, void* Data, EErrorCo
 		if (FPlatformString::Strncmp(ANSI_TO_TCHAR(UserLogin->Username), TEXT("909185693"), sizeof(UserLogin->Username)) == 0 &&
 			FPlatformString::Strncmp(ANSI_TO_TCHAR(UserLogin->Password), TEXT("111111"), sizeof(UserLogin->Password)) == 0)
 		{
-			FEscapeUser SendData;
+			FUser SendData;
 			SendData.ID = 10086;
-			FPlatformString::Strncpy(SendData.Nickname, "Ø¼¼úÉÙ"), sizeof(SendData.Nickname));
-			EscapeServer->SendTo(Socket, ELogicCode::USER_LOGIN, EErrorCode::NONE, sizeof(FEscapeUser), &Data);
+			FPlatformString::Strncpy(ANSI_TO_TCHAR(SendData.Nickname), TEXT("Ø¼¼úÉÙ"), sizeof(SendData.Nickname));
+			EscapeServer->SendTo(*Connection, ELogicCode::USER_LOGIN, EErrorCode::NONE, sizeof(FUser), &SendData);
 		}
 		else
 		{
-			EscapeServer->SendTo(Socket, ELogicCode::USER_LOGIN, EErrorCode::PASSWORD_ERROR);
+			EscapeServer->SendTo(*Connection, ELogicCode::USER_LOGIN, EErrorCode::PASSWORD_ERROR);
 		}
 	}
 }
 
-void UEscapeMessageContrl::NotifyMatchGame(FSocket* Socket, void* Data, EErrorCode Error)
+void UEscapeMessageContrl::NotifyMatchGame(FConnection& Connection, void* Data, EErrorCode Error)
 {
 
 }
 
-void UEscapeMessageContrl::NotifyInvitation(FSocket* Socket, void* Data, EErrorCode Error)
+void UEscapeMessageContrl::NotifyInvitation(FConnection& Connection, void* Data, EErrorCode Error)
 {
 
 }

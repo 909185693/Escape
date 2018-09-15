@@ -8,6 +8,34 @@
 
 class UEscapeMessageContrl;
 
+struct FConnection
+{
+public:
+	FConnection(FSocket* InSocket)
+		: UserID(0)
+		, Socket(InSocket)
+		, NetworkErrorCount(0)
+	{
+
+	}
+
+	FSocket* operator->()
+	{
+		return Socket;
+	}
+
+	FSocket* operator*()
+	{
+		return Socket;
+	}
+
+	int32 UserID;
+
+	FSocket* Socket;
+
+	int32 NetworkErrorCount;
+};
+
 UCLASS(Transient, config = Engine)
 class ESCAPENETWORK_API UEscapeServer : public UEscapeNetworkBase
 {
@@ -39,8 +67,10 @@ protected:
 	UPROPERTY()
 	TSubclassOf<UEscapeMessageContrl> EscapeMessageContrlClass;
 
+	TArray<TSharedPtr<FConnection>> Connections;
+
 protected:
-	DECLARE_DELEGATE_ThreeParams(FServerMessageDelegate, FSocket*, void*, EErrorCode);
+	DECLARE_DELEGATE_ThreeParams(FServerMessageDelegate, FConnection&, void*, EErrorCode);
 
 	struct FServerMessageCallback
 	{
@@ -50,13 +80,12 @@ protected:
 
 		FServerMessageDelegate Delegate;
 	};
-
 	typedef TSharedPtr<FServerMessageCallback> FServerMessageCallbackPtr;
 
 	TArray<FServerMessageCallbackPtr> MessagesCallback;
 
 	template <typename UserClass>
-	using FServerMessageCallbackThreeParamsPtr = void(UserClass::*)(FSocket*, void*, EErrorCode);
+	using FServerMessageCallbackThreeParamsPtr = void(UserClass::*)(FConnection&, void*, EErrorCode);
 
 public:
 	template <typename UserClass>
@@ -86,44 +115,14 @@ public:
 		}
 	}
 
-	void ExecuteMessageCallback(FSocket* ClientSocket, ELogicCode Code, EErrorCode Error, void* Data)
+	void ExecuteMessageCallback(FConnection& Connection, ELogicCode Code, EErrorCode Error, void* Data)
 	{
 		for (FServerMessageCallbackPtr CallbackPtr : MessagesCallback)
 		{
 			if (CallbackPtr->Code == Code)
 			{
-				CallbackPtr->Delegate.ExecuteIfBound(ClientSocket, Data, Error);
+				CallbackPtr->Delegate.ExecuteIfBound(Connection, Data, Error);
 			}
 		}
 	}
-
-protected:
-	struct FEscapeSocket
-	{
-	public:
-		FEscapeSocket(FSocket* InSocket)
-			: Socket(InSocket)
-			, NetworkErrorCount(0)
-		{
-
-		}
-
-		FSocket* operator->()
-		{
-			return Socket;
-		}
-
-		FSocket* operator*()
-		{
-			return Socket;
-		}
-
-		int32 NetworkErrorCount;
-
-	protected:
-
-		FSocket* Socket;
-	};
-
-	TArray<FEscapeSocket> ClientsSocket;
 };

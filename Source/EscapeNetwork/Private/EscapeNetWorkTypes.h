@@ -66,7 +66,7 @@ struct FUserLogin
 	char Password[20];
 };
 
-struct FEscapeUser
+struct FUser
 {
 	int32	ID;
 	char	Nickname[20];

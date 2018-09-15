@@ -4,9 +4,11 @@
 #include "EscapeGameInstance.h"
 
 
-AEscapePlayerController_Lobby::AEscapePlayerController_Lobby(const FObjectInitializer& ObjectInitializer) :
-	Super(ObjectInitializer)
+AEscapePlayerController_Lobby::AEscapePlayerController_Lobby(const FObjectInitializer& ObjectInitializer) 
+	: Super(ObjectInitializer)
 {
+	bShowMouseCursor = true;
+
 	// 设置默认角色类
 	static ConstructorHelpers::FClassFinder<UUserWidget> UserWidgetClassFinder(TEXT("/Game/Blueprints/UMG/Lobby/Lobby"));
 	if (UserWidgetClassFinder.Succeeded())

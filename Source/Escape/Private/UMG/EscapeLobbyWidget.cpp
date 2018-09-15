@@ -1,6 +1,7 @@
 // Copyright 2018 by January. All Rights Reserved.
 
 #include "EscapeLobbyWidget.h"
+#include "Escape.h"
 
 
 UEscapeLobbyWidget::UEscapeLobbyWidget(const FObjectInitializer& ObjectInitializer) :
@@ -57,7 +58,28 @@ void UEscapeLobbyWidget::RegisterMessageCallback()
 
 void UEscapeLobbyWidget::NotifyUserLogin(void* Data, EErrorCode Error)
 {
-	ReceiveNotifyUserLogin(Error == EErrorCode::NONE);
+	FEscapeUser EscapeUser;
+
+	EUserLogin NotifyCode = Login_Success;
+	switch (Error)
+	{
+	case EErrorCode::NONE:
+		EscapeUser = FEscapeUser(*(FUser*)Data);
+		break;
+	case EErrorCode::NETWORK_ERROR:
+		NotifyCode = Login_NetworkError;
+		break;
+	case EErrorCode::PASSWORD_ERROR:
+		NotifyCode = Login_PasswordError;
+		break;
+	default:
+		NotifyCode = Login_NoneError;
+		break;
+	}
+
+	UE_LOG(LogEscape, Log, TEXT("NotifyUserLogin => ID[%d] Nickname[%s]"), EscapeUser.ID, TCHAR_TO_UTF8(*EscapeUser.Nickname));
+
+	ReceiveNotifyUserLogin(NotifyCode, EscapeUser);
 }
 
 void UEscapeLobbyWidget::NotifyMatchGame(void* Data, EErrorCode Error)
