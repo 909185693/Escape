@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Object.h"
+#include "EscapeNetWorkTypes.h"
 #include "EscapeMessageContrl.generated.h"
 
 
@@ -17,6 +18,14 @@ class ESCAPENETWORK_API UEscapeMessageContrl : public UObject
 	virtual void BeginDestroy() override;
 
 protected:
+	/// ”√ªßµ«¬º
+	void NotifyUserLogin(FSocket* Socket, void* Data, EErrorCode Error);
+
+	/// ∆•≈‰”Œœ∑
+	void NotifyMatchGame(FSocket* Socket, void* Data, EErrorCode Error);
+	
+	/// —˚«Î
+	void NotifyInvitation(FSocket* Socket, void* Data, EErrorCode Error);
 
 protected:
 	UPROPERTY()

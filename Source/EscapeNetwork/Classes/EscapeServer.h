@@ -39,6 +39,65 @@ protected:
 	UPROPERTY()
 	TSubclassOf<UEscapeMessageContrl> EscapeMessageContrlClass;
 
+protected:
+	DECLARE_DELEGATE_ThreeParams(FServerMessageDelegate, FSocket*, void*, EErrorCode);
+
+	struct FServerMessageCallback
+	{
+		ELogicCode Code;
+		
+		UObject* Object;
+
+		FServerMessageDelegate Delegate;
+	};
+
+	typedef TSharedPtr<FServerMessageCallback> FServerMessageCallbackPtr;
+
+	TArray<FServerMessageCallbackPtr> MessagesCallback;
+
+	template <typename UserClass>
+	using FServerMessageCallbackThreeParamsPtr = void(UserClass::*)(FSocket*, void*, EErrorCode);
+
+public:
+	template <typename UserClass>
+	inline FServerMessageCallbackPtr AddMessageCallback(ELogicCode Code, UserClass* InUserObject, FServerMessageCallbackThreeParamsPtr<UserClass> InFunc)
+	{
+		FServerMessageCallbackPtr MessageCallback = MakeShareable(new FServerMessageCallback());
+		MessageCallback->Code = Code;
+		MessageCallback->Object = InUserObject;
+		MessageCallback->Delegate.BindUObject(InUserObject, InFunc);
+		MessagesCallback.Add(MessageCallback);
+
+		return MessageCallback;
+	}
+
+	void ClearMessageCallback(UObject* Object)
+	{
+		TArray<FServerMessageCallbackPtr>::TIterator It(MessagesCallback);
+		for (; It; ++It)
+		{
+			FServerMessageCallbackPtr CallbackPtr = *It;
+			if (CallbackPtr->Object == Object)
+			{
+				MessagesCallback.Remove(CallbackPtr);
+
+				CallbackPtr.Reset();
+			}
+		}
+	}
+
+	void ExecuteMessageCallback(FSocket* ClientSocket, ELogicCode Code, EErrorCode Error, void* Data)
+	{
+		for (FServerMessageCallbackPtr CallbackPtr : MessagesCallback)
+		{
+			if (CallbackPtr->Code == Code)
+			{
+				CallbackPtr->Delegate.ExecuteIfBound(ClientSocket, Data, Error);
+			}
+		}
+	}
+
+protected:
 	struct FEscapeSocket
 	{
 	public:
@@ -67,39 +126,4 @@ protected:
 	};
 
 	TArray<FEscapeSocket> ClientsSocket;
-
-	struct FMessageData
-	{
-	public:
-		FMessageData(void* InData, ELogicCode InCode, EErrorCode InError, FSocket* InSocket)
-			: Data(InData)
-			, Code(InCode)
-			, Error(InError)
-			, Socket(InSocket)
-		{
-
-		}
-
-		FMessageData()
-			: Data(nullptr)
-			, Code(ELogicCode::INVALID)
-			, Error(EErrorCode::NONE)
-			, Socket(nullptr)
-		{
-
-		}
-
-		void* Data;
-
-		ELogicCode Code;
-
-		EErrorCode Error;
-
-		FSocket* Socket;
-	};
-
-	TQueue<FMessageData, EQueueMode::Mpsc> MessageQueue;
-
-protected:
-	virtual void AddMessage(void* Data, ELogicCode Code, EErrorCode Error, FSocket* ClientSocket);
 };

@@ -60,11 +60,11 @@ void UEscapeClient::TickDispatch(float DeltaTime)
 
 			MessageQueue.Dequeue(MessageData);
 
-			for (FMessageCallbackPtr& Callback : MessagesCallback)
+			for (FClientMessageCallbackPtr& Callback : MessagesCallback)
 			{
 				if (Callback->Code == MessageData.Code)
 				{
-					Callback->MessageDelegate.ExecuteIfBound(MessageData.Data, MessageData.Error);
+					Callback->Delegate.ExecuteIfBound(MessageData.Data, MessageData.Error);
 				}
 			}
 
@@ -123,7 +123,7 @@ void UEscapeClient::Send(ELogicCode Code, int32 DataSize, void* Data)
 	if (bIsConnected)
 	{
 		check(Socket);
-		if (!SendTo(Socket, Code, DataSize, Data))
+		if (!SendTo(Socket, Code, EErrorCode::NONE, DataSize, Data))
 		{
 			AddMessage(nullptr, ELogicCode::CONNECTION, EErrorCode::NETWORK_ERROR);
 		}
@@ -148,6 +148,13 @@ void UEscapeClient::Reconnect()
 	{
 		UE_LOG(LogEscapeNetwork, Warning, TEXT("EscapeClient : %s"), *Error);
 	}
+}
+
+void UEscapeClient::BeginDestroy()
+{
+	Super::BeginDestroy();
+
+	MessagesCallback.Empty();
 }
 
 void UEscapeClient::AddMessage(void* Data, ELogicCode Code, EErrorCode Error)

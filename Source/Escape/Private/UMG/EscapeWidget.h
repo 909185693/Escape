@@ -33,9 +33,7 @@ protected:
 
 protected:
 	virtual void RegisterMessageCallback();
-	virtual void UnregisterMessageCallback();
 
-	FMessageCallbackPtr NotifyConnectionHandle;
 	virtual void NotifyConnection(void* Data, EErrorCode Error);
 	
 	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "NotifyConnection"))

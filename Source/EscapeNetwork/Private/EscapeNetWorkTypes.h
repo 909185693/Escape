@@ -66,6 +66,12 @@ struct FUserLogin
 	char Password[20];
 };
 
+struct FEscapeUser
+{
+	int32	ID;
+	char	Nickname[20];
+};
+
 struct FMatchGame
 {
 };

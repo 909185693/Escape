@@ -20,25 +20,56 @@ public:
 	virtual void Send(ELogicCode Code, int32 DataSize, void* Data);
 	virtual void Reconnect();
 
-protected:
-	virtual void AddMessage(void* Data, ELogicCode Code, EErrorCode Error);
+public:
+	virtual void BeginDestroy() override;
 
 protected:
-	UPROPERTY(Config)
-	FString ServerIP;
+	DECLARE_DELEGATE_TwoParams(FClientMessageDelegate, void*, EErrorCode);
 
-	UPROPERTY(Config)
-	int32 ServerPort;
+	struct FClientMessageCallback
+	{
+		ELogicCode Code;
 
-	int32 ConnectCount;
+		UObject* Object;
 
-	UPROPERTY(Config)
-	int32 MaxConnectCount;
+		FClientMessageDelegate Delegate;
+	};
 
-	bool bShouldConnected;
+	typedef TSharedPtr<FClientMessageCallback> FClientMessageCallbackPtr;
 
-	bool bIsConnected;
+	TArray<FClientMessageCallbackPtr> MessagesCallback;
 
+	template <typename UserClass>
+	using FClientMessageCallbackTwoParamsPtr = void(UserClass::*)(void*, EErrorCode);
+
+public:
+	template <typename UserClass>
+	inline FClientMessageCallbackPtr AddMessageCallback(ELogicCode Code, UserClass* InUserObject, FClientMessageCallbackTwoParamsPtr<UserClass> InFunc)
+	{
+		FClientMessageCallbackPtr MessageCallback = MakeShareable(new FClientMessageCallback());
+		MessageCallback->Code = Code;
+		MessageCallback->Delegate.BindUObject(InUserObject, InFunc);
+		MessagesCallback.Add(MessageCallback);
+
+		return MessageCallback;
+	}
+
+	void ClearMessageCallback(UObject* Object)
+	{
+		TArray<FClientMessageCallbackPtr>::TIterator It(MessagesCallback);
+		for ( ; It; ++It)
+		{
+			FClientMessageCallbackPtr CallbackPtr = *It;
+			if (CallbackPtr->Object == Object)
+			{
+				MessagesCallback.Remove(CallbackPtr);
+
+				CallbackPtr.Reset();
+			}
+		}
+	}
+
+protected:
 	struct FMessageData
 	{
 	public:
@@ -66,4 +97,22 @@ protected:
 	};
 
 	TQueue<FMessageData, EQueueMode::Mpsc> MessageQueue;
+
+	virtual void AddMessage(void* Data, ELogicCode Code, EErrorCode Error);
+
+protected:
+	UPROPERTY(Config)
+	FString ServerIP;
+
+	UPROPERTY(Config)
+	int32 ServerPort;
+
+	int32 ConnectCount;
+
+	UPROPERTY(Config)
+	int32 MaxConnectCount;
+
+	bool bShouldConnected;
+
+	bool bIsConnected;
 };

@@ -29,7 +29,10 @@ void UEscapeWidget::BeginDestroy()
 {
 	Super::BeginDestroy();
 
-	UnregisterMessageCallback();
+	if (EscapeClient != nullptr)
+	{
+		EscapeClient->ClearMessageCallback(this);
+	}
 }
 
 UEscapeClient* UEscapeWidget::GetEscapeClient() const
@@ -49,15 +52,7 @@ void UEscapeWidget::RegisterMessageCallback()
 {
 	if (EscapeClient != nullptr)
 	{
-		NotifyConnectionHandle = EscapeClient->AddMessageCallback(ELogicCode::CONNECTION, this, &UEscapeWidget::NotifyConnection);
-	}
-}
-
-void UEscapeWidget::UnregisterMessageCallback()
-{
-	if (EscapeClient != nullptr)
-	{
-		EscapeClient->RemoveMessageCallback(NotifyConnectionHandle);
+		EscapeClient->AddMessageCallback(ELogicCode::CONNECTION, this, &UEscapeWidget::NotifyConnection);
 	}
 }
 

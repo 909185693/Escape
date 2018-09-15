@@ -1,6 +1,7 @@
 // Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 
 #include "EscapeServer.h"
+#include "EscapeMessageContrl.h"
 
 
 UEscapeServer::UEscapeServer(const FObjectInitializer& ObjectInitializer)
@@ -49,7 +50,7 @@ bool UEscapeServer::Register(UEscapeEngine* InEngine)
 		}
 		else
 		{
-			UE_LOG(LogEscape, Error, TEXT("Failed to load class '%s'"), *EscapeClientClassName);
+			UE_LOG(LogEscapeNetwork, Error, TEXT("Failed to load class '%s'"), *EscapeMessageContrlClassName);
 		}
 
 		UE_LOG(LogEscapeNetwork, Log, TEXT("EscapeServer : listening on port %i"), ListenPort);
@@ -105,7 +106,7 @@ void UEscapeServer::Process()
 			{
 				ClientSocket.NetworkErrorCount = 0;
 
-				AddMessage(Data, Code, Error, ClientSocket);
+				ExecuteMessageCallback(*ClientSocket, Code, Error, Data);
 
 				FMemory::Free(Data);
 
@@ -124,29 +125,4 @@ void UEscapeServer::Process()
 			}
 		}
 	}
-
-	// 消息处理
-	if (!MessageQueue.IsEmpty())
-	{
-		FMessageData MessageData;
-
-		MessageQueue.Dequeue(MessageData);
-
-		for (FMessageCallbackPtr& Callback : MessagesCallback)
-		{
-			if (Callback->Code == MessageData.Code)
-			{
-				Callback->MessageDelegate.ExecuteIfBound(MessageData.Data, MessageData.Error);
-			}
-		}
-
-		FMemory::Free(MessageData.Data);
-	}
-}
-
-void UEscapeServer::AddMessage(void* Data, ELogicCode Code, EErrorCode Error, FSocket* ClientSocket)
-{
-	MessageQueue.Enqueue(FMessageData(Data, Code, Error, ClientSocket));
-
-	UE_LOG(LogEscapeNetwork, Log, TEXT("EscapeClient : Recv => Code[%d] Error[%d]"), Code, Error);
 }

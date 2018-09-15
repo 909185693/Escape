@@ -15,17 +15,6 @@
 
 class FEscapeOnlineAsyncTaskManager;
 
-DECLARE_DELEGATE_TwoParams(FMessageDelegate, void*, EErrorCode);
-
-struct FMessageCallback
-{
-	ELogicCode Code;
-	
-	FMessageDelegate MessageDelegate;
-};
-
-typedef TSharedPtr<FMessageCallback> FMessageCallbackPtr;
-
 UCLASS(Transient, config = Engine)
 class UEscapeNetworkBase : public UObject
 {
@@ -33,32 +22,11 @@ class UEscapeNetworkBase : public UObject
 
 	virtual bool Register(UEscapeEngine* InEngine);
 	virtual bool InitBase(FString& Error);
-	virtual bool SendTo(FSocket* Socket, ELogicCode Code, int32 DataSize, void* Data);
+	virtual bool SendTo(FSocket* Socket, ELogicCode Code, EErrorCode Error, int32 DataSize = 0, void* Data = nullptr);
 	virtual bool RecvFrom(FSocket* Socket, void*& OutData, ELogicCode& OutCode, EErrorCode& OutError);
 	virtual void TickDispatch(float DeltaTime) PURE_VIRTUAL(UEscapeNetworkBase::TickDispatch, );
 	virtual void Process() PURE_VIRTUAL(UEscapeNetworkBase::Process, );
 	virtual class UEscapeEngine* GetEngine() const;
-
-	template <typename UserClass>
-	using FMessageCallbackTwoParamsPtr = void(UserClass::*)(void*, EErrorCode);
-
-	template <typename UserClass>
-	inline FMessageCallbackPtr AddMessageCallback(ELogicCode Code, UserClass* InUserObject, FMessageCallbackTwoParamsPtr<UserClass> InFunc)
-	{
-		FMessageCallbackPtr MessageCallback = MakeShareable(new FMessageCallback());
-		MessageCallback->Code = Code;
-		MessageCallback->MessageDelegate.BindUObject(InUserObject, InFunc);
-		MessagesCallback.Add(MessageCallback);
-
-		return MessageCallback;
-	}
-
-	void RemoveMessageCallback(FMessageCallbackPtr& MessageCallback)
-	{
-		MessagesCallback.Remove(MessageCallback);
-
-		MessageCallback.Reset();
-	}
 
 	/// UObject 
 	virtual void BeginDestroy() override;
@@ -79,6 +47,4 @@ protected:
 
 	/** Handles to various registered delegates */
 	FDelegateHandle TickDispatchDelegateHandle;
-
-	TArray<FMessageCallbackPtr> MessagesCallback;
 };

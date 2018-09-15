@@ -15,8 +15,8 @@ void UEscapeLobbyWidget::UserLogin(const FText& Username, const FText& Password)
 	{
 		FUserLogin Data;
 
-		FPlatformString::Strcpy(Data.Username, sizeof(Data.Username), TCHAR_TO_ANSI(*Username.ToString()));
-		FPlatformString::Strcpy(Data.Password, sizeof(Data.Password), TCHAR_TO_ANSI(*Password.ToString()));
+		FPlatformString::Strncpy(Data.Username, TCHAR_TO_ANSI(*Username.ToString()), sizeof(Data.Username));
+		FPlatformString::Strncpy(Data.Password, TCHAR_TO_ANSI(*Password.ToString()), sizeof(Data.Password));
 
 		EscapeClient->Send(ELogicCode::USER_LOGIN, sizeof(FUserLogin), &Data);
 	}
@@ -49,21 +49,9 @@ void UEscapeLobbyWidget::RegisterMessageCallback()
 
 	if (EscapeClient != nullptr)
 	{
-		NotifyUserLoginPtr = EscapeClient->AddMessageCallback(ELogicCode::USER_LOGIN, this, &UEscapeLobbyWidget::NotifyUserLogin);
-		NotifyUserLoginPtr = EscapeClient->AddMessageCallback(ELogicCode::USER_LOGIN, this, &UEscapeLobbyWidget::NotifyUserLogin);
-		NotifyUserLoginPtr = EscapeClient->AddMessageCallback(ELogicCode::USER_LOGIN, this, &UEscapeLobbyWidget::NotifyUserLogin);
-	}
-}
-
-void UEscapeLobbyWidget::UnregisterMessageCallback()
-{
-	Super::UnregisterMessageCallback();
-
-	if (EscapeClient != nullptr)
-	{
-		EscapeClient->RemoveMessageCallback(NotifyUserLoginPtr);
-		EscapeClient->RemoveMessageCallback(NotifyMatchGamePtr);
-		EscapeClient->RemoveMessageCallback(NotifyInvitationPtr);
+		EscapeClient->AddMessageCallback(ELogicCode::USER_LOGIN, this, &UEscapeLobbyWidget::NotifyUserLogin);
+		EscapeClient->AddMessageCallback(ELogicCode::MATCH_GAME, this, &UEscapeLobbyWidget::NotifyMatchGame);
+		EscapeClient->AddMessageCallback(ELogicCode::INVITATION, this, &UEscapeLobbyWidget::NotifyInvitation);
 	}
 }
 

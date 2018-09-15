@@ -24,24 +24,20 @@ protected:
 
 protected:
 	virtual void RegisterMessageCallback() override;
-	virtual void UnregisterMessageCallback() override;
 
 	/// ”√ªßµ«¬º
-	FMessageCallbackPtr NotifyUserLoginPtr;
 	void NotifyUserLogin(void* Data, EErrorCode Error);
 
 	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "NotifyUserLogin"))
 	void ReceiveNotifyUserLogin(bool bSuccess);
 
 	/// ∆•≈‰”Œœ∑
-	FMessageCallbackPtr NotifyMatchGamePtr;
 	void NotifyMatchGame(void* Data, EErrorCode Error);
 
 	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "NotifyMatchGame"))
 	void ReceiveNotifyMatchGame(bool bSuccess);
 
 	/// —˚«Î
-	FMessageCallbackPtr NotifyInvitationPtr;
 	void NotifyInvitation(void* Data, EErrorCode Error);
 
 	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "NotifyMatchGame"))

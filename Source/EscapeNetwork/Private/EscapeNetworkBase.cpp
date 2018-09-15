@@ -65,15 +65,18 @@ bool UEscapeNetworkBase::InitBase(FString& Error)
 	return true;
 }
 
-bool UEscapeNetworkBase::SendTo(FSocket* SendSocket, ELogicCode Code, int32 DataSize, void* Data)
+bool UEscapeNetworkBase::SendTo(FSocket* SendSocket, ELogicCode Code, EErrorCode Error, int32 DataSize, void* Data)
 {
 	int32 Count = DataSize + sizeof(FDataHeader);
 	void* SendData = FMemory::Malloc(Count);
 
 	FDataHeader* DataHeader = (FDataHeader*)SendData;
-	DataHeader->Init(Code, EErrorCode::NONE, DataSize);
+	DataHeader->Init(Code, Error, DataSize);
 
-	FMemory::Memcpy((void*)(DataHeader + 1), Data, DataSize);
+	if (DataSize > 0)
+	{
+		FMemory::Memcpy((void*)(DataHeader + 1), Data, DataSize);
+	}
 
 	int32 BytesSent = 0;
 	bool bResult = SendSocket->Send((uint8*)SendData, Count, BytesSent);
@@ -171,6 +174,4 @@ void UEscapeNetworkBase::BeginDestroy()
 		SocketSubsystem->DestroySocket(Socket);
 		Socket = nullptr;
 	}
-
-	MessagesCallback.Empty();
 }
