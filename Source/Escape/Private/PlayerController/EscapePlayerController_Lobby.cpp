@@ -8,7 +8,7 @@ AEscapePlayerController_Lobby::AEscapePlayerController_Lobby(const FObjectInitia
 	Super(ObjectInitializer)
 {
 	// 设置默认角色类
-	static ConstructorHelpers::FClassFinder<UUserWidget> UserWidgetClassFinder(TEXT("/Game/Blueprints/UMG/Lobby/UserLogin"));
+	static ConstructorHelpers::FClassFinder<UUserWidget> UserWidgetClassFinder(TEXT("/Game/Blueprints/UMG/Lobby/Lobby"));
 	if (UserWidgetClassFinder.Succeeded())
 	{
 		UserWidgetClass = UserWidgetClassFinder.Class;

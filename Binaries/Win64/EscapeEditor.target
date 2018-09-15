@@ -112,14 +112,6 @@
 			"Type": "SymbolFile"
 		},
 		{
-			"Path": "$(EngineDir)/Plugins/Online/OnlineSubsystemSteam/Binaries/Win64/UE4Editor-OnlineSubsystemSteam.dll",
-			"Type": "DynamicLibrary"
-		},
-		{
-			"Path": "$(EngineDir)/Plugins/Online/OnlineSubsystemSteam/Binaries/Win64/UE4Editor-OnlineSubsystemSteam.pdb",
-			"Type": "SymbolFile"
-		},
-		{
 			"Path": "$(ProjectDir)/Plugins/Crasheye/Binaries/Win64/UE4Editor-Crasheye.dll",
 			"Type": "DynamicLibrary"
 		},
@@ -3504,10 +3496,6 @@
 			"Type": "RequiredResource"
 		},
 		{
-			"Path": "$(EngineDir)/Plugins/Online/OnlineSubsystemSteam/Binaries/Win64/UE4Editor.modules",
-			"Type": "RequiredResource"
-		},
-		{
 			"Path": "$(ProjectDir)/Plugins/Crasheye/Binaries/Win64/UE4Editor.modules",
 			"Type": "RequiredResource"
 		},
@@ -3803,10 +3791,6 @@
 		},
 		{
 			"Path": "$(EngineDir)/Plugins/Online/OnlineSubsystemUtils/OnlineSubsystemUtils.uplugin",
-			"Type": "UFS"
-		},
-		{
-			"Path": "$(EngineDir)/Plugins/Online/OnlineSubsystemSteam/OnlineSubsystemSteam.uplugin",
 			"Type": "UFS"
 		},
 		{
@@ -5048,14 +5032,6 @@
 		{
 			"Path": "$(EngineDir)/Content/SlateDebug/Fonts/LastResort.ttf",
 			"Type": "UFS"
-		},
-		{
-			"Path": "$(EngineDir)/Binaries/ThirdParty/Steamworks/Steamv139/Win64/steam_api64.dll",
-			"Type": "NonUFS"
-		},
-		{
-			"Path": "$(EngineDir)/Config/controller.vdf",
-			"Type": "NonUFS"
 		},
 		{
 			"Path": "$(EngineDir)/Binaries/ThirdParty/svn/Win64/apr_crypto_openssl-1.dll",

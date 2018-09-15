@@ -60,11 +60,11 @@ void UEscapeClient::TickDispatch(float DeltaTime)
 
 			MessageQueue.Dequeue(MessageData);
 
-			for (FMessageCallback& Callback : MessagesCallback)
+			for (FMessageCallbackPtr& Callback : MessagesCallback)
 			{
-				if (Callback.Code == MessageData.Code)
+				if (Callback->Code == MessageData.Code)
 				{
-					Callback.MessageDelegate.ExecuteIfBound(MessageData.Data, MessageData.Error);
+					Callback->MessageDelegate.ExecuteIfBound(MessageData.Data, MessageData.Error);
 				}
 			}
 

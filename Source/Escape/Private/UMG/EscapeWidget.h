@@ -22,20 +22,24 @@ class ESCAPE_API UEscapeWidget : public UUserWidget
 	GENERATED_UCLASS_BODY()
 	
 	virtual bool Initialize() override;
+	virtual void BeginDestroy() override;
 
 	/// UEscapeWidget
 	virtual UEscapeClient* GetEscapeClient() const;
 
 protected:
-	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "NotifyConnection"))
-	void ReceiveNotifyConnection(ENetworkConnection NetworkConnection);
-
 	UFUNCTION(BlueprintCallable, Category = "Network")
 	void Reconnect();
 
 protected:
-	virtual void BindEscapeClientEvent();
+	virtual void RegisterMessageCallback();
+	virtual void UnregisterMessageCallback();
+
+	FMessageCallbackPtr NotifyConnectionHandle;
 	virtual void NotifyConnection(void* Data, EErrorCode Error);
+	
+	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "NotifyConnection"))
+	void ReceiveNotifyConnection(ENetworkConnection NetworkConnection);
 
 protected:
 	UPROPERTY(Transient)

@@ -8,7 +8,8 @@
 
 #define SocketDescription TEXT("EscapeNetwork")
 
-UEscapeNetworkBase::UEscapeNetworkBase(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+UEscapeNetworkBase::UEscapeNetworkBase(const FObjectInitializer& ObjectInitializer) 
+	: Super(ObjectInitializer)
 	, Socket(nullptr)
 {
 

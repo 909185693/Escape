@@ -2,6 +2,10 @@
 
 #pragma once
 
+#define ESCAPELOGICSERVER_PACKAGE 0
+#define ESCAPEDEDICATEDSERVER_PACKAGE 0
+#define ESCAPECLIENT_PACKAGE 0
+
 
 enum ELogicCode : uint16
 {
@@ -60,4 +64,13 @@ struct FUserLogin
 {
 	char Username[20];
 	char Password[20];
+};
+
+struct FMatchGame
+{
+};
+
+struct FInvitation
+{
+	int32 UserID;
 };

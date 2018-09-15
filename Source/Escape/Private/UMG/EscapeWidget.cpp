@@ -19,10 +19,17 @@ bool UEscapeWidget::Initialize()
 	{
 		EscapeClient = GameInstance->GetEscapeClient();
 
-		BindEscapeClientEvent();
+		RegisterMessageCallback();
 	}
 
 	return true;
+}
+
+void UEscapeWidget::BeginDestroy()
+{
+	Super::BeginDestroy();
+
+	UnregisterMessageCallback();
 }
 
 UEscapeClient* UEscapeWidget::GetEscapeClient() const
@@ -38,11 +45,19 @@ void UEscapeWidget::Reconnect()
 	}
 }
 
-void UEscapeWidget::BindEscapeClientEvent()
+void UEscapeWidget::RegisterMessageCallback()
 {
 	if (EscapeClient != nullptr)
 	{
-		EscapeClient->AddMessageCallback(ELogicCode::CONNECTION, this, &UEscapeWidget::NotifyConnection);
+		NotifyConnectionHandle = EscapeClient->AddMessageCallback(ELogicCode::CONNECTION, this, &UEscapeWidget::NotifyConnection);
+	}
+}
+
+void UEscapeWidget::UnregisterMessageCallback()
+{
+	if (EscapeClient != nullptr)
+	{
+		EscapeClient->RemoveMessageCallback(NotifyConnectionHandle);
 	}
 }
 

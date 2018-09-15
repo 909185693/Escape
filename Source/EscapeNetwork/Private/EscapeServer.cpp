@@ -2,11 +2,14 @@
 
 #include "EscapeServer.h"
 
+
 UEscapeServer::UEscapeServer(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 	, ListenPort(8800)
+	, DedicatedServerPort(9800)
 	, MaxBackLog(1024)
 	, MaxNetworkErrorCount(10)
+	, EscapeMessageContrlClassName(TEXT("/Script/EscapeNetwork.EscapeMessageContrl"))
 {
 
 }
@@ -31,6 +34,24 @@ bool UEscapeServer::Register(UEscapeEngine* InEngine)
 			return false;
 		}
 
+		EscapeMessageContrlClass = LoadClass<UEscapeMessageContrl>(NULL, *EscapeMessageContrlClassName, NULL, LOAD_None, NULL);
+		if (EscapeMessageContrlClass != nullptr)
+		{
+			if (EscapeMessageContrl == nullptr)
+			{
+				EscapeMessageContrl = NewObject<UEscapeMessageContrl>(GetTransientPackage(), EscapeMessageContrlClass);
+			}
+
+			if (EscapeMessageContrl != nullptr)
+			{
+				EscapeMessageContrl->Register(this);
+			}
+		}
+		else
+		{
+			UE_LOG(LogEscape, Error, TEXT("Failed to load class '%s'"), *EscapeClientClassName);
+		}
+
 		UE_LOG(LogEscapeNetwork, Log, TEXT("EscapeServer : listening on port %i"), ListenPort);
 	}
 
@@ -48,15 +69,13 @@ void UEscapeServer::Process()
 
 	check(Socket);
 
-	TSharedPtr<FInternetAddr> InternetAddr = SocketSubsystem->CreateInternetAddr();
-	FSocket* AcceptSocket = Socket->Accept(*InternetAddr, TEXT("ESCAPENETWORK"));
+	FSocket* AcceptSocket = Socket->Accept(TEXT("ESCAPENETWORK"));
 	if (AcceptSocket != nullptr)
 	{
 		ClientsSocket.Add(FEscapeSocket(AcceptSocket));
-		
-		UE_LOG(LogEscapeNetwork, Log, TEXT("Accept : socket addr[%s]"), *(InternetAddr->ToString(true)));
 	}
 
+	// 消息接收
 	TArray<FEscapeSocket>::TIterator It(ClientsSocket);
 	for (; It; ++It)
 	{
@@ -86,6 +105,8 @@ void UEscapeServer::Process()
 			{
 				ClientSocket.NetworkErrorCount = 0;
 
+				AddMessage(Data, Code, Error, ClientSocket);
+
 				FMemory::Free(Data);
 
 				UE_LOG(LogEscapeNetwork, Log, TEXT("EscapeServer : Recv => Code[%d] Error[%d]"), Code, Error);
@@ -103,4 +124,29 @@ void UEscapeServer::Process()
 			}
 		}
 	}
+
+	// 消息处理
+	if (!MessageQueue.IsEmpty())
+	{
+		FMessageData MessageData;
+
+		MessageQueue.Dequeue(MessageData);
+
+		for (FMessageCallbackPtr& Callback : MessagesCallback)
+		{
+			if (Callback->Code == MessageData.Code)
+			{
+				Callback->MessageDelegate.ExecuteIfBound(MessageData.Data, MessageData.Error);
+			}
+		}
+
+		FMemory::Free(MessageData.Data);
+	}
+}
+
+void UEscapeServer::AddMessage(void* Data, ELogicCode Code, EErrorCode Error, FSocket* ClientSocket)
+{
+	MessageQueue.Enqueue(FMessageData(Data, Code, Error, ClientSocket));
+
+	UE_LOG(LogEscapeNetwork, Log, TEXT("EscapeClient : Recv => Code[%d] Error[%d]"), Code, Error);
 }

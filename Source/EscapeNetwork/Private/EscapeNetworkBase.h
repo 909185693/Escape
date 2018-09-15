@@ -13,17 +13,18 @@
 #include "EscapeNetworkBase.generated.h"
 
 
+class FEscapeOnlineAsyncTaskManager;
+
 DECLARE_DELEGATE_TwoParams(FMessageDelegate, void*, EErrorCode);
 
 struct FMessageCallback
 {
 	ELogicCode Code;
-
+	
 	FMessageDelegate MessageDelegate;
 };
 
-class FEscapeNetworkNotify;
-class FEscapeOnlineAsyncTaskManager;
+typedef TSharedPtr<FMessageCallback> FMessageCallbackPtr;
 
 UCLASS(Transient, config = Engine)
 class UEscapeNetworkBase : public UObject
@@ -42,12 +43,21 @@ class UEscapeNetworkBase : public UObject
 	using FMessageCallbackTwoParamsPtr = void(UserClass::*)(void*, EErrorCode);
 
 	template <typename UserClass>
-	inline void AddMessageCallback(ELogicCode Code, UserClass* InUserObject, FMessageCallbackTwoParamsPtr<UserClass> InFunc)
+	inline FMessageCallbackPtr AddMessageCallback(ELogicCode Code, UserClass* InUserObject, FMessageCallbackTwoParamsPtr<UserClass> InFunc)
 	{
-		FMessageCallback MessageCallback;
-		MessageCallback.Code = Code;
-		MessageCallback.MessageDelegate.BindUObject(InUserObject, InFunc);
+		FMessageCallbackPtr MessageCallback = MakeShareable(new FMessageCallback());
+		MessageCallback->Code = Code;
+		MessageCallback->MessageDelegate.BindUObject(InUserObject, InFunc);
 		MessagesCallback.Add(MessageCallback);
+
+		return MessageCallback;
+	}
+
+	void RemoveMessageCallback(FMessageCallbackPtr& MessageCallback)
+	{
+		MessagesCallback.Remove(MessageCallback);
+
+		MessageCallback.Reset();
 	}
 
 	/// UObject 
@@ -70,5 +80,5 @@ protected:
 	/** Handles to various registered delegates */
 	FDelegateHandle TickDispatchDelegateHandle;
 
-	TArray<FMessageCallback> MessagesCallback;
+	TArray<FMessageCallbackPtr> MessagesCallback;
 };

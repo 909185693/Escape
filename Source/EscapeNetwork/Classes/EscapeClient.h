@@ -6,32 +6,6 @@
 #include "EscapeClient.generated.h"
 
 
-struct FMessageData
-{
-public:
-	FMessageData(void* InData, ELogicCode InCode, EErrorCode InError)
-		: Data(InData)
-		, Code(InCode)
-		, Error(InError)
-	{
-
-	}
-
-	FMessageData()
-		: Data(nullptr)
-		, Code(ELogicCode::INVALID)
-		, Error(EErrorCode::NONE)
-	{
-
-	}
-
-	void* Data;
-
-	ELogicCode Code;
-
-	EErrorCode Error;
-};
-
 UCLASS(Transient, config = Engine)
 class ESCAPENETWORK_API UEscapeClient : public UEscapeNetworkBase
 {
@@ -64,6 +38,32 @@ protected:
 	bool bShouldConnected;
 
 	bool bIsConnected;
+
+	struct FMessageData
+	{
+	public:
+		FMessageData(void* InData, ELogicCode InCode, EErrorCode InError)
+			: Data(InData)
+			, Code(InCode)
+			, Error(InError)
+		{
+
+		}
+
+		FMessageData()
+			: Data(nullptr)
+			, Code(ELogicCode::INVALID)
+			, Error(EErrorCode::NONE)
+		{
+
+		}
+
+		void* Data;
+
+		ELogicCode Code;
+
+		EErrorCode Error;
+	};
 
 	TQueue<FMessageData, EQueueMode::Mpsc> MessageQueue;
 };

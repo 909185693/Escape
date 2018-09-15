@@ -9,7 +9,7 @@ public class EscapeTarget : TargetRules
 	{
 		Type = TargetType.Game;
 
-        bUsesSteam = true;
+        //bUsesSteam = true;
 
         ExtraModuleNames.AddRange( new string[] { "Escape" } );
 	}
