@@ -33,6 +33,9 @@ protected:
 	/// 专用服务器注册
 	void NotifyRegisterServer(FConnection& Connection, void* Data, EErrorCode Error);
 
+private:
+	bool ClientTravel();
+
 protected:
 	UPROPERTY(Transient)
 	UEscapeServer* EscapeServer;

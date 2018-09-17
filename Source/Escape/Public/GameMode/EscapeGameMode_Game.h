@@ -3,17 +3,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/GameMode.h"
-#include "EscapeGameModeBase.generated.h"
+#include "GameMode/EscapeGameModeBase.h"
+#include "EscapeGameMode_Game.generated.h"
+
 
 /**
  * 
  */
-UCLASS()
-class ESCAPE_API AEscapeGameModeBase : public AGameMode
+UCLASS(Config = Game)
+class ESCAPE_API AEscapeGameMode_Game : public AEscapeGameModeBase
 {
 	GENERATED_UCLASS_BODY()
-
+	
 	/**
 	 * Initialize the game.
 	 * The GameMode's InitGame() event is called before any other functions (including PreInitializeComponents() )
@@ -22,10 +23,6 @@ class ESCAPE_API AEscapeGameModeBase : public AGameMode
 	 */
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 
-	/** Transitions to calls BeginPlay on actors. */
-	virtual void StartPlay() override;
-	
-	/** Returns game session class to use */
-	virtual TSubclassOf<AGameSession> GetGameSessionClass() const override;
-	
+	/** Called when a Controller with a PlayerState leaves the game or is destroyed */
+	virtual void Logout(AController* Exiting) override;
 };

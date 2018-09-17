@@ -78,8 +78,7 @@ struct FMatchGame
 
 struct FClientTravel
 {
-	int32	Port;
-	char	IP[15];
+	char	URL[256];
 };
 
 struct FInvitation

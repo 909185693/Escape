@@ -110,14 +110,14 @@ void UEscapeServer::Process()
 
 				FMemory::Free(Data);
 
-				UE_LOG(LogEscapeNetwork, Log, TEXT("EscapeServer : Recv => Code[%d] Error[%d]"), Code, Error);
+				UE_LOG(LogEscapeNetwork, Log, TEXT("EscapeServer : Recv data Code[%d] Error[%d]"), Code, Error);
 			}
 
 			if (bSeriousError)
 			{
 				CloseConnection(Connection);
 
-				UE_LOG(LogEscapeNetwork, Log, TEXT("EscapeServer : net error => Code[%d] Error[%d]"), Code, Error);
+				UE_LOG(LogEscapeNetwork, Log, TEXT("EscapeServer : Network error Code[%d] Error[%d]"), Code, Error);
 			}
 		}
 	}

@@ -60,13 +60,18 @@ void UEscapeMessageContrl::NotifyUserLogin(FConnection& Connection, void* Data, 
 
 void UEscapeMessageContrl::NotifyMatchGame(FConnection& Connection, void* Data, EErrorCode Error)
 {
-	bool bResult = true;
+	bool bResult = false;
 
 	MatchConnections.AddUnique(Connection);
 
-	if (MatchConnections.Num() > 0 && DedicatedServerInfoSessions.Num() == 0)
+	if (DedicatedServerInfoSessions.Num() == 0)
 	{
 		FString GameNameOrProjectFile;
+
+#if UE_BUILD_SHIPPING
+		int32 CurrentProcessId = FPlatformProcess::GetCurrentProcessId();
+		GameNameOrProjectFile = FPlatformProcess::GetApplicationName(CurrentProcessId);
+#else
 		if (FPaths::IsProjectFilePathSet())
 		{
 			GameNameOrProjectFile = FString::Printf(TEXT("\"%s\""), *FPaths::GetProjectFilePath());
@@ -75,6 +80,7 @@ void UEscapeMessageContrl::NotifyMatchGame(FConnection& Connection, void* Data, 
 		{
 			GameNameOrProjectFile = FApp::GetProjectName();
 		}
+#endif
 
 		FGuid Guid = FGuid::NewGuid();
 		FString MapName(TEXT("EscapeMap"));
@@ -91,17 +97,17 @@ void UEscapeMessageContrl::NotifyMatchGame(FConnection& Connection, void* Data, 
 
 		if (NewSession->ProcessHandle.IsValid())
 		{
+			bResult = true;
+
 			UE_LOG(LogEscapeNetwork, Log, TEXT("Run a dedicated server of the game. Guid[%s] MapName[%s] GameMode[%s]"), *Guid.ToString(), *MapName, *GameMode);
 		}
 		else
 		{
-			bResult = false;
-
 			UE_LOG(LogEscapeNetwork, Error, TEXT("Failed to run a dedicated server of the game."));
 		}
 	}
 
-	EscapeServer->SendTo(*Connection, ELogicCode::MATCH_GAME, bResult ? EErrorCode::NONE : EErrorCode::UNKNOWN_ERROR);
+	EscapeServer->SendTo(*Connection, ELogicCode::MATCH_GAME, (bResult || ClientTravel()) ? EErrorCode::NONE : EErrorCode::UNKNOWN_ERROR);
 }
 
 void UEscapeMessageContrl::NotifyInvitation(FConnection& Connection, void* Data, EErrorCode Error)
@@ -121,21 +127,19 @@ void UEscapeMessageContrl::NotifyRegisterServer(FConnection& Connection, void* D
 			if (DedicatedServerInfo.Guid == FString(ANSI_TO_TCHAR(DedicatedServer->Guid)))
 			{
 				bRegisterSuccess = true;
+
+				DedicatedServerInfo.bIsRegister = true;
 				DedicatedServerInfo.Port = DedicatedServer->Port;
-				DedicatedServerInfo.IP = FString(ANSI_TO_TCHAR(DedicatedServer->IP));
 
-				FClientTravel ClientTravel;
-				ClientTravel.Port = DedicatedServer->Port;
-				FPlatformString::Strncpy(ClientTravel.IP, DedicatedServer->IP, sizeof(ClientTravel.IP));
+				TSharedPtr<FInternetAddr> InternetAddr = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->CreateInternetAddr();
+				Connection->GetPeerAddress(*InternetAddr);
+				DedicatedServerInfo.IP = InternetAddr->ToString(false);
 
-				for (FConnection& ClientConnection : MatchConnections)
-				{
-					EscapeServer->SendTo(*ClientConnection, ELogicCode::CLIENT_TRAVEL, EErrorCode::NONE, sizeof(FClientTravel), &ClientTravel);
-				}
-				
-				return;
+				UE_LOG(LogEscapeNetwork, Log, TEXT("EscapeServer : Register dedicated server %s:%d"), *DedicatedServerInfo.IP, DedicatedServerInfo.Port);
 			}
 		}
+
+		ClientTravel();
 	}
 
 	if (!bRegisterSuccess)
@@ -149,4 +153,27 @@ void UEscapeMessageContrl::NotifyRegisterServer(FConnection& Connection, void* D
 
 		MatchConnections.Empty();
 	}
+}
+
+bool UEscapeMessageContrl::ClientTravel()
+{
+	for (FDedicatedServerInfo& DedicatedServerInfo : DedicatedServerInfoSessions)
+	{
+		if (DedicatedServerInfo.bIsRegister)
+		{
+			FClientTravel Travel;
+			FString URL = FString::Printf(TEXT("%s:%d"), *DedicatedServerInfo.IP, DedicatedServerInfo.Port);
+			FPlatformString::Strncpy(Travel.URL, TCHAR_TO_ANSI(*URL), sizeof(Travel.URL));
+			for (FConnection& ClientConnection : MatchConnections)
+			{
+				EscapeServer->SendTo(*ClientConnection, ELogicCode::CLIENT_TRAVEL, EErrorCode::NONE, sizeof(FClientTravel), &Travel);
+			}
+
+			MatchConnections.Empty();
+
+			return true;
+		}
+	}
+
+	return false;
 }

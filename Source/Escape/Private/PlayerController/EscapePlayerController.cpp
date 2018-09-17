@@ -53,7 +53,7 @@ void AEscapePlayerController::NotifyClientTravel(void* Data, EErrorCode Error)
 {
 	FClientTravel* Travel = (FClientTravel*)Data;
 
-	FString URL = FString::Printf(TEXT("%s:%d"), ANSI_TO_TCHAR(Travel->IP), Travel->Port);
+	FString URL(ANSI_TO_TCHAR(Travel->URL));
 
 	ClientTravel(URL, TRAVEL_Absolute);
 }
