@@ -76,7 +76,20 @@ struct FMatchGame
 {
 };
 
+struct FClientTravel
+{
+	int32	Port;
+	char	IP[15];
+};
+
 struct FInvitation
 {
 	int32 UserID;
+};
+
+struct FDedicatedServer
+{
+	int32	Port;
+	char	IP[15];
+	char	Guid[128];
 };

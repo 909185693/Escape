@@ -17,23 +17,13 @@ AEscapePlayerController_Lobby::AEscapePlayerController_Lobby(const FObjectInitia
 	}
 }
 
-void AEscapePlayerController_Lobby::StartGame()
-{
-	JionGameRoom();
-}
-
-bool AEscapePlayerController_Lobby::JionGameRoom_Validate()
-{
-	return true;
-}
-
-void AEscapePlayerController_Lobby::JionGameRoom_Implementation()
-{
-
-}
-
 void AEscapePlayerController_Lobby::BeginPlay()
 {
 	Super::BeginPlay();
+
+	FInputModeUIOnly InputMode;
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+
+	SetInputMode(InputMode);
 }
 

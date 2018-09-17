@@ -13,12 +13,6 @@ UCLASS()
 class ESCAPE_API AEscapePlayerController_Lobby : public AEscapePlayerController
 {
 	GENERATED_UCLASS_BODY()
-	
-	UFUNCTION(Exec)
-	void StartGame();
-	
-	UFUNCTION(Server, Reliable, WithValidation)
-	void JionGameRoom();
 
 	virtual void BeginPlay() override;
 };

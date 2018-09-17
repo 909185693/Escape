@@ -24,9 +24,14 @@ public:
 		return Socket;
 	}
 
-	FSocket* operator*()
+	FSocket* operator*() const
 	{
 		return Socket;
+	}
+
+	bool operator==(const FConnection& Other) const
+	{
+		return Socket == *Other;
 	}
 
 	int32 UserID;
@@ -125,4 +130,6 @@ public:
 			}
 		}
 	}
+
+	void CloseConnection(FConnection& Connection);
 };

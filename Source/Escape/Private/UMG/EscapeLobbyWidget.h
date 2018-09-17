@@ -25,13 +25,6 @@ struct FEscapeUser
 		FMemory::Memzero(this, sizeof(FEscapeUser));
 	}
 
-	FEscapeUser(FUser& User)
-		: ID(User.ID)
-		, Nickname(User.Nickname)
-	{
-
-	}
-
 	UPROPERTY(BlueprintReadOnly)
 	int32 ID;
 

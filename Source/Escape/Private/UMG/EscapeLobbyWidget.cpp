@@ -64,7 +64,11 @@ void UEscapeLobbyWidget::NotifyUserLogin(void* Data, EErrorCode Error)
 	switch (Error)
 	{
 	case EErrorCode::NONE:
-		EscapeUser = FEscapeUser(*(FUser*)Data);
+	{
+		EscapeUser.ID = *((int32*)(Data));
+		char* NickName = (char*)((char*)Data + sizeof(int32));
+		EscapeUser.Nickname = UTF8_TO_TCHAR(NickName);
+	}
 		break;
 	case EErrorCode::NETWORK_ERROR:
 		NotifyCode = Login_NetworkError;
@@ -77,7 +81,7 @@ void UEscapeLobbyWidget::NotifyUserLogin(void* Data, EErrorCode Error)
 		break;
 	}
 
-	UE_LOG(LogEscape, Log, TEXT("NotifyUserLogin => ID[%d] Nickname[%s]"), EscapeUser.ID, TCHAR_TO_UTF8(*EscapeUser.Nickname));
+	UE_LOG(LogEscape, Log, TEXT("NotifyUserLogin => ID[%d] Nickname[%s]"), EscapeUser.ID, *EscapeUser.Nickname);
 
 	ReceiveNotifyUserLogin(NotifyCode, EscapeUser);
 }

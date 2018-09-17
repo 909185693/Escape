@@ -115,14 +115,21 @@ void UEscapeServer::Process()
 
 			if (bSeriousError)
 			{
-				Connection->Close();
-
-				SocketSubsystem->DestroySocket(*Connection);
-
-				It.RemoveCurrent();
+				CloseConnection(Connection);
 
 				UE_LOG(LogEscapeNetwork, Log, TEXT("EscapeServer : net error => Code[%d] Error[%d]"), Code, Error);
 			}
 		}
 	}
+}
+
+void UEscapeServer::CloseConnection(FConnection& Connection)
+{
+	ExecuteMessageCallback(Connection, ELogicCode::CONNECTION, EErrorCode::NETWORK_ERROR, nullptr);
+
+	Connection->Close();
+
+	SocketSubsystem->DestroySocket(*Connection);
+
+	Connections.Remove(MakeShareable(&Connection));
 }
