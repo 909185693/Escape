@@ -12,7 +12,7 @@ AEscapeGameMode_Game::AEscapeGameMode_Game(const FObjectInitializer& ObjectIniti
 	, MaxPlayers(5)
 {
 	// 设置默认角色类
-	static ConstructorHelpers::FClassFinder<APawn> DefaultPawnClassFinder(TEXT("/Game/Blueprints/Character/EscapeCharacter_Player"));
+	static ConstructorHelpers::FClassFinder<APawn> DefaultPawnClassFinder(TEXT("/Game/Blueprints/Character/EscapeCharacter_Kwang"));
 	if (DefaultPawnClassFinder.Succeeded())
 	{
 		DefaultPawnClass = DefaultPawnClassFinder.Class;

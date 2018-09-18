@@ -36,6 +36,7 @@
 *.db
 *.opendb
 *.hotreload
+*.exp
 
 # Folders
 .vs
@@ -47,3 +48,11 @@ Releases
 Binaries/Android
 Content/Collections
 Content/Developers
+
+#Kwang
+Content/ParagonKwang/FX
+Content/ParagonKwang/Characters/Global
+Content/ParagonKwang/Characters/Heroes/Kwang/Materials
+Content/ParagonKwang/Characters/Heroes/Kwang/Skins
+Content/ParagonKwang/Characters/Heroes/Kwang/Sounds
+Content/ParagonKwang/Characters/Heroes/Kwang/Textures

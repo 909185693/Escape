@@ -233,7 +233,10 @@ bool UEscapeMessageContrl::StartupDedicatedServer()
 		GameNameOrProjectFile = FApp::GetProjectName();
 	}
 	GamePath = FPlatformProcess::GenerateApplicationPath(FApp::GetName(), FApp::GetBuildConfiguration());
-	Params = FString::Printf(TEXT("%s %s?game=%s?guid=%s -server -log"), *GameNameOrProjectFile, *MapName, *GameMode, *Guid.ToString());
+	Params = FString::Printf(TEXT("%s %s?game=%s?guid=%s -server"), *GameNameOrProjectFile, *MapName, *GameMode, *Guid.ToString());
+#if !UE_BUILD_SHIPPING
+	Params = FString::Printf(TEXT("%s -log"), *Params);
+#endif
 #endif
 	TSharedPtr<FDedicatedServerInfo> NewSession = MakeShareable(new FDedicatedServerInfo());
 
