@@ -38,6 +38,7 @@ void UEscapeMessageContrl::NotifyConnection(TSharedPtr<FConnection> Connection, 
 	if (Error != EErrorCode::NONE)
 	{
 		MatchConnections.Remove(Connection);
+		PendingMatchConnections.Remove(Connection);
 
 		TSharedPtr<FDedicatedServerInfo> DedicatedServerInfo = StaticCastSharedPtr<FDedicatedServerInfo>(Connection);
 		if (DedicatedServerInfo.IsValid())
@@ -77,6 +78,7 @@ void UEscapeMessageContrl::NotifyMatchGame(TSharedPtr<FConnection> Connection, v
 void UEscapeMessageContrl::NotifyCancelGame(TSharedPtr<FConnection> Connection, void* Data, EErrorCode Error)
 {
 	MatchConnections.Remove(Connection);
+	PendingMatchConnections.Remove(Connection);
 }
 
 void UEscapeMessageContrl::NotifyInvitation(TSharedPtr<FConnection> Connection, void* Data, EErrorCode Error)
@@ -167,7 +169,7 @@ void UEscapeMessageContrl::ClientTravel()
 		/// 匹配玩家
 		if (DedicatedServerInfo->bIsRegister &&
 			DedicatedServerInfo->NumPlayers < DedicatedServerInfo->MaxPlayers &&
-			DedicatedServerInfo->NumPlayers + MatchConnections.Num() >= DedicatedServerInfo->MinPlayers)
+			DedicatedServerInfo->NumPlayers + MatchConnections.Num() + PendingMatchConnections.Num() >= DedicatedServerInfo->MinPlayers)
 		{
 			FClientTravel Travel;
 			FString URL = FString::Printf(TEXT("%s:%d"), *DedicatedServerInfo->IP, DedicatedServerInfo->Port);
