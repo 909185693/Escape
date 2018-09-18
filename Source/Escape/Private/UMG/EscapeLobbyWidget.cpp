@@ -27,9 +27,15 @@ void UEscapeLobbyWidget::MatchGame()
 {
 	if (EscapeClient)
 	{
-		FMatchGame Data;
+		EscapeClient->Send(ELogicCode::MATCH_GAME);
+	}
+}
 
-		EscapeClient->Send(ELogicCode::MATCH_GAME, sizeof(FMatchGame), &Data);
+void UEscapeLobbyWidget::CancelMatch()
+{
+	if (EscapeClient)
+	{
+		EscapeClient->Send(ELogicCode::CANCEL_MATCH);
 	}
 }
 
@@ -51,7 +57,6 @@ void UEscapeLobbyWidget::RegisterMessageCallback()
 	if (EscapeClient != nullptr)
 	{
 		EscapeClient->AddMessageCallback(ELogicCode::USER_LOGIN, this, &UEscapeLobbyWidget::NotifyUserLogin);
-		EscapeClient->AddMessageCallback(ELogicCode::MATCH_GAME, this, &UEscapeLobbyWidget::NotifyMatchGame);
 		EscapeClient->AddMessageCallback(ELogicCode::INVITATION, this, &UEscapeLobbyWidget::NotifyInvitation);
 	}
 }
@@ -84,11 +89,6 @@ void UEscapeLobbyWidget::NotifyUserLogin(void* Data, EErrorCode Error)
 	UE_LOG(LogEscape, Log, TEXT("NotifyUserLogin => ID[%d] Nickname[%s]"), EscapeUser.ID, *EscapeUser.Nickname);
 
 	ReceiveNotifyUserLogin(NotifyCode, EscapeUser);
-}
-
-void UEscapeLobbyWidget::NotifyMatchGame(void* Data, EErrorCode Error)
-{
-	ReceiveNotifyMatchGame(Error == EErrorCode::NONE);
 }
 
 void UEscapeLobbyWidget::NotifyInvitation(void* Data, EErrorCode Error)

@@ -45,6 +45,9 @@ protected:
 	void MatchGame();
 
 	UFUNCTION(BlueprintCallable, Category = "Lobby")
+	void CancelMatch();
+
+	UFUNCTION(BlueprintCallable, Category = "Lobby")
 	void Invitation(const int32 UserID);
 
 protected:
@@ -55,12 +58,6 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "NotifyUserLogin"))
 	void ReceiveNotifyUserLogin(EUserLogin NotifyCode, FEscapeUser EscapeUser);
-
-	/// ∆•≈‰”Œœ∑
-	void NotifyMatchGame(void* Data, EErrorCode Error);
-
-	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "NotifyMatchGame"))
-	void ReceiveNotifyMatchGame(bool bSuccess);
 
 	/// —˚«Î
 	void NotifyInvitation(void* Data, EErrorCode Error);

@@ -72,10 +72,6 @@ struct FUser
 	char	Nickname[20];
 };
 
-struct FMatchGame
-{
-};
-
 struct FClientTravel
 {
 	char	URL[256];
@@ -88,7 +84,19 @@ struct FInvitation
 
 struct FDedicatedServer
 {
+	FDedicatedServer()
+	{
+		FMemory::Memzero(this, sizeof(FDedicatedServer));
+	}
+
 	int32	Port;
 	char	IP[15];
 	char	Guid[128];
+	int32	MinPlayers;
+	int32	MaxPlayers;
+};
+
+struct FGameInfo
+{
+	int32 NumPlayers;
 };

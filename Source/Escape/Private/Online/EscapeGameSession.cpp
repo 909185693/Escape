@@ -2,6 +2,7 @@
 
 #include "EscapeGameSession.h"
 #include "EscapeEngine.h"
+#include "EscapeGameMode_Game.h"
 #include "Kismet/GameplayStatics.h"
 #include "OnlineSubsystemSessionSettings.h"
 
@@ -86,6 +87,11 @@ void AEscapeGameSession::RegisterServer()
 #endif
 }
 
+UEscapeClient* AEscapeGameSession::GetEscapeClient() const
+{
+	return EscapeClient;
+}
+
 #if ESCAPE_BUILD_SERVER
 void AEscapeGameSession::NotifyConnection(void* Data, EErrorCode Error)
 {
@@ -95,8 +101,15 @@ void AEscapeGameSession::NotifyConnection(void* Data, EErrorCode Error)
 		{
 			FDedicatedServer DedicatedServer;
 
-			const FURL& URL = GetWorld()->URL;
+			AEscapeGameMode_Game* GameMode = GetWorld()->GetAuthGameMode<AEscapeGameMode_Game>();
+			if (GameMode != nullptr)
+			{
+				DedicatedServer.MinPlayers = GameMode->MinPlayers;
+				DedicatedServer.MaxPlayers = GameMode->MaxPlayers;
+			}
 
+			const FURL& URL = GetWorld()->URL;
+			
 			DedicatedServer.Port = URL.Port;
 
 			FPlatformString::Strncpy(DedicatedServer.IP, "127.0.0.1", sizeof(DedicatedServer.IP));

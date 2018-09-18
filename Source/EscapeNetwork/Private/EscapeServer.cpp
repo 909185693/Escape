@@ -80,7 +80,7 @@ void UEscapeServer::Process()
 	TArray<TSharedPtr<FConnection>>::TIterator It(Connections);
 	for (; It; ++It)
 	{
-		FConnection& Connection = **It;
+		TSharedPtr<FConnection> Connection = *It;
 
 		void* Data = nullptr;
 
@@ -88,7 +88,7 @@ void UEscapeServer::Process()
 
 		EErrorCode Error;
 
-		if (RecvFrom(*Connection, Data, Code, Error))
+		if (RecvFrom(Connection->Socket, Data, Code, Error))
 		{
 			bool bSeriousError = false;
 			if (Error == INVALID_DATA)
@@ -97,14 +97,14 @@ void UEscapeServer::Process()
 			}
 			else if (Error == NETWORK_ERROR)
 			{
-				if (++Connection.NetworkErrorCount > MaxNetworkErrorCount)
+				if (++Connection->NetworkErrorCount > MaxNetworkErrorCount)
 				{
 					bSeriousError = true;
 				}
 			}
 			else
 			{
-				Connection.NetworkErrorCount = 0;
+				Connection->NetworkErrorCount = 0;
 
 				ExecuteMessageCallback(Connection, Code, Error, Data);
 
@@ -123,13 +123,16 @@ void UEscapeServer::Process()
 	}
 }
 
-void UEscapeServer::CloseConnection(FConnection& Connection)
+void UEscapeServer::CloseConnection(TSharedPtr<FConnection> Connection)
 {
 	ExecuteMessageCallback(Connection, ELogicCode::CONNECTION, EErrorCode::NETWORK_ERROR, nullptr);
 
-	Connection->Close();
+	if (Connection->Socket != nullptr)
+	{
+		Connection->Socket->Close();
+		SocketSubsystem->DestroySocket(Connection->Socket);
+		Connection->Socket = nullptr;
+	}
 
-	SocketSubsystem->DestroySocket(*Connection);
-
-	Connections.Remove(MakeShareable(&Connection));
+	Connections.Remove(Connection);
 }

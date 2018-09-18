@@ -6,13 +6,13 @@
 	{
 		"MajorVersion": 4,
 		"MinorVersion": 20,
-		"PatchVersion": 2,
+		"PatchVersion": 1,
 		"Changelist": 0,
 		"CompatibleChangelist": 4212847,
 		"IsLicenseeVersion": 0,
 		"IsPromotedBuild": 0,
 		"BranchName": "++UE4+Release-4.20",
-		"BuildId": "34cbce79-f6b1-4465-bcdb-2c0c2aad9cd5"
+		"BuildId": "47c0be5e-b361-407a-a311-f73d96b154d2"
 	},
 	"BuildProducts": [
 		{

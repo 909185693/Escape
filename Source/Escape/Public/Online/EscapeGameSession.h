@@ -24,6 +24,9 @@ class ESCAPE_API AEscapeGameSession : public AGameSession
 	*/
 	virtual void RegisterServer() override;
 
+	/// UEscapeGameInstance
+	class UEscapeClient* GetEscapeClient() const;
+
 #if ESCAPE_BUILD_SERVER
 	virtual void NotifyConnection(void* Data, EErrorCode Error);
 	virtual void NotifyRegisterServer(void* Data, EErrorCode Error);

@@ -17,7 +17,7 @@ class ESCAPENETWORK_API UEscapeClient : public UEscapeNetworkBase
 	/// EscapeClient
 public:
 	virtual void TickDispatch(float DeltaTime) override;
-	virtual void Send(ELogicCode Code, int32 DataSize, void* Data);
+	virtual void Send(ELogicCode Code, int32 DataSize = 0, void* Data = nullptr);
 	virtual void Reconnect();
 
 public:
@@ -63,8 +63,6 @@ public:
 			if (CallbackPtr->Object == Object)
 			{
 				MessagesCallback.Remove(CallbackPtr);
-
-				CallbackPtr.Reset();
 			}
 		}
 	}

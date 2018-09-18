@@ -12,30 +12,24 @@ struct FConnection
 {
 public:
 	FConnection(FSocket* InSocket)
-		: UserID(0)
-		, Socket(InSocket)
+		: Socket(InSocket)
 		, NetworkErrorCount(0)
 	{
 
 	}
 
-	FSocket* operator->()
+	FConnection()
+		: Socket(nullptr)
+		, NetworkErrorCount(0)
 	{
-		return Socket;
-	}
 
-	FSocket* operator*() const
-	{
-		return Socket;
 	}
 
 	bool operator==(const FConnection& Other) const
 	{
-		return Socket == *Other;
+		return Socket == Other.Socket;
 	}
-
-	int32 UserID;
-
+	
 	FSocket* Socket;
 
 	int32 NetworkErrorCount;
@@ -75,7 +69,7 @@ protected:
 	TArray<TSharedPtr<FConnection>> Connections;
 
 protected:
-	DECLARE_DELEGATE_ThreeParams(FServerMessageDelegate, FConnection&, void*, EErrorCode);
+	DECLARE_DELEGATE_ThreeParams(FServerMessageDelegate, TSharedPtr<FConnection>, void*, EErrorCode);
 
 	struct FServerMessageCallback
 	{
@@ -90,7 +84,7 @@ protected:
 	TArray<FServerMessageCallbackPtr> MessagesCallback;
 
 	template <typename UserClass>
-	using FServerMessageCallbackThreeParamsPtr = void(UserClass::*)(FConnection&, void*, EErrorCode);
+	using FServerMessageCallbackThreeParamsPtr = void(UserClass::*)(TSharedPtr<FConnection>, void*, EErrorCode);
 
 public:
 	template <typename UserClass>
@@ -114,13 +108,11 @@ public:
 			if (CallbackPtr->Object == Object)
 			{
 				MessagesCallback.Remove(CallbackPtr);
-
-				CallbackPtr.Reset();
 			}
 		}
 	}
 
-	void ExecuteMessageCallback(FConnection& Connection, ELogicCode Code, EErrorCode Error, void* Data)
+	void ExecuteMessageCallback(TSharedPtr<FConnection> Connection, ELogicCode Code, EErrorCode Error, void* Data)
 	{
 		for (FServerMessageCallbackPtr CallbackPtr : MessagesCallback)
 		{
@@ -131,5 +123,21 @@ public:
 		}
 	}
 
-	void CloseConnection(FConnection& Connection);
+	void CloseConnection(TSharedPtr<FConnection> Connection);
+
+	template<typename Struct> bool RegisterConnection(TSharedPtr<FConnection> Source, const TSharedPtr<Struct> Target)
+	{
+		Target->InitConnection(*Source);
+
+		TSharedPtr<FConnection> TargetToAdd = ConstCastSharedPtr<Struct>(Target);
+		if (TargetToAdd.IsValid())
+		{
+			Connections.Remove(Source);
+			Connections.Add(TargetToAdd);
+			
+			return true;
+		}
+
+		return false;
+	}
 };

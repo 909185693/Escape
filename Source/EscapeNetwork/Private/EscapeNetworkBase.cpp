@@ -3,7 +3,6 @@
 #include "EscapeNetworkBase.h"
 #include "EscapeNetworkModule.h"
 #include "EscapeNetworkDelegates.h"
-#include "EscapeOnlineAsyncTaskManager.h"
 
 
 #define SocketDescription TEXT("EscapeNetwork")
@@ -145,6 +144,14 @@ bool UEscapeNetworkBase::RecvFrom(FSocket* RecvSocket, void*& OutData, ELogicCod
 UEscapeEngine* UEscapeNetworkBase::GetEngine() const
 {
 	return Engine;
+}
+
+void UEscapeNetworkBase::AddToParallelTasks(FOnlineAsyncTask* NewTask)
+{
+	if (OnlineAsyncTaskThreadRunnable != nullptr)
+	{
+		OnlineAsyncTaskThreadRunnable->AddToParallelTasks(NewTask);
+	}
 }
 
 void UEscapeNetworkBase::BeginDestroy()
