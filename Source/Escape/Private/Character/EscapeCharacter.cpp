@@ -213,7 +213,7 @@ void AEscapeCharacter::OnDeath(float KillingDamage, class APawn* PawnInstigator,
 	SetActorEnableCollision(true);
 
 	// Death anim
-	float DeathAnimDuration = PlayAnimMontage(DeathMontage);
+	float DeathAnimDuration = DeathAnimationAsset ? DeathAnimationAsset->GetMaxCurrentTime() : 0.f;
 
 	// Ragdoll
 	if (DeathAnimDuration > 0.f)
@@ -224,6 +224,8 @@ void AEscapeCharacter::OnDeath(float KillingDamage, class APawn* PawnInstigator,
 
 		// Enable blend physics so the bones are properly blending against the montage.
 		GetMesh()->bBlendPhysics = true;
+		GetMesh()->SetAnimationMode(EAnimationMode::AnimationSingleNode);
+		GetMesh()->PlayAnimation(DeathAnimationAsset, false);
 
 		// Use a local timer handle as we don't need to store it for later but we don't need to look for something to clear
 		FTimerHandle TimerHandle;

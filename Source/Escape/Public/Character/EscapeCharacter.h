@@ -68,7 +68,7 @@ protected:
 	class USoundBase* DeathSound;
 
 	UPROPERTY(EditAnywhere, Replicated, Category = Sound)
-	class UAnimMontage* DeathMontage;
+	class UAnimationAsset* DeathAnimationAsset;
 
 	/** notification when killed, for both the server and client. */
 	virtual void OnDeath(float KillingDamage, class APawn* InstigatingPawn, class AActor* DamageCauser);

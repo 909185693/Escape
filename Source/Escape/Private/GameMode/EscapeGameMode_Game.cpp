@@ -48,48 +48,65 @@ void AEscapeGameMode_Game::Logout(AController* Exiting)
 
 	SyncGameInfo();
 
-	if (NumPlayers == 0 && !GetWorld()->IsPlayInEditor())
+	if (NumPlayers == 0)
 	{
 		RequestExit();
 	}
+}
+
+void AEscapeGameMode_Game::FinishMatch()
+{
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
+	{
+		AEscapePlayerController_Game* PlayerController = Cast<AEscapePlayerController_Game>(It->Get());
+		if (PlayerController == EventInstigator)
+		{
+			PlayerController->ClientMatchStatus(EMatchStatus::Victory);
+		}
+		else
+		{
+			PlayerController->ClientMatchStatus(EMatchStatus::Defeated);
+		}
+	}
+
+	FTimerHandle RequestExit;
+
+	GetWorld()->GetTimerManager().SetTimer(RequestExit, this, &AEscapeGameMode_Game::RequestExit, 60.f, false);
 }
 
 void AEscapeGameMode_Game::NotifyPlayerTakeDamage(float DamageAmount, bool bKilled, AEscapeCharacter* DamageCauser, class AController* EventInstigator)
 {
 	if (bKilled)
 	{
-		bool bFinishMatch = true;
-		for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
+		if (!bFinishMatch)
 		{
-			APlayerController* PlayerController = It->Get();
-			if (PlayerController != EventInstigator)
-			{
-				AEscapeCharacter* Player = Cast<AEscapeCharacter>(PlayerController->GetPawn());
-				if (Player && Player->IsAlive())
-				{
-					bFinishMatch = false;
-				}
-			}
-		}
+			bFinishMatch = true;
 
-		if (bFinishMatch)
-		{
 			for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
 			{
-				AEscapePlayerController_Game* PlayerController = Cast<AEscapePlayerController_Game>(It->Get());
-				if (PlayerController == EventInstigator)
+				APlayerController* PlayerController = It->Get();
+				if (PlayerController != EventInstigator)
 				{
-					PlayerController->ClientMatchStatus(EMatchStatus::Victory);
-				}
-				else
-				{
-					PlayerController->ClientMatchStatus(EMatchStatus::Defeated);
+					AEscapeCharacter* Player = Cast<AEscapeCharacter>(PlayerController->GetPawn());
+					if (Player && Player->IsAlive())
+					{
+						bFinishMatch = false;
+					}
 				}
 			}
 
-			FTimerHandle RequestExit;
+			if (bFinishMatch)
+			{
+				VictoryController = EventInstigator;
 
-			GetWorld()->GetTimerManager().SetTimer(RequestExit, this, &AEscapeGameMode_Game::RequestExit, 60.f, false);
+				FTimerHandle FinishMatchHandle;
+
+				GetWorld()->GetTimerManager().SetTimer(FinishMatchHandle, this, &AEscapeGameMode_Game::FinishMatch, 5.f, false);
+			}
+		}
+		else
+		{
+
 		}
 	}
 }
@@ -118,5 +135,10 @@ void AEscapeGameMode_Game::RequestExit()
 		}
 	}
 
-	FPlatformMisc::RequestExit(false);
+#if UE_BUILD_DEVELOPMENT
+	if (!GetWorld()->IsPlayInEditor())
+#endif
+	{
+		FPlatformMisc::RequestExit(false);
+	}
 }

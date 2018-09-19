@@ -37,6 +37,8 @@ class ESCAPE_API AEscapeGameMode_Game : public AEscapeGameModeBase
 	virtual void Logout(AController* Exiting) override;
 
 	/// AEscapeGameMode_Game
+	virtual void FinishMatch();
+
 	virtual void NotifyPlayerTakeDamage(float DamageAmount, bool bKilled, AEscapeCharacter* DamageCauser, class AController* EventInstigator);
 
 	virtual void SyncGameInfo();
@@ -49,4 +51,11 @@ public:
 
 	UPROPERTY(Config)
 	int32 MaxPlayers;
+
+protected:
+	UPROPERTY()
+	uint32 bFinishMatch : 1;
+
+	UPROPERTY(Transient)
+	AController* VictoryController;
 };

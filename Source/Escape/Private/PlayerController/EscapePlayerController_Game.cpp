@@ -36,6 +36,9 @@ void AEscapePlayerController_Game::AddDamageInfo(float NewDamage, FVector NewHit
 
 void AEscapePlayerController_Game::ClientMatchStatus_Implementation(EMatchStatus MatchStatus)
 {
+	SetIgnoreLookInput(true);
+	SetIgnoreMoveInput(true);
+
 	AEscapeCharacter_Player* PlayerPawn = Cast<AEscapeCharacter_Player>(GetPawn());
 	if (PlayerPawn != nullptr)
 	{
