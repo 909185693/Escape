@@ -31,6 +31,9 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Network")
 	void Reconnect();
 
+	UFUNCTION(BlueprintCallable, Category = "Game")
+	void ReturnLobby();
+
 protected:
 	virtual void RegisterMessageCallback();
 

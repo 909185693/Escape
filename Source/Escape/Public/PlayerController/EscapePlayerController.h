@@ -20,6 +20,8 @@ class ESCAPE_API AEscapePlayerController : public APlayerController
 	/// UEscapeGameInstance
 	class UEscapeClient* GetEscapeClient() const;
 
+	virtual void ReturnLobby();
+
 	virtual void NotifyClientTravel(void* Data, EErrorCode Error);
 
 protected:

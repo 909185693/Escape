@@ -30,7 +30,6 @@ void UEscapeAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	{
 		Speed = Owner->GetVelocity().Size2D();
 
-
 		// 设置角色运动方向
 		const FRotator ActorRotator = Owner->GetActorRotation();
 		FQuat AQuat = FQuat(Owner->LastVelocityRotation);

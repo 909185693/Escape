@@ -13,6 +13,7 @@ public class Escape : ModuleRules
             "Core",
             "CoreUObject",
             "Engine",
+            "EngineSettings",
             "InputCore",
             "Networking",
             "OnlineSubsystem",

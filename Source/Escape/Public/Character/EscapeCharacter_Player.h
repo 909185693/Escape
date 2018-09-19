@@ -15,6 +15,7 @@ class ESCAPE_API AEscapeCharacter_Player : public AEscapeCharacter
 {
 	GENERATED_UCLASS_BODY()
 	
+protected:
 	/**
 	 *	Function called every frame on this Actor. Override this function to implement custom logic to be executed every frame.
 	 *	Note that Tick is disabled by default, and you will need to check PrimaryActorTick.bCanEverTick is set to true to enable it.
@@ -67,9 +68,18 @@ class ESCAPE_API AEscapeCharacter_Player : public AEscapeCharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Player")
 	float BaseLookUpRate;
 
+protected:
 	/** Is attack pressed */
 	UPROPERTY(Transient)
 	bool bAttackPressed;
+
+	/** When the attack is delayed, the next time is delayed. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player")
+	float FirstPressedDelay;
+
+	/** When the attack is delayed, the next time is delayed. */
+	UPROPERTY(Transient)
+	float LastPressedTime;
 
 	/**
 	 * Called via input to character attack
@@ -83,4 +93,6 @@ class ESCAPE_API AEscapeCharacter_Player : public AEscapeCharacter
 	UFUNCTION(BlueprintCallable, Category = "Attack")
 	virtual void StopAttacking();
 	
+public:
+	void SetAttackPressed(bool bPressed);
 };

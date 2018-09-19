@@ -53,9 +53,25 @@ protected:
 	 */
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
+	/** switch to ragdoll */
+	virtual void SetRagdollPhysics();
+
 	/** Broadcast play hit */
 	UFUNCTION(NetMulticast, Reliable)
-	virtual void PlayHit(float DamageAmount, APawn* InstigatorPawn, AActor* DamageCauser, const FHitResult& HiResult);
+	virtual void PlayHit(float ActualDamage, bool bIsCrit, bool bKilled, APawn* PawnInstigator, AActor* DamageCauser, const FHitResult& HiResult);
+
+	/** Identifies if pawn is in its dying state */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Property")
+	uint32 bIsDying : 1;
+
+	UPROPERTY(EditAnywhere, Replicated, Category = Sound)
+	class USoundBase* DeathSound;
+
+	UPROPERTY(EditAnywhere, Replicated, Category = Sound)
+	class UAnimMontage* DeathMontage;
+
+	/** notification when killed, for both the server and client. */
+	virtual void OnDeath(float KillingDamage, class APawn* InstigatingPawn, class AActor* DamageCauser);
 
 	/**
 	 *	Function called every frame on this Actor. Override this function to implement custom logic to be executed every frame.
@@ -66,11 +82,23 @@ protected:
 	virtual void Tick(float DeltaTime) override;
 
 public:
+	virtual float GetHealth() const { return Health; };
+	virtual float GetMaxHealth() const { return MaxHealth; };
+	virtual bool IsAlive() const { return Health > 0.f; };
+		
+protected:
+	UPROPERTY(EditAnywhere, Category = "Property")
+	float AttackSpeed;
+
+	UPROPERTY(EditAnywhere, Replicated, Category = "Property")
+	float Health;
+
+	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Property")
+	float MaxHealth;
+
+public:
 	/** Convert to cardinal direction with direction  */
 	virtual TEnumAsByte<ECardinalDirection::Type> ConvertDirection(float NewDirection) const;
-
-	UPROPERTY(EditAnywhere, Category = "Attack")
-	float AttackSpeed;
 
 	/** Assault Counter */
 	UPROPERTY(Transient)
@@ -121,8 +149,8 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	void BroadcastAttack(uint8 Count);
 	
-	UFUNCTION()
-	void PlayImpactEffect(const FHitResult& HitResult);
+	UFUNCTION(NetMulticast, Reliable)
+	void PlayDamaged(const FHitResult& HitResult);
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	TArray<FAttack> ComboTable;
@@ -134,7 +162,10 @@ protected:
 	TArray<AActor*> DamagedActors;
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
-	float TimeDilationInterpSpeed;
+	float DamagedPauseFPSTime;
+
+	UPROPERTY(Transient)
+	float LastDamagedPauseFPSTime;
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	TMap<TEnumAsByte<ECardinalDirection::Type>, UAnimMontage*> GithitMontage;
@@ -173,6 +204,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Animation")
 	float TurnInPlaceDelay;
+
+	UPROPERTY(BlueprintReadOnly, Category = "World")
+	float TimeSeconds;
 
 protected:
 	void ManagerCharactorRotation(float DeltaTime);

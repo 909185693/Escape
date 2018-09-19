@@ -11,7 +11,7 @@ AEscapeCharacter_Player::AEscapeCharacter_Player(const class FObjectInitializer&
 	, BaseLookUpRate(45.f)
 
 {
-
+	FirstPressedDelay = 0.2f;
 }
 
 void AEscapeCharacter_Player::Tick(float DeltaTime)
@@ -20,7 +20,10 @@ void AEscapeCharacter_Player::Tick(float DeltaTime)
 
 	if (IsLocallyControlled() && bAttackPressed)
 	{
-		Attack();
+		if (TimeSeconds - LastPressedTime >= FirstPressedDelay)
+		{
+			Attack();
+		}
 	}
 }
 
@@ -95,7 +98,7 @@ void AEscapeCharacter_Player::MoveRight(float Val)
 			FRotator const ControlSpaceRot = Controller->GetControlRotation();
 
 			// transform to world space and add it
-			AddMovementInput(FRotationMatrix(ControlSpaceRot).GetScaledAxis(EAxis::Y), Val);
+			AddMovementInput(FRotationMatrix(ControlSpaceRot).GetScaledAxis(EAxis::Y), Val * CustomTimeDilation);
 		}
 	}
 }
@@ -109,7 +112,7 @@ void AEscapeCharacter_Player::MoveForward(float Val)
 			FRotator const ControlSpaceRot = Controller->GetControlRotation();
 
 			// transform to world space and add it
-			AddMovementInput(FRotationMatrix(ControlSpaceRot).GetScaledAxis(EAxis::X), Val);
+			AddMovementInput(FRotationMatrix(ControlSpaceRot).GetScaledAxis(EAxis::X), Val * CustomTimeDilation);
 		}
 	}
 }
@@ -129,9 +132,18 @@ void AEscapeCharacter_Player::LookUpAtRate(float Rate)
 void AEscapeCharacter_Player::StartAttack()
 {
 	bAttackPressed = true;
+
+	LastPressedTime = TimeSeconds;
+
+	Attack();
 }
 
 void AEscapeCharacter_Player::StopAttacking()
 {
 	bAttackPressed = false;
+}
+
+void AEscapeCharacter_Player::SetAttackPressed(bool bPressed)
+{
+	bAttackPressed = bPressed;
 }

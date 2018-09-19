@@ -2,6 +2,7 @@
 
 #include "EscapePlayerController.h"
 #include "EscapeGameInstance.h"
+#include "GameMapsSettings.h"
 
 
 AEscapePlayerController::AEscapePlayerController(const FObjectInitializer& ObjectInitializer) :
@@ -14,7 +15,7 @@ void AEscapePlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (UserWidgetClass != nullptr)
+	if (IsLocalController() && UserWidgetClass != nullptr)
 	{
 		UserWidget = CreateWidget(this, UserWidgetClass);
 		UserWidget->AddToViewport();
@@ -47,6 +48,15 @@ void AEscapePlayerController::Destroyed()
 UEscapeClient* AEscapePlayerController::GetEscapeClient() const
 {
 	return EscapeClient;
+}
+
+void AEscapePlayerController::ReturnLobby()
+{
+	const UGameMapsSettings* GameMapsSettings = GetDefault<UGameMapsSettings>();
+	const FString& DefaultMap = GameMapsSettings->GetGameDefaultMap();
+	const FString& URL = FString::Printf(TEXT("%s"), *DefaultMap);
+
+	ClientTravelInternal(DefaultMap, ETravelType::TRAVEL_Absolute);
 }
 
 void AEscapePlayerController::NotifyClientTravel(void* Data, EErrorCode Error)

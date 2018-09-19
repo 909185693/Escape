@@ -7,12 +7,6 @@
 void UAnimNotifyState_DamageCheck::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration)
 {
 	Super::NotifyBegin(MeshComp, Animation, TotalDuration);
-
-	AEscapeCharacter* Character = MeshComp ? Cast<AEscapeCharacter>(MeshComp->GetOwner()) : nullptr;
-	if (Character != nullptr)
-	{
-		Character->DamagedClear();
-	}
 }
 
 void UAnimNotifyState_DamageCheck::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float FrameDeltaTime)

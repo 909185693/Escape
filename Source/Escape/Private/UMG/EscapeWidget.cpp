@@ -2,11 +2,13 @@
 
 #include "EscapeWidget.h"
 #include "EscapeGameInstance.h"
+#include "EscapePlayerController.h"
 
 
 UEscapeWidget::UEscapeWidget(const FObjectInitializer& ObjectInitializer) :
 	Super(ObjectInitializer)
 {
+
 }
 
 bool UEscapeWidget::Initialize()
@@ -45,6 +47,15 @@ void UEscapeWidget::Reconnect()
 	if (EscapeClient != nullptr)
 	{
 		EscapeClient->Reconnect();
+	}
+}
+
+void UEscapeWidget::ReturnLobby()
+{
+	AEscapePlayerController* PlayerController = Cast<AEscapePlayerController>(GetOwningPlayer());
+	if (PlayerController != nullptr)
+	{
+		PlayerController->ReturnLobby();
 	}
 }
 

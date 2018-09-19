@@ -2,11 +2,14 @@
 
 #include "EscapeCharacter.h"
 #include "Escape.h"
+#include "EscapeGameMode_Game.h"
+#include "EscapePlayerController_Game.h"
 #include "EscapeCharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "DrawDebugHelpers.h"
+#include "UnrealNetwork.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Engine/EngineTypes.h"
 #include "Kismet/GameplayStatics.h"
@@ -50,9 +53,13 @@ AEscapeCharacter::AEscapeCharacter(const class FObjectInitializer& ObjectInitial
 		WeaponCapsule->SetupAttachment(GetMesh(), TEXT("weapon_r"));
 	}
 
+	Health = 1000.f;
+	DamagedPauseFPSTime = 0.1f;
+
 	bUseControllerRotationYaw = false;
 
 	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.TickGroup = ETickingGroup::TG_PrePhysics;
 }
 
 void AEscapeCharacter::BeginPlay()
@@ -63,6 +70,7 @@ void AEscapeCharacter::BeginPlay()
 
 	TargetRotation = ActorRotation;
 	CharacterRotation = ActorRotation;
+	MaxHealth = Health;
 }
 
 TEnumAsByte<ECardinalDirection::Type> AEscapeCharacter::ConvertDirection(float NewDirection) const
@@ -89,6 +97,12 @@ float AEscapeCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const
 {
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
+	bool bIsCrit = FMath::FRand() <= 0.2f;
+
+	ActualDamage = (1.f + FMath::FRand() * 0.2f) * ActualDamage * (bIsCrit ? 2.f : 1.f);
+
+	Health = FMath::Max(0.f, Health - ActualDamage);
+
 	APawn* InstigatorPawn = EventInstigator ? EventInstigator->GetPawn() : nullptr;
 
 	FHitResult HitResult;
@@ -96,34 +110,150 @@ float AEscapeCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const
 
 	DamageEvent.GetBestHitInfo(this, InstigatorPawn, HitResult, ImpulseDir);
 
-	PlayHit(ActualDamage, InstigatorPawn, DamageCauser, HitResult);
+	const bool bKilled = !IsAlive();
+
+	PlayHit(ActualDamage, bIsCrit, bKilled, InstigatorPawn, DamageCauser, HitResult);
+
+	AEscapeGameMode_Game* GameMode = GetWorld()->GetAuthGameMode<AEscapeGameMode_Game>();
+	if (GameMode != nullptr)
+	{
+		GameMode->NotifyPlayerTakeDamage(ActualDamage, bKilled, this, EventInstigator);
+	}
 
 	return ActualDamage;
 }
 
-void AEscapeCharacter::PlayHit_Implementation(float DamageAmount, APawn* InstigatorPawn, AActor* DamageCauser, const FHitResult& HiResult)
+void AEscapeCharacter::SetRagdollPhysics()
+{
+	bool bInRagdoll = false;
+
+	if (IsPendingKill())
+	{
+		bInRagdoll = false;
+	}
+	else if (!GetMesh() || !GetMesh()->GetPhysicsAsset())
+	{
+		bInRagdoll = false;
+	}
+	else
+	{
+		// initialize physics/etc
+		GetMesh()->SetSimulatePhysics(true);
+		GetMesh()->WakeAllRigidBodies();
+		GetMesh()->bBlendPhysics = true;
+
+		bInRagdoll = true;
+	}
+
+	GetCharacterMovement()->StopMovementImmediately();
+	GetCharacterMovement()->DisableMovement();
+	GetCharacterMovement()->SetComponentTickEnabled(false);
+
+	if (!bInRagdoll)
+	{
+		// hide and set short lifespan
+		TurnOff();
+		SetActorHiddenInGame(true);
+		SetLifeSpan(1.0f);
+	}
+	else
+	{
+		SetLifeSpan(10.0f);
+	}
+}
+
+void AEscapeCharacter::PlayHit_Implementation(float ActualDamage, bool bIsCrit, bool bKilled, APawn* PawnInstigator, AActor* DamageCauser, const FHitResult& HiResult)
 {
 	const FRotator& HitFromRotation = GetActorTransform().InverseTransformPosition(HiResult.ImpactPoint).Rotation();
 
 	TEnumAsByte<ECardinalDirection::Type> HitFromCardinalDirection = ConvertDirection(HitFromRotation.Yaw);
-	
+
 	UAnimMontage** MontageToPlay = GithitMontage.Find(HitFromCardinalDirection);
 	if (MontageToPlay != nullptr)
 	{
 		PlayAnimMontage(*MontageToPlay);
+	}
 
-		UE_LOG(LogTemp, Log, TEXT("PlayHit [%s]"), *GetNameSafe(*MontageToPlay));
+	AEscapePlayerController_Game* PlayerController = PawnInstigator ? Cast<AEscapePlayerController_Game>(PawnInstigator->Controller) : nullptr;
+	if (PlayerController != nullptr)
+	{
+		PlayerController->AddDamageInfo(ActualDamage, HiResult.ImpactPoint, bIsCrit);
+	}
+
+	if (bKilled)
+	{
+		OnDeath(ActualDamage, PawnInstigator, DamageCauser);
 	}
 }
 
+void AEscapeCharacter::OnDeath(float KillingDamage, class APawn* PawnInstigator, class AActor* DamageCauser)
+{
+	if (bIsDying)
+	{
+		return;
+	}
+
+	bReplicateMovement = false;
+	TearOff();
+	bIsDying = true;
+
+	// cannot use IsLocallyControlled here, because even local client's controller may be NULL here
+	if (GetNetMode() != NM_DedicatedServer && DeathSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, DeathSound, GetActorLocation());
+	}
+
+	DetachFromControllerPendingDestroy();
+
+	if (GetMesh())
+	{
+		static FName CollisionProfileName(TEXT("Ragdoll"));
+		GetMesh()->SetCollisionProfileName(CollisionProfileName);
+	}
+	SetActorEnableCollision(true);
+
+	// Death anim
+	float DeathAnimDuration = PlayAnimMontage(DeathMontage);
+
+	// Ragdoll
+	if (DeathAnimDuration > 0.f)
+	{
+		// Trigger ragdoll a little before the animation early so the character doesn't
+		// blend back to its normal position.
+		const float TriggerRagdollTime = DeathAnimDuration - 0.7f;
+
+		// Enable blend physics so the bones are properly blending against the montage.
+		GetMesh()->bBlendPhysics = true;
+
+		// Use a local timer handle as we don't need to store it for later but we don't need to look for something to clear
+		FTimerHandle TimerHandle;
+		GetWorldTimerManager().SetTimer(TimerHandle, this, &AEscapeCharacter::SetRagdollPhysics, FMath::Max(0.1f, TriggerRagdollTime), false);
+	}
+	else
+	{
+		SetRagdollPhysics();
+	}
+
+	// disable collisions on capsule
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Ignore);
+}
+
+
 void AEscapeCharacter::Tick(float DeltaTime)
 {
+	TimeSeconds = GetWorld()->GetTimeSeconds();
+
 	Super::Tick(DeltaTime);
 
 	ManagerCharactorRotation(DeltaTime);
-	
-	//CustomTimeDilation = FMath::FInterpTo(CustomTimeDilation, 1.f, DeltaTime, 128.f);
-	CustomTimeDilation = FMath::FInterpConstantTo(CustomTimeDilation, 1.f, DeltaTime, TimeDilationInterpSpeed);
+
+	if (TimeSeconds - LastDamagedPauseFPSTime > DamagedPauseFPSTime)
+	{
+		CustomTimeDilation = 1.f;
+
+		GetMesh()->GlobalAnimRateScale = 1.f;
+	}
 }
 
 void AEscapeCharacter::Attack()
@@ -132,6 +262,8 @@ void AEscapeCharacter::Attack()
 	{
 		if (ComboTable.IsValidIndex(AttackCount))
 		{
+			DamagedClear();
+
 			PlayAnimMontage(ComboTable[AttackCount].Montage, AttackSpeed);
 		}
 
@@ -188,6 +320,11 @@ void AEscapeCharacter::DamagedClear()
 
 void AEscapeCharacter::DamageCheck(float DeltaTime)
 {
+	if (Role == ROLE_SimulatedProxy)
+	{
+		return;
+	}
+
 	if (GetMesh()->SkeletalMesh == nullptr)
 	{
 		return;
@@ -196,10 +333,7 @@ void AEscapeCharacter::DamageCheck(float DeltaTime)
 	const FVector& TraceStart = LastWeaponLocation;
 	const FVector& TraceEnd = GetMesh()->GetSocketLocation(FName(TEXT("weapon_r")));
 
-	if (Role == ROLE_Authority)
-	{
-		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("TraceEnd [%s] DeltaTime[%0.2f]"), *TraceEnd.ToCompactString(), DeltaTime), true, false, FLinearColor::White, 10.f);
-	}	
+	//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("TraceEnd [%s] DeltaTime[%0.2f]"), *TraceEnd.ToCompactString(), DeltaTime), true, false, FLinearColor::White, 10.f);
 
 	FCollisionQueryParams CollisionQueryParams;
 	CollisionQueryParams.bReturnPhysicalMaterial = true;
@@ -213,17 +347,17 @@ void AEscapeCharacter::DamageCheck(float DeltaTime)
 		AActor* HitActor = HitResult.GetActor();
 		if (HitActor != nullptr && !DamagedActors.Contains(HitActor))
 		{
-			CustomTimeDilation = 0.00001f;
-
 			DamagedActors.AddUnique(HitActor);
-
-			PlayImpactEffect(HitResult);
 
 			if (Role == ROLE_Authority && ComboTable.IsValidIndex(AttackCount))
 			{
-				FVector HitFromDirection = (HitResult.ImpactPoint - HitActor->GetActorLocation()).GetSafeNormal();
+				PlayDamaged(HitResult);
+
+				FVector HitFromDirection = HitResult.ImpactNormal.GetSafeNormal(); //(HitResult.ImpactPoint - HitActor->GetActorLocation()).GetSafeNormal();
 
 				UGameplayStatics::ApplyPointDamage(HitActor, ComboTable[AttackCount].Damage, HitFromDirection, HitResult, Controller, this, ComboTable[AttackCount].DamageType);
+
+				UE_LOG(LogTemp, Log, TEXT("AEscapeCharacter::DamageCheck() HitActor[%s]"), *GetNameSafe(HitActor));
 			}
 
 			//DrawDebugLine(GetWorld(), HitResult.ImpactPoint, HitResult.ImpactPoint + 50.f * HitResult.ImpactNormal, FColor::Yellow, false, 10.f);
@@ -257,10 +391,16 @@ void AEscapeCharacter::BroadcastAttack_Implementation(uint8 Count)
 	}
 }
 
-void AEscapeCharacter::PlayImpactEffect(const FHitResult& HitResult)
+void AEscapeCharacter::PlayDamaged_Implementation(const FHitResult& HitResult)
 {
+	LastDamagedPauseFPSTime = TimeSeconds;
+
+	CustomTimeDilation = 0.f;
+
+	GetMesh()->GlobalAnimRateScale = 0.f;
+
 	TEnumAsByte<EPhysicalSurface> PhysicalSurface = HitResult.PhysMaterial.IsValid() ? HitResult.PhysMaterial->SurfaceType : TEnumAsByte<EPhysicalSurface>(EPhysicalSurface::SurfaceType_Default);
-	
+
 	UParticleSystem** ParticleSystem = ImpactParticle.Find(PhysicalSurface);
 	if (ParticleSystem != nullptr)
 	{
@@ -284,7 +424,9 @@ void AEscapeCharacter::ManagerCharactorRotation(float DeltaTime)
 			{
 				const FRotator& NewTatgetRotation = FRotator(0.f, GetControlRotation().Yaw, 0.f).GetNormalized();
 
-				SetCharactorRotation(NewTatgetRotation, true, 15.f);
+				const float InterpSpeed = FMath::Abs(CharacterRotation.Yaw - NewTatgetRotation.Yaw) / 10.f;
+
+				SetCharactorRotation(NewTatgetRotation, true, InterpSpeed);
 
 				LastVelocityRotation = EscapeCharacterMovement->Velocity.Rotation();
 			}
@@ -346,7 +488,10 @@ void AEscapeCharacter::ServerSetCharactorRotation_Implementation(const FRotator&
 	CharacterRotation = NewCharactorRotation;
 }
 
-//void AEscapeCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
-//{
-//	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-//}
+void AEscapeCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AEscapeCharacter, Health);
+	DOREPLIFETIME(AEscapeCharacter, MaxHealth);
+}

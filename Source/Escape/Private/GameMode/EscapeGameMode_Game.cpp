@@ -1,9 +1,11 @@
 // Copyright 2018 by January. All Rights Reserved.
 
 #include "EscapeGameMode_Game.h"
+#include "EscapeGameSession.h"
+#include "EscapeCharacter.h"
+#include "EscapeHUD_Game.h"
 #include "EscapePlayerState_Game.h"
 #include "EscapePlayerController_Game.h"
-#include "EscapeGameSession.h"
 
 
 AEscapeGameMode_Game::AEscapeGameMode_Game(const FObjectInitializer& ObjectInitializer)
@@ -23,6 +25,9 @@ AEscapeGameMode_Game::AEscapeGameMode_Game(const FObjectInitializer& ObjectIniti
 
 	// 设置角色控制类
 	PlayerControllerClass = AEscapePlayerController_Game::StaticClass();
+
+	// 设置HUD类
+	HUDClass = AEscapeHUD_Game::StaticClass();
 }
 
 void AEscapeGameMode_Game::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
@@ -43,9 +48,49 @@ void AEscapeGameMode_Game::Logout(AController* Exiting)
 
 	SyncGameInfo();
 
-	if (NumPlayers == 0)
+	if (NumPlayers == 0 && !GetWorld()->IsPlayInEditor())
 	{
-		FPlatformMisc::RequestExit(false);
+		RequestExit();
+	}
+}
+
+void AEscapeGameMode_Game::NotifyPlayerTakeDamage(float DamageAmount, bool bKilled, AEscapeCharacter* DamageCauser, class AController* EventInstigator)
+{
+	if (bKilled)
+	{
+		bool bFinishMatch = true;
+		for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
+		{
+			APlayerController* PlayerController = It->Get();
+			if (PlayerController != EventInstigator)
+			{
+				AEscapeCharacter* Player = Cast<AEscapeCharacter>(PlayerController->GetPawn());
+				if (Player && Player->IsAlive())
+				{
+					bFinishMatch = false;
+				}
+			}
+		}
+
+		if (bFinishMatch)
+		{
+			for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
+			{
+				AEscapePlayerController_Game* PlayerController = Cast<AEscapePlayerController_Game>(It->Get());
+				if (PlayerController == EventInstigator)
+				{
+					PlayerController->ClientMatchStatus(EMatchStatus::Victory);
+				}
+				else
+				{
+					PlayerController->ClientMatchStatus(EMatchStatus::Defeated);
+				}
+			}
+
+			FTimerHandle RequestExit;
+
+			GetWorld()->GetTimerManager().SetTimer(RequestExit, this, &AEscapeGameMode_Game::RequestExit, 60.f, false);
+		}
 	}
 }
 
@@ -60,4 +105,18 @@ void AEscapeGameMode_Game::SyncGameInfo()
 
 		EscapeClient->Send(ELogicCode::GAME_INFO, sizeof(FGameInfo), &GameInfo);
 	}
+}
+
+void AEscapeGameMode_Game::RequestExit()
+{
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
+	{
+		AEscapePlayerController_Game* PlayerController = Cast<AEscapePlayerController_Game>(It->Get());
+		if (PlayerController != nullptr)
+		{
+			PlayerController->ReturnLobby();
+		}
+	}
+
+	FPlatformMisc::RequestExit(false);
 }

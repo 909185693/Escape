@@ -178,6 +178,11 @@ void UEscapeNetworkBase::BeginDestroy()
 
 	if (SocketSubsystem)
 	{
+		if (Socket)
+		{
+			Socket->Close();
+		}
+		
 		SocketSubsystem->DestroySocket(Socket);
 		Socket = nullptr;
 	}

@@ -7,9 +7,16 @@
 #include "EscapeGameMode_Game.generated.h"
 
 
-/**
- * 
- */
+class AEscapeCharacter;
+
+UENUM(BlueprintType)
+enum EMatchStatus
+{
+	Victory,
+	Defeated,
+	Dogfall
+};
+
 UCLASS(Config = Game)
 class ESCAPE_API AEscapeGameMode_Game : public AEscapeGameModeBase
 {
@@ -29,7 +36,12 @@ class ESCAPE_API AEscapeGameMode_Game : public AEscapeGameModeBase
 	/** Called when a Controller with a PlayerState leaves the game or is destroyed */
 	virtual void Logout(AController* Exiting) override;
 
+	/// AEscapeGameMode_Game
+	virtual void NotifyPlayerTakeDamage(float DamageAmount, bool bKilled, AEscapeCharacter* DamageCauser, class AController* EventInstigator);
+
 	virtual void SyncGameInfo();
+
+	virtual void RequestExit();
 
 public:
 	UPROPERTY(Config)

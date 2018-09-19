@@ -7,9 +7,7 @@
 AEscapePlayerController_Lobby::AEscapePlayerController_Lobby(const FObjectInitializer& ObjectInitializer) 
 	: Super(ObjectInitializer)
 {
-	bShowMouseCursor = true;
-
-	// 设置默认角色类
+	// 设置默认Widget类
 	static ConstructorHelpers::FClassFinder<UUserWidget> UserWidgetClassFinder(TEXT("/Game/Blueprints/UMG/Lobby/Lobby"));
 	if (UserWidgetClassFinder.Succeeded())
 	{
@@ -20,6 +18,8 @@ AEscapePlayerController_Lobby::AEscapePlayerController_Lobby(const FObjectInitia
 void AEscapePlayerController_Lobby::BeginPlay()
 {
 	Super::BeginPlay();
+
+	bShowMouseCursor = true;
 
 	FInputModeUIOnly InputMode;
 	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
