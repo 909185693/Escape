@@ -155,6 +155,12 @@ void UEscapeMessageContrl::ClientTravel()
 
 	for (TSharedPtr<FDedicatedServerInfo> DedicatedServerInfo : DedicatedServerInfoSessions)
 	{
+		/// 服务器状态
+		if (DedicatedServerInfo->MatchState != EMatchState::Readyed)
+		{
+			continue;
+		}
+
 		/// 服务器注册超时
 		if (!DedicatedServerInfo->bIsRegister)
 		{

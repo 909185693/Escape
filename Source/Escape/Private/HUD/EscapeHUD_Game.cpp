@@ -10,17 +10,26 @@ static FName HealthName(TEXT("HealthBar"));
 AEscapeHUD_Game::AEscapeHUD_Game(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	static ConstructorHelpers::FObjectFinder<UTexture2D> HealthTextureFinder(TEXT("/Game/UI/HUD/Health"));
-	static ConstructorHelpers::FObjectFinder<UFont> FontObj(TEXT("/Game/Font/XMFF.XMFF"));
-	DamageInfoFont = FontObj.Object;
+#if !UE_SERVER
+#if UE_BUILD_DEVELOPMENT
+	if (IsRunningGame())
+	{
+#endif
+		static ConstructorHelpers::FObjectFinder<UFont> FontObj(TEXT("/Game/Font/XMFF.XMFF"));
+		DamageInfoFont = FontObj.Object;
 
-	DamageFontRenderInfo.bEnableShadow = true;
+		DamageFontRenderInfo.bEnableShadow = true;
 
-	HealthTexture = HealthTextureFinder.Object;
+		static ConstructorHelpers::FObjectFinder<UTexture2D> HealthTextureFinder(TEXT("/Game/UI/HUD/Health"));
+		HealthTexture = HealthTextureFinder.Object;
 
-	HealthBarBg = UCanvas::MakeIcon(HealthTexture, 0, 0, 64, 6);
-	HealthBar = UCanvas::MakeIcon(HealthTexture, 0, 6, 64, 6);
-	HealthIcon = UCanvas::MakeIcon(HealthTexture, 0, 12, 64, 6);
+		HealthBarBg = UCanvas::MakeIcon(HealthTexture, 0, 0, 64, 6);
+		HealthBar = UCanvas::MakeIcon(HealthTexture, 0, 6, 64, 6);
+		HealthIcon = UCanvas::MakeIcon(HealthTexture, 0, 12, 64, 6);
+#if UE_BUILD_DEVELOPMENT
+	}
+#endif
+#endif
 }
 
 void AEscapeHUD_Game::DrawHUD()

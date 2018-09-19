@@ -150,6 +150,11 @@ void UEscapeClient::Reconnect()
 	}
 }
 
+bool UEscapeClient::IsConnected() const
+{
+	return bIsConnected;
+}
+
 void UEscapeClient::BeginDestroy()
 {
 	Super::BeginDestroy();

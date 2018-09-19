@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "EscapeNetwork.h"
+#include "EscapeSystemTypes.h"
 #include "Blueprint/UserWidget.h"
 #include "EscapeWidget.generated.h"
 
@@ -20,19 +21,26 @@ UCLASS()
 class ESCAPE_API UEscapeWidget : public UUserWidget
 {
 	GENERATED_UCLASS_BODY()
-	
-	virtual bool Initialize() override;
+
+	virtual void NativeConstruct() override;
 	virtual void BeginDestroy() override;
 
 	/// UEscapeWidget
-	virtual UEscapeClient* GetEscapeClient() const;
+	virtual class UEscapeClient* GetEscapeClient() const;
+	virtual class UEscapeSystem* GetEscapeSystem() const;
 
 protected:
 	UFUNCTION(BlueprintCallable, Category = "Network")
 	void Reconnect();
 
+	UFUNCTION(BlueprintCallable, Category = "Lobby")
+	bool IsConnected() const;
+
 	UFUNCTION(BlueprintCallable, Category = "Game")
 	void ReturnLobby();
+
+	UFUNCTION(BlueprintCallable, Category = "Game")
+	bool GetEscapeUser(FEscapeUser& OutEscapeUser) const;
 
 protected:
 	virtual void RegisterMessageCallback();
@@ -45,4 +53,7 @@ protected:
 protected:
 	UPROPERTY(Transient)
 	UEscapeClient* EscapeClient;
+
+	UPROPERTY(Transient)
+	UEscapeSystem* EscapeSystem;
 };

@@ -1,6 +1,7 @@
 // Copyright 2018 by January. All Rights Reserved.
 
 #include "EscapeWidget.h"
+#include "EscapeSystem.h"
 #include "EscapeGameInstance.h"
 #include "EscapePlayerController.h"
 
@@ -11,20 +12,19 @@ UEscapeWidget::UEscapeWidget(const FObjectInitializer& ObjectInitializer) :
 
 }
 
-bool UEscapeWidget::Initialize()
+void UEscapeWidget::NativeConstruct()
 {
-	Super::Initialize();
-
 	UWorld* World = GetWorld();
 	UEscapeGameInstance* GameInstance = World ? Cast<UEscapeGameInstance>(World->GetGameInstance()) : nullptr;
 	if (GameInstance != nullptr)
 	{
 		EscapeClient = GameInstance->GetEscapeClient();
+		EscapeSystem = GameInstance->GetEscapeSystem();
 
 		RegisterMessageCallback();
 	}
 
-	return true;
+	Super::NativeConstruct();
 }
 
 void UEscapeWidget::BeginDestroy()
@@ -37,9 +37,14 @@ void UEscapeWidget::BeginDestroy()
 	}
 }
 
-UEscapeClient* UEscapeWidget::GetEscapeClient() const
+class UEscapeClient* UEscapeWidget::GetEscapeClient() const
 {
 	return EscapeClient;
+}
+
+class UEscapeSystem* UEscapeWidget::GetEscapeSystem() const
+{
+	return EscapeSystem;
 }
 
 void UEscapeWidget::Reconnect()
@@ -50,6 +55,16 @@ void UEscapeWidget::Reconnect()
 	}
 }
 
+bool UEscapeWidget::IsConnected() const
+{
+	if (EscapeClient != nullptr)
+	{
+		return EscapeClient->IsConnected();
+	}
+
+	return false;
+}
+
 void UEscapeWidget::ReturnLobby()
 {
 	AEscapePlayerController* PlayerController = Cast<AEscapePlayerController>(GetOwningPlayer());
@@ -57,6 +72,19 @@ void UEscapeWidget::ReturnLobby()
 	{
 		PlayerController->ReturnLobby();
 	}
+}
+
+bool UEscapeWidget::GetEscapeUser(FEscapeUser& OutEscapeUser) const
+{
+	TSharedPtr<FEscapeUser> EscapeUser = EscapeSystem ? EscapeSystem->GetEscapeUser() : nullptr;
+	if (EscapeUser.IsValid())
+	{
+		OutEscapeUser = *EscapeUser;
+
+		return true;
+	}
+
+	return false;
 }
 
 void UEscapeWidget::RegisterMessageCallback()

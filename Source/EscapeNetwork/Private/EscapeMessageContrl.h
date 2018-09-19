@@ -63,6 +63,7 @@ protected:
 			, IP(TEXT(""))
 			, Port(0)
 			, NumPlayers(0)
+			, MatchState(EMatchState::Readyed)
 		{
 			Socket = nullptr;
 			NetworkErrorCount = 0;
@@ -97,6 +98,9 @@ protected:
 
 		/// 当前玩家数量
 		int32 NumPlayers;
+
+		/// 游戏状态
+		EMatchState MatchState;
 
 		/// 线程ID
 		int32 ProcessID;

@@ -58,4 +58,6 @@ protected:
 
 	UPROPERTY(Transient)
 	AController* VictoryController;
+
+	FTimerHandle RequestExitHandle;
 };

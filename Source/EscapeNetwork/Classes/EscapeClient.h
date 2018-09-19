@@ -19,6 +19,7 @@ public:
 	virtual void TickDispatch(float DeltaTime) override;
 	virtual void Send(ELogicCode Code, int32 DataSize = 0, void* Data = nullptr);
 	virtual void Reconnect();
+	virtual bool IsConnected() const;
 
 public:
 	virtual void BeginDestroy() override;

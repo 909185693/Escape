@@ -59,7 +59,7 @@ void AEscapeGameMode_Game::FinishMatch()
 	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
 	{
 		AEscapePlayerController_Game* PlayerController = Cast<AEscapePlayerController_Game>(It->Get());
-		if (PlayerController == EventInstigator)
+		if (PlayerController == VictoryController)
 		{
 			PlayerController->ClientMatchStatus(EMatchStatus::Victory);
 		}
@@ -69,9 +69,7 @@ void AEscapeGameMode_Game::FinishMatch()
 		}
 	}
 
-	FTimerHandle RequestExit;
-
-	GetWorld()->GetTimerManager().SetTimer(RequestExit, this, &AEscapeGameMode_Game::RequestExit, 60.f, false);
+	GetWorld()->GetTimerManager().SetTimer(RequestExitHandle, this, &AEscapeGameMode_Game::RequestExit, 30.f, false);
 }
 
 void AEscapeGameMode_Game::NotifyPlayerTakeDamage(float DamageAmount, bool bKilled, AEscapeCharacter* DamageCauser, class AController* EventInstigator)

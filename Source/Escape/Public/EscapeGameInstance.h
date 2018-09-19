@@ -4,10 +4,12 @@
 
 #include "Online.h"
 #include "Engine/GameInstance.h"
+#include "EscapeSystemTypes.h"
 #include "EscapeGameInstance.generated.h"
 
 
 class UEscapeClient;
+class UEscapeSystem;
 
 UCLASS()
 class ESCAPE_API UEscapeGameInstance : public UGameInstance
@@ -21,10 +23,14 @@ class ESCAPE_API UEscapeGameInstance : public UGameInstance
 	
 	/// UEscapeGameInstance
 	class UEscapeClient* GetEscapeClient() const;
+	class UEscapeSystem* GetEscapeSystem() const;
 
 protected:
 	UPROPERTY(Transient)
 	UEscapeClient* EscapeClient;
+
+	UPROPERTY(Transient)
+	UEscapeSystem* EscapeSystem;
 
 	UPROPERTY(Config)
 	FString EscapeClientClassName;

@@ -2,6 +2,7 @@
 
 #include "EscapeGameInstance.h"
 #include "CrasheyeHelper.h"
+#include "EscapeSystem.h"
 #include "EscapeNetwork.h"
 #include "EscapeEngine.h"
 #include "Escape.h"
@@ -37,6 +38,9 @@ void UEscapeGameInstance::Init()
 			if (EscapeClient != nullptr)
 			{
 				EscapeClient->Register(Cast<UEscapeEngine>(GetEngine()));
+
+				EscapeSystem = NewObject<UEscapeSystem>(GetTransientPackage(), UEscapeSystem::StaticClass());
+				EscapeSystem->Register(EscapeClient);
 			}
 		}
 		else
@@ -65,4 +69,9 @@ void UEscapeGameInstance::OnStart()
 class UEscapeClient* UEscapeGameInstance::GetEscapeClient() const
 {
 	return EscapeClient;
+}
+
+class UEscapeSystem* UEscapeGameInstance::GetEscapeSystem() const
+{
+	return EscapeSystem;
 }

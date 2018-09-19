@@ -15,23 +15,6 @@ enum EUserLogin
 	Login_NoneError,
 };
 
-USTRUCT(BlueprintType)
-struct FEscapeUser
-{
-	GENERATED_USTRUCT_BODY()
-
-	FEscapeUser()
-	{
-		FMemory::Memzero(this, sizeof(FEscapeUser));
-	}
-
-	UPROPERTY(BlueprintReadOnly)
-	int32 ID;
-
-	UPROPERTY(BlueprintReadOnly)
-	FString Nickname;
-};
-
 UCLASS()
 class ESCAPE_API UEscapeLobbyWidget : public UEscapeWidget
 {
@@ -57,7 +40,7 @@ protected:
 	void NotifyUserLogin(void* Data, EErrorCode Error);
 
 	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "NotifyUserLogin"))
-	void ReceiveNotifyUserLogin(EUserLogin NotifyCode, FEscapeUser EscapeUser);
+	void ReceiveNotifyUserLogin(EUserLogin NotifyCode);
 
 	/// ÑûÇë
 	void NotifyInvitation(void* Data, EErrorCode Error);

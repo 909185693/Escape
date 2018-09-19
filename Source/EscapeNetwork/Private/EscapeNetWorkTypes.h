@@ -82,6 +82,13 @@ struct FInvitation
 	int32 UserID;
 };
 
+enum EMatchState
+{
+	Readyed,
+	Processing,
+	Finished
+};
+
 struct FDedicatedServer
 {
 	FDedicatedServer()
@@ -99,4 +106,6 @@ struct FDedicatedServer
 struct FGameInfo
 {
 	int32 NumPlayers;
+
+	EMatchState MatchState;
 };
