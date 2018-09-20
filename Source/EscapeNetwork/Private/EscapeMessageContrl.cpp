@@ -24,7 +24,8 @@ void UEscapeMessageContrl::Register(UEscapeServer* InEscapeServer)
 		EscapeServer->AddMessageCallback(ELogicCode::INVITATION, this, &UEscapeMessageContrl::NotifyInvitation);
 		EscapeServer->AddMessageCallback(ELogicCode::CONNECTION, this, &UEscapeMessageContrl::NotifyConnection);
 		EscapeServer->AddMessageCallback(ELogicCode::REGISTER_SERVER, this, &UEscapeMessageContrl::NotifyRegisterServer);
-		EscapeServer->AddMessageCallback(ELogicCode::GAME_INFO, this, &UEscapeMessageContrl::NotifyGameInfo);
+		EscapeServer->AddMessageCallback(ELogicCode::MATCH_STATE, this, &UEscapeMessageContrl::NotifyMatchState);
+		EscapeServer->AddMessageCallback(ELogicCode::NUMPLAYERS, this, &UEscapeMessageContrl::NotifyNumPlayers);
 	}
 }
 
@@ -125,15 +126,25 @@ void UEscapeMessageContrl::NotifyRegisterServer(TSharedPtr<FConnection> Connecti
 	}
 }
 
-void UEscapeMessageContrl::NotifyGameInfo(TSharedPtr<FConnection> Connection, void* Data, EErrorCode Error)
+void UEscapeMessageContrl::NotifyMatchState(TSharedPtr<FConnection> Connection, void* Data, EErrorCode Error)
 {
 	TSharedPtr<FDedicatedServerInfo> DedicatedServerInfo = StaticCastSharedPtr<FDedicatedServerInfo>(Connection);
 	if (DedicatedServerInfo.IsValid())
 	{
-		FGameInfo* GameInfo = (FGameInfo*)Data;
-		DedicatedServerInfo->NumPlayers = GameInfo->NumPlayers;
+		DedicatedServerInfo->MatchState = *(EMatchState*)Data;
 
-		UE_LOG(LogEscapeNetwork, Log, TEXT("EscapeServer : Sync game info NumPlayers[%d]"), DedicatedServerInfo->NumPlayers);
+		UE_LOG(LogEscapeNetwork, Log, TEXT("EscapeServer : Sync game state [%d]"), (int32)DedicatedServerInfo->MatchState);
+	}
+}
+
+void UEscapeMessageContrl::NotifyNumPlayers(TSharedPtr<FConnection> Connection, void* Data, EErrorCode Error)
+{
+	TSharedPtr<FDedicatedServerInfo> DedicatedServerInfo = StaticCastSharedPtr<FDedicatedServerInfo>(Connection);
+	if (DedicatedServerInfo.IsValid())
+	{
+		DedicatedServerInfo->NumPlayers = *(int32*)Data;
+
+		UE_LOG(LogEscapeNetwork, Log, TEXT("EscapeServer : Sync num players [%d]"), (int32)DedicatedServerInfo->NumPlayers);
 	}
 }
 
@@ -156,7 +167,7 @@ void UEscapeMessageContrl::ClientTravel()
 	for (TSharedPtr<FDedicatedServerInfo> DedicatedServerInfo : DedicatedServerInfoSessions)
 	{
 		/// 服务器状态
-		if (DedicatedServerInfo->MatchState != EMatchState::Readyed)
+		if (DedicatedServerInfo->MatchState != EMatchState::EnteringMap)
 		{
 			continue;
 		}

@@ -35,8 +35,11 @@ protected:
 	/// 专用服务器注册
 	void NotifyRegisterServer(TSharedPtr<FConnection> Connection, void* Data, EErrorCode Error);
 
-	/// 游戏信息
-	void NotifyGameInfo(TSharedPtr<FConnection> Connection, void* Data, EErrorCode Error);
+	/// 游戏状态
+	void NotifyMatchState(TSharedPtr<FConnection> Connection, void* Data, EErrorCode Error);
+
+	/// 房间人数
+	void NotifyNumPlayers(TSharedPtr<FConnection> Connection, void* Data, EErrorCode Error);
 
 private:
 	void ClientTravel();
@@ -63,7 +66,7 @@ protected:
 			, IP(TEXT(""))
 			, Port(0)
 			, NumPlayers(0)
-			, MatchState(EMatchState::Readyed)
+			, MatchState(EMatchState::EnteringMap)
 		{
 			Socket = nullptr;
 			NetworkErrorCount = 0;

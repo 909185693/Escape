@@ -13,5 +13,4 @@ UCLASS()
 class ESCAPE_API AEscapePlayerState_Game : public AEscapePlayerState
 {
 	GENERATED_BODY()
-		
 };

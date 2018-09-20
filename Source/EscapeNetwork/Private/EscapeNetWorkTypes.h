@@ -84,9 +84,12 @@ struct FInvitation
 
 enum EMatchState
 {
-	Readyed,
-	Processing,
-	Finished
+	EnteringMap,
+	WaitingToStart,
+	InProgress,
+	WaitingPostMatch,
+	LeavingMap,
+	Aborted
 };
 
 struct FDedicatedServer
@@ -101,11 +104,4 @@ struct FDedicatedServer
 	char	Guid[128];
 	int32	MinPlayers;
 	int32	MaxPlayers;
-};
-
-struct FGameInfo
-{
-	int32 NumPlayers;
-
-	EMatchState MatchState;
 };

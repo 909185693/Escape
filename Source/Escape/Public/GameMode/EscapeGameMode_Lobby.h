@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameMode/EscapeGameModeBase.h"
+#include "GameFramework/GameModeBase.h"
 #include "EscapeGameMode_Lobby.generated.h"
 
 
@@ -13,7 +13,7 @@ class UEscapeServer;
  * 
  */
 UCLASS(Config = Game)
-class ESCAPE_API AEscapeGameMode_Lobby : public AEscapeGameModeBase
+class ESCAPE_API AEscapeGameMode_Lobby : public AGameModeBase
 {
 	GENERATED_UCLASS_BODY()
 	

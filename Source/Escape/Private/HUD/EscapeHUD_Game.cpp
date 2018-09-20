@@ -64,31 +64,35 @@ void AEscapeHUD_Game::MakeUV(FCanvasIcon& Icon, FVector2D& UV0, FVector2D& UV1, 
 
 void AEscapeHUD_Game::DrawHealth()
 {
-	const float ScaleUI = 1.f;
-
-	for (FConstPawnIterator It = GetWorld()->GetPawnIterator(); It; ++It)
+	if (HealthBar.Texture)
 	{
-		AEscapeCharacter* Pawn = Cast<AEscapeCharacter>(*It);
-		APlayerController* PlayerController = Cast<APlayerController>(GetOwner());
-		if (PlayerController && Pawn && Pawn->IsAlive() && Pawn->WasRecentlyRendered())
+		const float ScaleUI = 1.f;
+
+		for (FConstPawnIterator It = GetWorld()->GetPawnIterator(); It; ++It)
 		{
-			FVector ActorLocation = Pawn->GetMesh()->GetSocketLocation(HealthName);
-			FVector2D ScreenPostion = FVector2D::ZeroVector;
-			UGameplayStatics::ProjectWorldToScreen(PlayerController, ActorLocation, ScreenPostion);
+			AEscapeCharacter* Pawn = Cast<AEscapeCharacter>(*It);
+			APlayerController* PlayerController = Cast<APlayerController>(GetOwner());
+			if (PlayerController && Pawn && Pawn->IsAlive() && Pawn->WasRecentlyRendered())
+			{
+				FVector ActorLocation = Pawn->GetMesh()->GetSocketLocation(HealthName);
+				FVector2D ScreenPostion = FVector2D::ZeroVector;
+				UGameplayStatics::ProjectWorldToScreen(PlayerController, ActorLocation, ScreenPostion);
 
-			FVector2D DrawPostion(ScreenPostion.X - HealthBarBg.UL / 2, ScreenPostion.Y - HealthBarBg.VL / 2);
+				FVector2D DrawPostion(ScreenPostion.X - HealthBarBg.UL / 2, ScreenPostion.Y - HealthBarBg.VL / 2);
 
-			Canvas->SetDrawColor(FColor::White);
+				Canvas->SetDrawColor(FColor::White);
 
-			Canvas->DrawIcon(HealthBarBg, DrawPostion.X, DrawPostion.Y, ScaleUI);
-			const float HealthAmount = FMath::Min(1.f, (float)Pawn->GetHealth() / (float)Pawn->GetMaxHealth());
+				Canvas->DrawIcon(HealthBarBg, DrawPostion.X, DrawPostion.Y, ScaleUI);
+				const float HealthAmount = FMath::Min(1.f, (float)Pawn->GetHealth() / (float)Pawn->GetMaxHealth());
 
-			FCanvasTileItem TileItem(FVector2D(DrawPostion.X, DrawPostion.Y), HealthBar.Texture->Resource,
-				FVector2D(HealthBar.UL * HealthAmount * ScaleUI, HealthBar.VL * ScaleUI), FLinearColor::White);
-			MakeUV(HealthBar, TileItem.UV0, TileItem.UV1, HealthBar.U, HealthBar.V, HealthBar.UL * HealthAmount, HealthBar.VL);
-			TileItem.BlendMode = SE_BLEND_Translucent;
-			Canvas->DrawItem(TileItem);
+				FCanvasTileItem TileItem(FVector2D(DrawPostion.X, DrawPostion.Y), HealthBar.Texture->Resource,
+					FVector2D(HealthBar.UL * HealthAmount * ScaleUI, HealthBar.VL * ScaleUI), FLinearColor::White);
+				MakeUV(HealthBar, TileItem.UV0, TileItem.UV1, HealthBar.U, HealthBar.V, HealthBar.UL * HealthAmount, HealthBar.VL);
+				TileItem.BlendMode = SE_BLEND_Translucent;
+				Canvas->DrawItem(TileItem);
+			}
 		}
+
 	}
 }
 

@@ -2,8 +2,10 @@
 
 #include "EscapeGameMode_Game.h"
 #include "EscapeGameSession.h"
+#include "EscapeNetwork.h"
 #include "EscapeCharacter.h"
 #include "EscapeHUD_Game.h"
+#include "EscapeGameState.h"
 #include "EscapePlayerState_Game.h"
 #include "EscapePlayerController_Game.h"
 
@@ -28,6 +30,9 @@ AEscapeGameMode_Game::AEscapeGameMode_Game(const FObjectInitializer& ObjectIniti
 
 	// 设置HUD类
 	HUDClass = AEscapeHUD_Game::StaticClass();
+
+	// 设置游戏状态类
+	GameStateClass = AEscapeGameState::StaticClass();
 }
 
 void AEscapeGameMode_Game::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
@@ -35,26 +40,118 @@ void AEscapeGameMode_Game::InitGame(const FString& MapName, const FString& Optio
 	Super::InitGame(MapName, Options, ErrorMessage);
 }
 
+void AEscapeGameMode_Game::StartPlay()
+{
+	// Don't call super, this class handles begin play/match start itself
+	if (MatchState == MatchState::EnteringMap)
+	{
+		SetMatchState(MatchState::WaitingToStart);
+	}
+
+	bDelayedStart = true;
+}
+
 void AEscapeGameMode_Game::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 
-	SyncGameInfo();
+	SyncNumPlayers();
 }
 
 void AEscapeGameMode_Game::Logout(AController* Exiting)
 {
 	Super::Logout(Exiting);
 
-	SyncGameInfo();
+	SyncNumPlayers();
 
 	if (NumPlayers == 0)
 	{
-		RequestExit();
+		AbortMatch();
 	}
 }
 
-void AEscapeGameMode_Game::FinishMatch()
+void AEscapeGameMode_Game::HandleMatchIsWaitingToStart()
+{
+	Super::HandleMatchIsWaitingToStart();
+}
+	 
+void AEscapeGameMode_Game::HandleMatchHasStarted()
+{
+	Super::HandleMatchHasStarted();
+}
+
+void AEscapeGameMode_Game::HandleMatchHasEnded()
+{
+	Super::HandleMatchHasEnded();
+
+	GetWorld()->GetTimerManager().SetTimer(MatchStatusHandle, this, &AEscapeGameMode_Game::NotifyMatchStatus, 5.f, false);
+}
+
+void AEscapeGameMode_Game::HandleLeavingMap()
+{
+	Super::HandleLeavingMap();
+	
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
+	{
+		AEscapePlayerController_Game* PlayerController = Cast<AEscapePlayerController_Game>(It->Get());
+		if (PlayerController != nullptr)
+		{
+			PlayerController->ReturnLobby();
+		}
+	}
+
+	AbortMatch();
+}
+	 
+void AEscapeGameMode_Game::HandleMatchAborted()
+{
+	Super::HandleMatchAborted();
+
+	RequestExit();
+}
+
+void AEscapeGameMode_Game::OnMatchStateSet()
+{
+	Super::OnMatchStateSet();
+
+	SyncMatchState();
+}
+
+void AEscapeGameMode_Game::NotifyTakeDamage(float DamageAmount, bool bKilled, AEscapeCharacter* DamageCauser, class AController* EventInstigator)
+{
+	if (bKilled)
+	{
+		if (MatchState == MatchState::InProgress)
+		{
+			bool bMatchFinished = true;
+			for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
+			{
+				APlayerController* PlayerController = It->Get();
+				if (PlayerController != EventInstigator)
+				{
+					AEscapeCharacter* Player = Cast<AEscapeCharacter>(PlayerController->GetPawn());
+					if (Player && Player->IsAlive())
+					{
+						bMatchFinished = false;
+					}
+				}
+			}
+
+			if (bMatchFinished)
+			{
+				VictoryController = EventInstigator;
+
+				EndMatch();
+			}
+		}
+		else
+		{
+
+		}
+	}
+}
+
+void AEscapeGameMode_Game::NotifyMatchStatus()
 {
 	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
 	{
@@ -69,70 +166,63 @@ void AEscapeGameMode_Game::FinishMatch()
 		}
 	}
 
-	GetWorld()->GetTimerManager().SetTimer(RequestExitHandle, this, &AEscapeGameMode_Game::RequestExit, 30.f, false);
+	GetWorld()->GetTimerManager().SetTimer(MatchStateHandle, this, &AGameMode::StartToLeaveMap, 10.f, false);
 }
 
-void AEscapeGameMode_Game::NotifyPlayerTakeDamage(float DamageAmount, bool bKilled, AEscapeCharacter* DamageCauser, class AController* EventInstigator)
+class UEscapeClient* AEscapeGameMode_Game::GetEscapeClient() const
 {
-	if (bKilled)
+	AEscapeGameSession* EscapeGameSession = Cast<AEscapeGameSession>(GameSession);
+	return EscapeGameSession ? Cast<UEscapeClient>(EscapeGameSession->GetEscapeClient()) : nullptr;
+}
+
+void AEscapeGameMode_Game::SyncNumPlayers() const
+{
+	UEscapeClient* EscapeClient = GetEscapeClient();
+	if (EscapeClient != nullptr)
 	{
-		if (!bFinishMatch)
-		{
-			bFinishMatch = true;
+		int32 NewNumPlayers = NumPlayers;
 
-			for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
-			{
-				APlayerController* PlayerController = It->Get();
-				if (PlayerController != EventInstigator)
-				{
-					AEscapeCharacter* Player = Cast<AEscapeCharacter>(PlayerController->GetPawn());
-					if (Player && Player->IsAlive())
-					{
-						bFinishMatch = false;
-					}
-				}
-			}
-
-			if (bFinishMatch)
-			{
-				VictoryController = EventInstigator;
-
-				FTimerHandle FinishMatchHandle;
-
-				GetWorld()->GetTimerManager().SetTimer(FinishMatchHandle, this, &AEscapeGameMode_Game::FinishMatch, 5.f, false);
-			}
-		}
-		else
-		{
-
-		}
+		EscapeClient->Send(ELogicCode::NUMPLAYERS, sizeof(NumPlayers), &NewNumPlayers);
 	}
 }
 
-void AEscapeGameMode_Game::SyncGameInfo()
+void AEscapeGameMode_Game::SyncMatchState() const
 {
-	AEscapeGameSession* EscapeGameSession = Cast<AEscapeGameSession>(GameSession);
-	UEscapeClient* EscapeClient = EscapeGameSession ? Cast<UEscapeClient>(EscapeGameSession->GetEscapeClient()) : nullptr;
+	UEscapeClient* EscapeClient = GetEscapeClient();
 	if (EscapeClient != nullptr)
 	{
-		FGameInfo GameInfo;
-		GameInfo.NumPlayers = NumPlayers;
+		EMatchState NewMatchState;
+		if (MatchState == MatchState::EnteringMap)
+		{
+			NewMatchState = EMatchState::EnteringMap;
+		}
+		else if (MatchState == MatchState::WaitingToStart)
+		{
+			NewMatchState = EMatchState::WaitingToStart;
+		}
+		else if (MatchState == MatchState::InProgress)
+		{
+			NewMatchState = EMatchState::InProgress;
+		}
+		else if (MatchState == MatchState::WaitingPostMatch)
+		{
+			NewMatchState = EMatchState::WaitingPostMatch;
+		}
+		else if (MatchState == MatchState::LeavingMap)
+		{
+			NewMatchState = EMatchState::LeavingMap;
+		}
+		else if (MatchState == MatchState::Aborted)
+		{
+			NewMatchState = EMatchState::Aborted;
+		}
 
-		EscapeClient->Send(ELogicCode::GAME_INFO, sizeof(FGameInfo), &GameInfo);
+		EscapeClient->Send(ELogicCode::MATCH_STATE, sizeof(NewMatchState), &NewMatchState);
 	}
 }
 
 void AEscapeGameMode_Game::RequestExit()
 {
-	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
-	{
-		AEscapePlayerController_Game* PlayerController = Cast<AEscapePlayerController_Game>(It->Get());
-		if (PlayerController != nullptr)
-		{
-			PlayerController->ReturnLobby();
-		}
-	}
-
 #if UE_BUILD_DEVELOPMENT
 	if (!GetWorld()->IsPlayInEditor())
 #endif

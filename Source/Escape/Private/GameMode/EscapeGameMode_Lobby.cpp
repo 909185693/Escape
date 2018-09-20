@@ -29,6 +29,7 @@ void AEscapeGameMode_Lobby::InitGame(const FString& MapName, const FString& Opti
 {
 	Super::InitGame(MapName, Options, ErrorMessage);
 
+#if ESCAPE_BUILD_SERVER
 	if (GetNetMode() == NM_DedicatedServer)
 	{
 		EscapeServerClass = LoadClass<UEscapeServer>(NULL, *EscapeServerClassName, NULL, LOAD_None, NULL);
@@ -50,4 +51,5 @@ void AEscapeGameMode_Lobby::InitGame(const FString& MapName, const FString& Opti
 			UE_LOG(LogEscape, Error, TEXT("Failed to load class '%s'"), *EscapeServerClassName);
 		}
 	}
+#endif
 }

@@ -117,7 +117,7 @@ float AEscapeCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const
 	AEscapeGameMode_Game* GameMode = GetWorld()->GetAuthGameMode<AEscapeGameMode_Game>();
 	if (GameMode != nullptr)
 	{
-		GameMode->NotifyPlayerTakeDamage(ActualDamage, bKilled, this, EventInstigator);
+		GameMode->NotifyTakeDamage(ActualDamage, bKilled, this, EventInstigator);
 	}
 
 	return ActualDamage;
