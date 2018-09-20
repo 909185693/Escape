@@ -375,41 +375,6 @@ void AEscapeCharacter::DamageCheck(float DeltaTime)
 	LastWeaponLocation = WeaponCapsule->GetComponentLocation();
 }
 
-void AEscapeCharacter::LaunchCharacter()
-{
-
-}
-
-void AEscapeCharacter::LaunchCharacter(FVector LaunchVelocity, bool bXYOverride, bool bZOverride)
-{
-	if (Role == ROLE_AutonomousProxy)
-	{
-		ServerLaunchCharacter(LaunchVelocity, bXYOverride, bZOverride);
-	}
-
-	PlayAnimMontage(LaunchMontage);
-}
-
-void AEscapeCharacter::ServerLaunchCharacter_Validate(FVector LaunchVelocity, bool bXYOverride, bool bZOverride)
-{
-	return true;
-}
-
-void AEscapeCharacter::ServerLaunchCharacter_Implementation(FVector LaunchVelocity, bool bXYOverride, bool bZOverride)
-{
-	LaunchCharacter(LaunchVelocity, bXYOverride, bZOverride);
-
-	BroadcastLaunchCharacter(LaunchVelocity, bXYOverride, bZOverride);
-}
-
-void AEscapeCharacter::BroadcastLaunchCharacter(FVector LaunchVelocity, bool bXYOverride, bool bZOverride)
-{
-	if (Role == ROLE_SimulatedProxy)
-	{
-		LaunchCharacter(LaunchVelocity, bXYOverride, bZOverride);
-	}
-}
-
 bool AEscapeCharacter::ServerAttack_Validate(uint8 Count)
 {
 	return true;

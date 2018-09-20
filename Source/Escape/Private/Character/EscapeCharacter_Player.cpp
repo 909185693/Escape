@@ -11,6 +11,7 @@ AEscapeCharacter_Player::AEscapeCharacter_Player(const class FObjectInitializer&
 	, BaseLookUpRate(45.f)
 
 {
+	bAttackPressed = true;
 	FirstPressedDelay = 0.2f;
 }
 
