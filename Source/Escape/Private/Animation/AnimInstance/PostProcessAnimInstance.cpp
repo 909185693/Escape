@@ -27,10 +27,14 @@ void UPostProcessAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	Super::NativeUpdateAnimation(DeltaSeconds);
 
 	USkeletalMeshComponent* OwnerComponent = GetSkelMeshComponent();
-	ACharacter* OwnerPawn = OwnerComponent ? Cast<ACharacter>(OwnerComponent->GetOwner()) : nullptr;
+	if (OwnerComponent != nullptr)
+	{
+		bBlendPhysics = OwnerComponent->bBlendPhysics;
+	}
 
+	ACharacter* OwnerPawn = OwnerComponent ? Cast<ACharacter>(OwnerComponent->GetOwner()) : nullptr;
 	class UCharacterMovementComponent* MovementComponent = OwnerPawn ? OwnerPawn->GetCharacterMovement() : nullptr;
-	if (MovementComponent && MovementComponent->IsMovingOnGround())
+	if (!bBlendPhysics && MovementComponent && MovementComponent->IsMovingOnGround())
 	{
 		bEnableFootIK = true;
 	}

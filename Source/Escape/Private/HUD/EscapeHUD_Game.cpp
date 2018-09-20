@@ -10,9 +10,9 @@ static FName HealthName(TEXT("HealthBar"));
 AEscapeHUD_Game::AEscapeHUD_Game(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-#if !UE_SERVER
+#if !UE_SERVER 
 #if UE_BUILD_DEVELOPMENT
-	if (IsRunningGame())
+	if (!IsNetMode(NM_DedicatedServer))
 	{
 #endif
 		static ConstructorHelpers::FObjectFinder<UFont> FontObj(TEXT("/Game/Font/XMFF.XMFF"));

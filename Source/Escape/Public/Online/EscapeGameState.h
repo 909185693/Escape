@@ -9,7 +9,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(config = Game)
 class ESCAPE_API AEscapeGameState : public AGameState
 {
 	GENERATED_UCLASS_BODY()
@@ -33,6 +33,6 @@ protected:
 protected:
 	FTimerHandle MatchStartHandle;
 
-	UPROPERTY(BlueprintReadOnly, Transient, Replicated)
+	UPROPERTY(Config, BlueprintReadOnly, Transient, Replicated)
 	int32 MatchStartCountDown;
 };

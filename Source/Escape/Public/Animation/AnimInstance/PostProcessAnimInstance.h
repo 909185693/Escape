@@ -89,6 +89,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = TraceSettings)
 	uint32 bEnableFootIK : 1;
 
+	/** Enables blending in of physics bodies whether Simulate or not*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = TraceSettings)
+	uint32 bBlendPhysics : 1;
+
 	/** Trace start height */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = TraceSettings)
 	float TraceStartHeight;

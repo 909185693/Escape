@@ -21,8 +21,6 @@ AEscapeCharacter::AEscapeCharacter(const class FObjectInitializer& ObjectInitial
 	, AttackSpeed(1.f)
 	, TurnInPlaceDelay(0.f)
 {
-	GetMesh()->MeshComponentUpdateFlag = EMeshComponentUpdateFlag::AlwaysTickPoseAndRefreshBones;
-
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.f);
 
 	// ÉãÏñ»ú¸Ë
@@ -65,6 +63,15 @@ AEscapeCharacter::AEscapeCharacter(const class FObjectInitializer& ObjectInitial
 void AEscapeCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (IsNetMode(NM_DedicatedServer))
+	{
+		GetMesh()->MeshComponentUpdateFlag = EMeshComponentUpdateFlag::AlwaysTickPoseAndRefreshBones;
+	}
+	else
+	{
+		GetMesh()->MeshComponentUpdateFlag = EMeshComponentUpdateFlag::OnlyTickPoseWhenRendered;
+	}
 
 	const FRotator& ActorRotation = GetActorRotation();
 
@@ -164,6 +171,8 @@ void AEscapeCharacter::SetRagdollPhysics()
 
 void AEscapeCharacter::PlayHit_Implementation(float ActualDamage, bool bIsCrit, bool bKilled, APawn* PawnInstigator, AActor* DamageCauser, const FHitResult& HiResult)
 {
+	ResetCombo();
+
 	const FRotator& HitFromRotation = GetActorTransform().InverseTransformPosition(HiResult.ImpactPoint).Rotation();
 
 	TEnumAsByte<ECardinalDirection::Type> HitFromCardinalDirection = ConvertDirection(HitFromRotation.Yaw);
@@ -212,15 +221,12 @@ void AEscapeCharacter::OnDeath(float KillingDamage, class APawn* PawnInstigator,
 	}
 	SetActorEnableCollision(true);
 
-	// Death anim
-	float DeathAnimDuration = DeathAnimationAsset ? DeathAnimationAsset->GetMaxCurrentTime() : 0.f;
-
 	// Ragdoll
-	if (DeathAnimDuration > 0.f)
+	if (DeathAnimationAsset != nullptr)
 	{
 		// Trigger ragdoll a little before the animation early so the character doesn't
 		// blend back to its normal position.
-		const float TriggerRagdollTime = DeathAnimDuration - 0.7f;
+		const float TriggerRagdollTime = 0.35f;
 
 		// Enable blend physics so the bones are properly blending against the montage.
 		GetMesh()->bBlendPhysics = true;
@@ -229,7 +235,7 @@ void AEscapeCharacter::OnDeath(float KillingDamage, class APawn* PawnInstigator,
 
 		// Use a local timer handle as we don't need to store it for later but we don't need to look for something to clear
 		FTimerHandle TimerHandle;
-		GetWorldTimerManager().SetTimer(TimerHandle, this, &AEscapeCharacter::SetRagdollPhysics, FMath::Max(0.1f, TriggerRagdollTime), false);
+		GetWorldTimerManager().SetTimer(TimerHandle, this, &AEscapeCharacter::SetRagdollPhysics, TriggerRagdollTime, false);
 	}
 	else
 	{
@@ -426,7 +432,7 @@ void AEscapeCharacter::ManagerCharactorRotation(float DeltaTime)
 			{
 				const FRotator& NewTatgetRotation = FRotator(0.f, GetControlRotation().Yaw, 0.f).GetNormalized();
 
-				const float InterpSpeed = FMath::Abs(CharacterRotation.Yaw - NewTatgetRotation.Yaw) / 10.f;
+				const float InterpSpeed = FMath::Min(7.5f, FMath::Abs(CharacterRotation.Yaw - NewTatgetRotation.Yaw) / 10.f);
 
 				SetCharactorRotation(NewTatgetRotation, true, InterpSpeed);
 
@@ -449,7 +455,7 @@ void AEscapeCharacter::ManagerCharactorRotation(float DeltaTime)
 		{
 			const FRotator& NewTatgetRotation = FRotator(0.f, GetControlRotation().Yaw, 0.f).GetNormalized();
 
-			const float InterpSpeed = FMath::Abs(CharacterRotation.Yaw - NewTatgetRotation.Yaw) / 10.f;
+			const float InterpSpeed = FMath::Min(6.5f, FMath::Abs(CharacterRotation.Yaw - NewTatgetRotation.Yaw) / 10.f);
 
 			SetCharactorRotation(NewTatgetRotation, true, InterpSpeed);
 		}
