@@ -188,6 +188,9 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, Category = Animation)
+	float LaunchSpeed;
+
+	UPROPERTY(EditAnywhere, Category = Animation)
 	class UAnimMontage* LaunchMontage;
 
 	UFUNCTION(Server, WithValidation, Reliable)

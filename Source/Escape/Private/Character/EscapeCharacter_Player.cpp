@@ -59,6 +59,7 @@ namespace EscapeInputBindings
 			UPlayerInput::AddEngineDefinedActionMapping(FInputActionKeyMapping("Attack", EKeys::LeftMouseButton));
 			UPlayerInput::AddEngineDefinedActionMapping(FInputActionKeyMapping("Attack", EKeys::TouchKeys[0]));
 			UPlayerInput::AddEngineDefinedActionMapping(FInputActionKeyMapping("Attack", EKeys::TouchKeys[1]));
+			UPlayerInput::AddEngineDefinedActionMapping(FInputActionKeyMapping("Launch", EKeys::RightMouseButton));
 		}
 	}
 }
@@ -76,6 +77,8 @@ void AEscapeCharacter_Player::SetupPlayerInputComponent(UInputComponent* PlayerI
 
 		PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &AEscapeCharacter_Player::StartAttack);
 		PlayerInputComponent->BindAction("Attack", IE_Released, this, &AEscapeCharacter_Player::StopAttacking);
+
+		PlayerInputComponent->BindAction("Launch", IE_Pressed, this, &AEscapeCharacter_Player::LaunchCharacter);
 
 		PlayerInputComponent->BindAxis("MoveForward", this, &AEscapeCharacter_Player::MoveForward);
 		PlayerInputComponent->BindAxis("MoveRight", this, &AEscapeCharacter_Player::MoveRight);
@@ -96,10 +99,14 @@ void AEscapeCharacter_Player::MoveRight(float Val)
 	{
 		if (Controller)
 		{
-			FRotator const ControlSpaceRot = Controller->GetControlRotation();
+			// find out which way is forward
+			const FRotator Rotation = Controller->GetControlRotation();
+			const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-			// transform to world space and add it
-			AddMovementInput(FRotationMatrix(ControlSpaceRot).GetScaledAxis(EAxis::Y), Val * CustomTimeDilation);
+			// get forward vector
+			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+			AddMovementInput(Direction, Val * CustomTimeDilation);
 		}
 	}
 }
@@ -110,10 +117,14 @@ void AEscapeCharacter_Player::MoveForward(float Val)
 	{
 		if (Controller)
 		{
-			FRotator const ControlSpaceRot = Controller->GetControlRotation();
+			// find out which way is forward
+			const FRotator Rotation = Controller->GetControlRotation();
+			const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-			// transform to world space and add it
-			AddMovementInput(FRotationMatrix(ControlSpaceRot).GetScaledAxis(EAxis::X), Val * CustomTimeDilation);
+			// get forward vector
+			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+
+			AddMovementInput(Direction, Val * CustomTimeDilation);
 		}
 	}
 }

@@ -54,6 +54,8 @@ AEscapeCharacter::AEscapeCharacter(const class FObjectInitializer& ObjectInitial
 	Health = 1000.f;
 	DamagedPauseFPSTime = 0.1f;
 
+	LaunchSpeed = 1800.f;
+
 	bUseControllerRotationYaw = false;
 
 	PrimaryActorTick.bCanEverTick = true;
@@ -377,7 +379,13 @@ void AEscapeCharacter::DamageCheck(float DeltaTime)
 
 void AEscapeCharacter::LaunchCharacter()
 {
-
+	FVector LaunchVelocity = GetActorRotation().Vector() * LaunchSpeed;
+	if (!LastControlInputVector.IsZero())
+	{
+		LaunchVelocity = LastControlInputVector.Rotation().Vector() * LaunchSpeed;
+	}
+	
+	LaunchCharacter(LaunchVelocity, true, false);
 }
 
 void AEscapeCharacter::LaunchCharacter(FVector LaunchVelocity, bool bXYOverride, bool bZOverride)
@@ -388,9 +396,11 @@ void AEscapeCharacter::LaunchCharacter(FVector LaunchVelocity, bool bXYOverride,
 	}
 
 	PlayAnimMontage(LaunchMontage);
+
+	Super::LaunchCharacter(LaunchVelocity, bXYOverride, bZOverride);
 }
 
-void AEscapeCharacter::ServerLaunchCharacter_Validate(FVector LaunchVelocity, bool bXYOverride, bool bZOverride)
+bool AEscapeCharacter::ServerLaunchCharacter_Validate(FVector LaunchVelocity, bool bXYOverride, bool bZOverride)
 {
 	return true;
 }
@@ -398,11 +408,11 @@ void AEscapeCharacter::ServerLaunchCharacter_Validate(FVector LaunchVelocity, bo
 void AEscapeCharacter::ServerLaunchCharacter_Implementation(FVector LaunchVelocity, bool bXYOverride, bool bZOverride)
 {
 	LaunchCharacter(LaunchVelocity, bXYOverride, bZOverride);
-
+	
 	BroadcastLaunchCharacter(LaunchVelocity, bXYOverride, bZOverride);
 }
 
-void AEscapeCharacter::BroadcastLaunchCharacter(FVector LaunchVelocity, bool bXYOverride, bool bZOverride)
+void AEscapeCharacter::BroadcastLaunchCharacter_Implementation(FVector LaunchVelocity, bool bXYOverride, bool bZOverride)
 {
 	if (Role == ROLE_SimulatedProxy)
 	{
