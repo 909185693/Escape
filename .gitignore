@@ -40,19 +40,19 @@
 
 # Folders
 .vs
-DerivedDataCache
-Intermediate
-Saved
-Build
-Releases
-Binaries/Android
-Content/Collections
-Content/Developers
+Escape/DerivedDataCache
+Escape/Intermediate
+Escape/Saved
+Escape/Build
+Escape/Releases
+Escape/Binaries/Android
+Escape/Content/Collections
+Escape/Content/Developers
 
 #Kwang
-Content/ParagonKwang/FX
-Content/ParagonKwang/Characters/Global
-Content/ParagonKwang/Characters/Heroes/Kwang/Materials
-Content/ParagonKwang/Characters/Heroes/Kwang/Skins
-Content/ParagonKwang/Characters/Heroes/Kwang/Sounds
-Content/ParagonKwang/Characters/Heroes/Kwang/Textures
+Escape/Content/ParagonKwang/FX
+Escape/Content/ParagonKwang/Characters/Global
+Escape/Content/ParagonKwang/Characters/Heroes/Kwang/Materials
+Escape/Content/ParagonKwang/Characters/Heroes/Kwang/Skins
+Escape/Content/ParagonKwang/Characters/Heroes/Kwang/Sounds
+Escape/Content/ParagonKwang/Characters/Heroes/Kwang/Textures
