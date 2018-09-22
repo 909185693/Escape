@@ -395,6 +395,8 @@ void AEscapeCharacter::LaunchCharacter(FVector LaunchVelocity, bool bXYOverride,
 		ServerLaunchCharacter(LaunchVelocity, bXYOverride, bZOverride);
 	}
 
+	bIsAttacking = true;
+
 	PlayAnimMontage(LaunchMontage);
 
 	Super::LaunchCharacter(LaunchVelocity, bXYOverride, bZOverride);
