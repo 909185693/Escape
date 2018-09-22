@@ -1,0 +1,13 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x64
+/SUBSYSTEM:WINDOWS
+/DEF
+/NAME:"UE4Editor-Crasheye.dll"
+/IGNORE:4221
+/NODEFAULTLIB
+"D:\Projects\Escape\Intermediate\Build\Win64\EscapeEditor\Development\Engine\SharedPCH.Engine.h.obj"
+"D:\Projects\Escape\Plugins\Crasheye\Intermediate\Build\Win64\UE4Editor\Development\Crasheye\Module.Crasheye.cpp.obj"
+"D:\Projects\Escape\Plugins\Crasheye\Intermediate\Build\Win64\UE4Editor\Development\Crasheye\Module.Crasheye.gen.cpp.obj"
+"D:\Projects\Escape\Plugins\Crasheye\Intermediate\Build\Win64\UE4Editor\Development\Crasheye\PCLaunch.rc.res"
+/OUT:"D:\Projects\Escape\Plugins\Crasheye\Intermediate\Build\Win64\UE4Editor\Development\Crasheye\UE4Editor-Crasheye.lib"
