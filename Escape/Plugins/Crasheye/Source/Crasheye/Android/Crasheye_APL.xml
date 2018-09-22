@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--UMeng plugin additions-->
+<root xmlns:android="http://schemas.android.com/apk/res/android">
+  <!-- init section is always evaluated once per architecture -->
+  <init>
+    <log text="Crasheye init "/>
+    <setBoolFromProperty result="Andoird_bEnableCrasheye" ini="Engine" section="/Script/Crasheye.CrasheyeRuntimeSettings" property="Andoird_bEnableCrasheye" default="false"/>
+  </init>
+  
+  
+  <resourceCopies>
+    <!-- copy src -->
+    <copyDir src="$S(PluginDir)/Build/" dst="$S(BuildDir)/" />
+    <copyDir src="$S(PluginDir)/prebuild/$S(Architecture)/" dst="$S(BuildDir)/libs/$S(Architecture)/" />
+  </resourceCopies>
+
+  <gameActivityImportAdditions>
+    <insert>
+      import com.xsj.crasheye.Crasheye;
+    </insert>
+  </gameActivityImportAdditions>
+
+  <gameActivityClassAdditions>
+    <insert>
+      public void AndroidThunkJava_SetAppIDToCrasheye(String appID)
+      {
+      Crasheye.initWithNativeHandle(this,appID);
+      Log.debug("Crasheye AndroidThunkJava_SetAppIDToCrasheye: " + appID);
+      }
+
+      public void AndroidThunkJava_SetVersionToCrasheye(String version)
+      {
+      Crasheye.setAppVersion(version);
+      Log.debug("Crasheye AndroidThunkJava_SetVersionToCrasheye: " + version);
+      }
+
+      public void AndroidThunkJava_SetUserNameToCrasheye(String UserName)
+      {
+      Crasheye.setUserIdentifier(UserName);
+      Log.debug("Crasheye AndroidThunkJava_SetUserNameToCrasheye: " + UserName);
+      }
+
+
+      public void AndroidThunkJava_SetLeaveBreadcrumbInfo(String Breadcrumb)
+      {
+      Crasheye.leaveBreadcrumb(Breadcrumb);
+      Log.debug("Crasheye AndroidThunkJava_SetLeaveBreadcrumbInfo: " + Breadcrumb);
+      }
+    </insert>
+  </gameActivityClassAdditions>
+      
+  
+  <androidManifestUpdates>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+  </androidManifestUpdates>
+
+</root>
