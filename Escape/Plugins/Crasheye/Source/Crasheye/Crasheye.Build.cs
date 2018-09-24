@@ -6,22 +6,6 @@ public class Crasheye : ModuleRules
 {
     public Crasheye(ReadOnlyTargetRules Target) : base(Target)
     {
-
-        PublicIncludePaths.AddRange(
-            new string[] {
-                "Crasheye/Public"
-				// ... add public include paths required here ...
-			}
-            );
-
-        PrivateIncludePaths.AddRange(
-            new string[] {
-                "Crasheye/Private",
-				// ... add other private include paths required here ...
-			}
-            );
-
-
         PublicDependencyModuleNames.AddRange(
             new string[]
             {

@@ -5,6 +5,7 @@
 #include "EscapeGameMode_Game.h"
 #include "EscapePlayerController_Game.h"
 #include "EscapeCharacterMovementComponent.h"
+#include "EscapeWeapon.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -23,7 +24,7 @@ AEscapeCharacter::AEscapeCharacter(const class FObjectInitializer& ObjectInitial
 {
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.f);
 
-	// ÉãÏñ»ú¸Ë
+	// æ‘„åƒæœºæ†
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	if (CameraBoom != nullptr)
 	{
@@ -33,22 +34,12 @@ AEscapeCharacter::AEscapeCharacter(const class FObjectInitializer& ObjectInitial
 		CameraBoom->CameraLagMaxDistance = 15.f;
 	}
 
-	// ÉãÏñ»ú¸úËæ
+	// æ‘„åƒæœºè·Ÿéš
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	if (FollowCamera != nullptr)
 	{
 		FollowCamera->SetupAttachment(CameraBoom);
 		FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
-	}
-
-	// ÎäÆ÷Åö×²
-	WeaponCapsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("WeaponCapsule"));
-	if (WeaponCapsule != nullptr)
-	{
-		WeaponCapsule->InitCapsuleSize(10.728559f, 81.710457f);
-		WeaponCapsule->SetRelativeLocationAndRotation(FVector(0.029829f, -57.326813f, 2.027954f), FRotator(0.000000f, -179.955994f, -89.350052));
-		WeaponCapsule->SetCollisionProfileName(TEXT("NoCollision"));
-		WeaponCapsule->SetupAttachment(GetMesh(), TEXT("weapon_r"));
 	}
 
 	Health = 1000.f;
@@ -60,6 +51,16 @@ AEscapeCharacter::AEscapeCharacter(const class FObjectInitializer& ObjectInitial
 
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.TickGroup = ETickingGroup::TG_PrePhysics;
+}
+
+void AEscapeCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	if (Role == ROLE_Authority)
+	{
+		EquipWeapon(WeaponClass);
+	}
 }
 
 void AEscapeCharacter::BeginPlay()
@@ -80,6 +81,46 @@ void AEscapeCharacter::BeginPlay()
 	TargetRotation = ActorRotation;
 	CharacterRotation = ActorRotation;
 	MaxHealth = Health;
+}
+
+class UCapsuleComponent* AEscapeCharacter::GetWeaponCollision() const
+{
+	return Weapon ? Weapon->GetCapsuleComponent() : nullptr;
+}
+
+void AEscapeCharacter::EquipWeapon(TSoftClassPtr<AEscapeWeapon> NewWeaponClass)
+{
+	FActorSpawnParameters ActorSpawnParameters;
+	ActorSpawnParameters.Owner = Controller;
+	ActorSpawnParameters.Instigator = this;
+	ActorSpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	AEscapeWeapon* NewWeapon = GetWorld()->SpawnActor<AEscapeWeapon>(WeaponClass.LoadSynchronous(), GetActorTransform(), ActorSpawnParameters);
+
+	EquipWeapon(NewWeapon, Weapon);
+}
+
+void AEscapeCharacter::EquipWeapon(AEscapeWeapon* NewWeapon, AEscapeWeapon* LastWeapon)
+{
+	if (LastWeapon != nullptr)
+	{
+		LastWeapon->Destroy();
+	}
+
+	if (NewWeapon)
+	{
+		Weapon = NewWeapon;
+
+		NewWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale);
+		NewWeapon->SetMasterPoseComponent(GetMesh());
+		NewWeapon->SetOwner(Controller);
+		NewWeapon->Instigator = this;
+	}
+}
+
+void AEscapeCharacter::OnRep_Weapon(AEscapeWeapon* LastWeapon)
+{
+	EquipWeapon(Weapon, LastWeapon);
 }
 
 TEnumAsByte<ECardinalDirection::Type> AEscapeCharacter::ConvertDirection(float NewDirection) const
@@ -247,7 +288,6 @@ void AEscapeCharacter::OnDeath(float KillingDamage, class APawn* PawnInstigator,
 	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Ignore);
 }
 
-
 void AEscapeCharacter::Tick(float DeltaTime)
 {
 	TimeSeconds = GetWorld()->GetTimeSeconds();
@@ -323,58 +363,66 @@ void AEscapeCharacter::DamagedClear()
 {
 	DamagedActors.Empty();
 
-	LastWeaponLocation = WeaponCapsule->GetComponentLocation();
+	UCapsuleComponent* WeaponCollision = GetWeaponCollision();
+	if (WeaponCollision != nullptr)
+	{
+		LastWeaponLocation = WeaponCollision->GetComponentLocation();
+	}
 }
 
 void AEscapeCharacter::DamageCheck(float DeltaTime)
 {
-	if (Role == ROLE_SimulatedProxy)
+	UCapsuleComponent* WeaponCollision = GetWeaponCollision();
+	if (WeaponCollision != nullptr)
 	{
-		return;
-	}
-
-	if (GetMesh()->SkeletalMesh == nullptr)
-	{
-		return;
-	}
-
-	const FVector& TraceStart = LastWeaponLocation;
-	const FVector& TraceEnd = GetMesh()->GetSocketLocation(FName(TEXT("weapon_r")));
-
-	//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("TraceEnd [%s] DeltaTime[%0.2f]"), *TraceEnd.ToCompactString(), DeltaTime), true, false, FLinearColor::White, 10.f);
-
-	FCollisionQueryParams CollisionQueryParams;
-	CollisionQueryParams.bReturnPhysicalMaterial = true;
-	CollisionQueryParams.AddIgnoredActor(this);
-
-	TArray<FHitResult> HitResults;
-	GetWorld()->SweepMultiByChannel(HitResults, TraceStart, TraceEnd, WeaponCapsule->GetComponentQuat(), ECC_Weapon, WeaponCapsule->GetCollisionShape(), CollisionQueryParams);
-
-	for (const FHitResult& HitResult : HitResults)
-	{
-		AActor* HitActor = HitResult.GetActor();
-		if (HitActor != nullptr && !DamagedActors.Contains(HitActor))
+		if (Role == ROLE_SimulatedProxy)
 		{
-			DamagedActors.AddUnique(HitActor);
-
-			if (Role == ROLE_Authority && ComboTable.IsValidIndex(AttackCount))
-			{
-				PlayDamaged(HitResult);
-
-				FVector HitFromDirection = HitResult.ImpactNormal.GetSafeNormal(); //(HitResult.ImpactPoint - HitActor->GetActorLocation()).GetSafeNormal();
-
-				UGameplayStatics::ApplyPointDamage(HitActor, ComboTable[AttackCount].Damage, HitFromDirection, HitResult, Controller, this, ComboTable[AttackCount].DamageType);
-
-				UE_LOG(LogTemp, Log, TEXT("AEscapeCharacter::DamageCheck() HitActor[%s]"), *GetNameSafe(HitActor));
-			}
-
-			//DrawDebugLine(GetWorld(), HitResult.ImpactPoint, HitResult.ImpactPoint + 50.f * HitResult.ImpactNormal, FColor::Yellow, false, 10.f);
-			//DrawDebugPoint(GetWorld(), HitResult.ImpactPoint, 10.f, FColor::Red, false, 10.f);
-			//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("HitActor [%s]"), *GetNameSafe(HitActor)), true, false, FLinearColor::White, 10.f);
+			return;
 		}
-	}
 
-	LastWeaponLocation = WeaponCapsule->GetComponentLocation();
+		if (GetMesh()->SkeletalMesh == nullptr)
+		{
+			return;
+		}
+
+		const FVector& TraceStart = LastWeaponLocation;
+		const FVector& TraceEnd = WeaponCollision->GetComponentLocation();
+
+		//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("TraceEnd [%s] DeltaTime[%0.2f]"), *TraceEnd.ToCompactString(), DeltaTime), true, false, FLinearColor::White, 10.f);
+
+		FCollisionQueryParams CollisionQueryParams;
+		CollisionQueryParams.bReturnPhysicalMaterial = true;
+		CollisionQueryParams.AddIgnoredActor(this);
+
+		TArray<FHitResult> HitResults;
+		GetWorld()->SweepMultiByChannel(HitResults, TraceStart, TraceEnd, WeaponCollision->GetComponentQuat(), ECC_Weapon, WeaponCollision->GetCollisionShape(), CollisionQueryParams);
+
+		for (const FHitResult& HitResult : HitResults)
+		{
+			AActor* HitActor = HitResult.GetActor();
+			if (HitActor != nullptr && !DamagedActors.Contains(HitActor))
+			{
+				DamagedActors.AddUnique(HitActor);
+
+				if (Role == ROLE_Authority && ComboTable.IsValidIndex(AttackCount))
+				{
+					PlayDamaged(HitResult);
+
+					FVector HitFromDirection = HitResult.ImpactNormal.GetSafeNormal(); //(HitResult.ImpactPoint - HitActor->GetActorLocation()).GetSafeNormal();
+
+					UGameplayStatics::ApplyPointDamage(HitActor, ComboTable[AttackCount].Damage, HitFromDirection, HitResult, Controller, this, ComboTable[AttackCount].DamageType);
+
+					UE_LOG(LogTemp, Log, TEXT("AEscapeCharacter::DamageCheck() HitActor[%s]"), *GetNameSafe(HitActor));
+				}
+
+				//DrawDebugLine(GetWorld(), HitResult.ImpactPoint, HitResult.ImpactPoint + 50.f * HitResult.ImpactNormal, FColor::Yellow, false, 10.f);
+				//DrawDebugPoint(GetWorld(), HitResult.ImpactPoint, 10.f, FColor::Red, false, 10.f);
+				//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("HitActor [%s]"), *GetNameSafe(HitActor)), true, false, FLinearColor::White, 10.f);
+			}
+		}
+
+		LastWeaponLocation = WeaponCollision->GetComponentLocation();
+	}
 }
 
 void AEscapeCharacter::LaunchCharacter()

@@ -8,7 +8,7 @@
 AEscapeGameState::AEscapeGameState(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	MatchStartCountDown = 60.f;
+	MatchStartCountDown = 30.f;
 }
 
 void AEscapeGameState::HandleMatchIsWaitingToStart()

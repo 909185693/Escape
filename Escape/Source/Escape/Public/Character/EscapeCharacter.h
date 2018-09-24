@@ -7,6 +7,8 @@
 #include "EscapeCharacter.generated.h"
 
 
+class AEscapeWeapon;
+
 UENUM(BlueprintType)
 namespace ECardinalDirection
 {
@@ -40,6 +42,10 @@ class ESCAPE_API AEscapeCharacter : public ACharacter
 	GENERATED_UCLASS_BODY()
 
 protected:
+	/** Allow actors to initialize themselves on the C++ side */
+	virtual void PostInitializeComponents() override;
+
+	/** Overridable native event for when play begins for this actor. */
 	virtual void BeginPlay() override;
 
 	/**
@@ -95,6 +101,24 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Property")
 	float MaxHealth;
+	
+public:
+	class AEscapeWeapon* GetWeapon() const { return Weapon; }
+	class UCapsuleComponent* GetWeaponCollision() const;
+
+protected:
+	UPROPERTY(Transient, ReplicatedUsing = OnRep_Weapon)
+	class AEscapeWeapon* Weapon;
+
+	void EquipWeapon(TSoftClassPtr<AEscapeWeapon> NewWeaponClass);
+
+	void EquipWeapon(AEscapeWeapon* NewWeapon, AEscapeWeapon* LastWeapon = nullptr);
+
+	UFUNCTION()
+	void OnRep_Weapon(AEscapeWeapon* LastWeapon);
+
+	UPROPERTY(EditAnywhere, Replicated, Category = "Property")
+	TSoftClassPtr<AEscapeWeapon> WeaponClass;
 
 public:
 	/** Convert to cardinal direction with direction  */
@@ -173,7 +197,6 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	TMap<TEnumAsByte<EPhysicalSurface>, UParticleSystem*> ImpactParticle;
 
-
 public:
 	void LaunchCharacter();
 
@@ -207,10 +230,6 @@ private:
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
-
-	/** Follow camera */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class UCapsuleComponent* WeaponCapsule;
 
 public:
 	UPROPERTY()
