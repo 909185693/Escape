@@ -2,7 +2,6 @@
 
 #include "EscapeNetworkBase.h"
 #include "EscapeNetworkModule.h"
-#include "EscapeNetworkDelegates.h"
 
 
 #define SocketDescription TEXT("EscapeNetwork")
@@ -19,7 +18,7 @@ bool UEscapeNetworkBase::Register(UEscapeEngine* InEngine)
 	FString Error;
 	if (!InitBase(Error))
 	{
-		UE_LOG(LogEscapeNetwork, Warning, TEXT("EscapeServer : %s"), *Error);
+		UE_LOG(LogEscapeNetwork, Warning, TEXT("Network : %s"), *Error);
 		return false;
 	}
 

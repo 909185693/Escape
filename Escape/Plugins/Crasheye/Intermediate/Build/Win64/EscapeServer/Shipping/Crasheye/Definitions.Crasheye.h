@@ -43,7 +43,7 @@
 #define PROJECT_PRODUCT_IDENTIFIER Escape
 #define NDEBUG 1
 #define UE_BUILD_SHIPPING 1
-#define UE_ENGINE_DIRECTORY "../../../../UnrealEngine/Engine/"
+#define UE_ENGINE_DIRECTORY "../../../../../UnrealEngine/Engine/"
 #define ORIGINAL_FILE_NAME "EscapeServer-Win64-Shipping.exe"
 #define UE_IS_ENGINE_MODULE 0
 #define UE_BUILD_DEVELOPMENT_WITH_DEBUGGAME 0

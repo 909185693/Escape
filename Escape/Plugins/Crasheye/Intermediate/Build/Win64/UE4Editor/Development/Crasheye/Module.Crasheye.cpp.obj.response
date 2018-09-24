@@ -24,7 +24,7 @@
 /wd4838
 /we4668
 /I .
-/I D:\Projects\Escape\Plugins\Crasheye\Source\Crasheye\Private
+/I D:\Projects\Escape\Escape\Plugins\Crasheye\Source\Crasheye\Private
 /I Runtime
 /I Runtime\Core\Public
 /I Runtime\Core
@@ -402,10 +402,10 @@
 /I ThirdParty
 /I ThirdParty\libSampleRate\Public
 /I ThirdParty\libSampleRate
-/I D:\Projects\Escape\Plugins\Crasheye\Intermediate\Build\Win64\UE4Editor\Inc\Crasheye
-/I D:\Projects\Escape\Plugins\Crasheye\Source
-/I D:\Projects\Escape\Plugins\Crasheye\Source\Crasheye\Public
-/I D:\Projects\Escape\Plugins\Crasheye\Source\Crasheye
+/I D:\Projects\Escape\Escape\Plugins\Crasheye\Intermediate\Build\Win64\UE4Editor\Inc\Crasheye
+/I D:\Projects\Escape\Escape\Plugins\Crasheye\Source
+/I D:\Projects\Escape\Escape\Plugins\Crasheye\Source\Crasheye\Public
+/I D:\Projects\Escape\Escape\Plugins\Crasheye\Source\Crasheye
 /I "D:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\VC\Tools\MSVC\14.15.26726\INCLUDE"
 /I "C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\include\um"
 /I "C:\Program Files (x86)\Windows Kits\10\include\10.0.16299.0\ucrt"
@@ -415,9 +415,9 @@
 /FI"D:\UnrealEngine\Engine\Intermediate\Build\Win64\UE4Editor\Development\Engine\SharedPCH.Engine.h"
 /Yu"D:\UnrealEngine\Engine\Intermediate\Build\Win64\UE4Editor\Development\Engine\SharedPCH.Engine.h"
 /Fp"D:\UnrealEngine\Engine\Intermediate\Build\Win64\UE4Editor\Development\Engine\SharedPCH.Engine.h.pch"
-"D:\Projects\Escape\Plugins\Crasheye\Intermediate\Build\Win64\UE4Editor\Development\Crasheye\Module.Crasheye.cpp"
-/FI"D:\Projects\Escape\Plugins\Crasheye\Intermediate\Build\Win64\UE4Editor\Development\Crasheye\Definitions.Crasheye.h"
-/Fo"D:\Projects\Escape\Plugins\Crasheye\Intermediate\Build\Win64\UE4Editor\Development\Crasheye\Module.Crasheye.cpp.obj"
+"D:\Projects\Escape\Escape\Plugins\Crasheye\Intermediate\Build\Win64\UE4Editor\Development\Crasheye\Module.Crasheye.cpp"
+/FI"D:\Projects\Escape\Escape\Plugins\Crasheye\Intermediate\Build\Win64\UE4Editor\Development\Crasheye\Definitions.Crasheye.h"
+/Fo"D:\Projects\Escape\Escape\Plugins\Crasheye\Intermediate\Build\Win64\UE4Editor\Development\Crasheye\Module.Crasheye.cpp.obj"
 /TP
 /GR-
 /W4

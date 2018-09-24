@@ -34,9 +34,7 @@ class ESCAPE_API AEscapeGameSession : public AGameSession
 
 protected:
 	FString Guid;
-
-	bool bIsLogicServer;
-
+	
 	UPROPERTY(Transient)
 	UEscapeClient* EscapeClient;
 

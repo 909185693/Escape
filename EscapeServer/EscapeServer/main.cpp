@@ -8,15 +8,22 @@ int main(int argc, char* argv[])
 {
 	bool bRegister = false;
 
-	Server* EscapeServer = new Server();
-	if (EscapeServer != nullptr)
+	CServer* Server = new CServer();
+	if (Server != nullptr)
 	{
-		bRegister = EscapeServer->Register();
+		bRegister = Server->Register();
 	}
 
 	char Command[256];
-	while (bRegister)
+	while (true)
 	{
+		if (strcmp(Command, "exit") == 0)
+		{
+			delete Server;
+			Server = nullptr;
+			break;
+		}
+
 		cin >> Command;
 	}
 

@@ -32,7 +32,6 @@ void AEscapeGameSession::InitOptions(const FString& Options)
 
 #if ESCAPE_BUILD_SERVER
 	Guid = UGameplayStatics::ParseOption(Options, TEXT("guid"));
-	bIsLogicServer = UGameplayStatics::HasOption(Options, TEXT("IsLogicServer"));
 #endif
 }
 
@@ -58,31 +57,27 @@ void AEscapeGameSession::RegisterServer()
 	}
 
 #if ESCAPE_BUILD_SERVER
-	if (!bIsLogicServer)
+	EscapeClientClass = LoadClass<UEscapeClient>(NULL, *EscapeClientClassName, NULL, LOAD_None, NULL);
+	if (EscapeClientClass != nullptr)
 	{
-		EscapeClientClass = LoadClass<UEscapeClient>(NULL, *EscapeClientClassName, NULL, LOAD_None, NULL);
-
-		if (EscapeClientClass != nullptr)
+		if (EscapeClient == nullptr)
 		{
-			if (EscapeClient == nullptr)
-			{
-				EscapeClient = NewObject<UEscapeClient>(GetTransientPackage(), EscapeClientClass);
-			}
-
-			if (EscapeClient != nullptr)
-			{
-				UGameInstance* GameInstance = GetGameInstance();
-				UEscapeEngine* EscapeEngine = GameInstance ? Cast<UEscapeEngine>(GameInstance->GetEngine()) : nullptr;
-
-				EscapeClient->Register(EscapeEngine);
-				EscapeClient->AddMessageCallback(ELogicCode::CONNECTION, this, &AEscapeGameSession::NotifyConnection);
-				EscapeClient->AddMessageCallback(ELogicCode::REGISTER_SERVER, this, &AEscapeGameSession::NotifyRegisterServer);
-			}
+			EscapeClient = NewObject<UEscapeClient>(GetTransientPackage(), EscapeClientClass);
 		}
-		else
+
+		if (EscapeClient != nullptr)
 		{
-			UE_LOG(LogEscape, Error, TEXT("Failed to load class '%s'"), *EscapeClientClassName);
+			UGameInstance* GameInstance = GetGameInstance();
+			UEscapeEngine* EscapeEngine = GameInstance ? Cast<UEscapeEngine>(GameInstance->GetEngine()) : nullptr;
+
+			EscapeClient->Register(EscapeEngine);
+			EscapeClient->AddMessageCallback(ELogicCode::CONNECTION, this, &AEscapeGameSession::NotifyConnection);
+			EscapeClient->AddMessageCallback(ELogicCode::REGISTER_SERVER, this, &AEscapeGameSession::NotifyRegisterServer);
 		}
+	}
+	else
+	{
+		UE_LOG(LogEscape, Error, TEXT("Failed to load class '%s'"), *EscapeClientClassName);
 	}
 #endif
 }
@@ -109,7 +104,7 @@ void AEscapeGameSession::NotifyConnection(void* Data, EErrorCode Error)
 			}
 
 			const FURL& URL = GetWorld()->URL;
-			
+
 			DedicatedServer.Port = URL.Port;
 
 			FPlatformString::Strncpy(DedicatedServer.IP, "127.0.0.1", sizeof(DedicatedServer.IP));

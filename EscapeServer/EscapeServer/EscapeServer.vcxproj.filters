@@ -16,17 +16,26 @@
     <Filter Include="源文件\Network">
       <UniqueIdentifier>{fac4ffc0-c175-4abc-968a-75224fa134d4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\Network">
+      <UniqueIdentifier>{bd987287-f018-4aed-b2a0-482a6ba1717c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Network\Server.cpp">
+    <ClCompile Include="Source\Network\Server.cpp">
+      <Filter>源文件\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Network\MessageContrl.cpp">
       <Filter>源文件\Network</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Network\Server.h">
+    <ClInclude Include="Header\Network\Server.h">
+      <Filter>头文件\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Network\MessageContrl.h">
       <Filter>源文件\Network</Filter>
     </ClInclude>
   </ItemGroup>

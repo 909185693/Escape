@@ -11,7 +11,8 @@ public class EscapeNetwork : ModuleRules
         PublicIncludePaths.AddRange(
             new string[] {
                 "EscapeNetwork/Public",
-                "EscapeNetwork/Classes"
+                "EscapeNetwork/Classes",
+                "../../Public"
             }
         );
 

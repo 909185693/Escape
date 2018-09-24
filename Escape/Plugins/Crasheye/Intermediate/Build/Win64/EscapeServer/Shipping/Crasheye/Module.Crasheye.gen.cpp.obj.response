@@ -21,7 +21,7 @@
 /wd4838
 /we4668
 /I .
-/I D:\Projects\Escape\Plugins\Crasheye\Source\Crasheye\Private
+/I D:\Projects\Escape\Escape\Plugins\Crasheye\Source\Crasheye\Private
 /I Runtime
 /I Runtime\Core\Public
 /I Runtime\Core
@@ -52,7 +52,7 @@
 /I Runtime\Core\Public\Traits
 /I Runtime\Core\Public\UObject
 /I Runtime\Core\Public\Windows
-/I D:\Projects\Escape\Intermediate\Build\Win64\EscapeServer\Inc\CoreUObject
+/I D:\Projects\Escape\Escape\Intermediate\Build\Win64\EscapeServer\Inc\CoreUObject
 /I Runtime\CoreUObject\Public
 /I Runtime\CoreUObject
 /I Runtime\CoreUObject\Public\Blueprint
@@ -62,7 +62,7 @@
 /I Runtime\CoreUObject\Public\Serialization\Formatters
 /I Runtime\CoreUObject\Public\Templates
 /I Runtime\CoreUObject\Public\UObject
-/I D:\Projects\Escape\Intermediate\Build\Win64\EscapeServer\Inc\Engine
+/I D:\Projects\Escape\Escape\Intermediate\Build\Win64\EscapeServer\Inc\Engine
 /I Runtime\Engine\Classes
 /I Runtime\Engine\Public
 /I Runtime\Engine
@@ -93,7 +93,7 @@
 /I Runtime\Json\Public\Dom
 /I Runtime\Json\Public\Policies
 /I Runtime\Json\Public\Serialization
-/I D:\Projects\Escape\Intermediate\Build\Win64\EscapeServer\Inc\SlateCore
+/I D:\Projects\Escape\Escape\Intermediate\Build\Win64\EscapeServer\Inc\SlateCore
 /I Runtime\SlateCore\Public
 /I Runtime\SlateCore
 /I Runtime\SlateCore\Public\Animation
@@ -110,14 +110,14 @@
 /I Runtime\SlateCore\Public\Textures
 /I Runtime\SlateCore\Public\Types
 /I Runtime\SlateCore\Public\Widgets
-/I D:\Projects\Escape\Intermediate\Build\Win64\EscapeServer\Inc\InputCore
+/I D:\Projects\Escape\Escape\Intermediate\Build\Win64\EscapeServer\Inc\InputCore
 /I Runtime\InputCore\Classes
 /I Runtime\InputCore\Public
 /I Runtime\InputCore
 /I Runtime\InputCore\Public\GenericPlatform
 /I Runtime\InputCore\Public\HAL
 /I Runtime\InputCore\Public\Windows
-/I D:\Projects\Escape\Intermediate\Build\Win64\EscapeServer\Inc\Slate
+/I D:\Projects\Escape\Escape\Intermediate\Build\Win64\EscapeServer\Inc\Slate
 /I Runtime\Slate\Public
 /I Runtime\Slate
 /I Runtime\Slate\Public\Framework
@@ -154,47 +154,47 @@
 /I Runtime\ShaderCore
 /I Runtime\UtilityShaders\Public
 /I Runtime\UtilityShaders
-/I D:\Projects\Escape\Intermediate\Build\Win64\EscapeServer\Inc\AssetRegistry
+/I D:\Projects\Escape\Escape\Intermediate\Build\Win64\EscapeServer\Inc\AssetRegistry
 /I Runtime\AssetRegistry\Public
 /I Runtime\AssetRegistry
-/I D:\Projects\Escape\Intermediate\Build\Win64\EscapeServer\Inc\EngineMessages
+/I D:\Projects\Escape\Escape\Intermediate\Build\Win64\EscapeServer\Inc\EngineMessages
 /I Runtime\EngineMessages\Public
 /I Runtime\EngineMessages
-/I D:\Projects\Escape\Intermediate\Build\Win64\EscapeServer\Inc\EngineSettings
+/I D:\Projects\Escape\Escape\Intermediate\Build\Win64\EscapeServer\Inc\EngineSettings
 /I Runtime\EngineSettings\Classes
 /I Runtime\EngineSettings\Public
 /I Runtime\EngineSettings
 /I Runtime\SynthBenchmark\Public
 /I Runtime\SynthBenchmark
-/I D:\Projects\Escape\Intermediate\Build\Win64\EscapeServer\Inc\Renderer
+/I D:\Projects\Escape\Escape\Intermediate\Build\Win64\EscapeServer\Inc\Renderer
 /I Runtime\Renderer\Public
 /I Runtime\Renderer
-/I D:\Projects\Escape\Intermediate\Build\Win64\EscapeServer\Inc\GameplayTags
+/I D:\Projects\Escape\Escape\Intermediate\Build\Win64\EscapeServer\Inc\GameplayTags
 /I Runtime\GameplayTags\Classes
 /I Runtime\GameplayTags\Public
 /I Runtime\GameplayTags
 /I Runtime\DatabaseSupport\Public
 /I Runtime\DatabaseSupport
-/I D:\Projects\Escape\Intermediate\Build\Win64\EscapeServer\Inc\PacketHandler
+/I D:\Projects\Escape\Escape\Intermediate\Build\Win64\EscapeServer\Inc\PacketHandler
 /I Runtime\PacketHandlers
 /I Runtime\PacketHandlers\PacketHandler\Classes
 /I Runtime\PacketHandlers\PacketHandler\Public
 /I Runtime\PacketHandlers\PacketHandler
 /I Runtime\PacketHandlers\ReliabilityHandlerComponent\Public
 /I Runtime\PacketHandlers\ReliabilityHandlerComponent
-/I D:\Projects\Escape\Intermediate\Build\Win64\EscapeServer\Inc\AudioPlatformConfiguration
+/I D:\Projects\Escape\Escape\Intermediate\Build\Win64\EscapeServer\Inc\AudioPlatformConfiguration
 /I Runtime\AudioPlatformConfiguration\Public
 /I Runtime\AudioPlatformConfiguration
-/I D:\Projects\Escape\Intermediate\Build\Win64\EscapeServer\Inc\MeshDescription
+/I D:\Projects\Escape\Escape\Intermediate\Build\Win64\EscapeServer\Inc\MeshDescription
 /I Runtime\MeshDescription\Public
 /I Runtime\MeshDescription
-/I D:\Projects\Escape\Intermediate\Build\Win64\EscapeServer\Inc\ClothingSystemRuntimeInterface
+/I D:\Projects\Escape\Escape\Intermediate\Build\Win64\EscapeServer\Inc\ClothingSystemRuntimeInterface
 /I Runtime\ClothingSystemRuntimeInterface\Public
 /I Runtime\ClothingSystemRuntimeInterface
 /I Runtime\NetworkReplayStreaming
 /I Runtime\NetworkReplayStreaming\NetworkReplayStreaming\Public
 /I Runtime\NetworkReplayStreaming\NetworkReplayStreaming
-/I D:\Projects\Escape\Intermediate\Build\Win64\EscapeServer\Inc\AudioMixer
+/I D:\Projects\Escape\Escape\Intermediate\Build\Win64\EscapeServer\Inc\AudioMixer
 /I Runtime\AudioMixer\Classes
 /I Runtime\AudioMixer\Public
 /I Runtime\AudioMixer
@@ -203,13 +203,13 @@
 /I ThirdParty
 /I ThirdParty\libSampleRate\Public
 /I ThirdParty\libSampleRate
-/I D:\Projects\Escape\Intermediate\Build\Win64\EscapeServer\Inc\AnimationCore
+/I D:\Projects\Escape\Escape\Intermediate\Build\Win64\EscapeServer\Inc\AnimationCore
 /I Runtime\AnimationCore\Public
 /I Runtime\AnimationCore
-/I D:\Projects\Escape\Plugins\Crasheye\Intermediate\Build\Win64\EscapeServer\Inc\Crasheye
-/I D:\Projects\Escape\Plugins\Crasheye\Source
-/I D:\Projects\Escape\Plugins\Crasheye\Source\Crasheye\Public
-/I D:\Projects\Escape\Plugins\Crasheye\Source\Crasheye
+/I D:\Projects\Escape\Escape\Plugins\Crasheye\Intermediate\Build\Win64\EscapeServer\Inc\Crasheye
+/I D:\Projects\Escape\Escape\Plugins\Crasheye\Source
+/I D:\Projects\Escape\Escape\Plugins\Crasheye\Source\Crasheye\Public
+/I D:\Projects\Escape\Escape\Plugins\Crasheye\Source\Crasheye
 /I "D:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\VC\Tools\MSVC\14.15.26726\INCLUDE"
 /I "C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\include\um"
 /I "C:\Program Files (x86)\Windows Kits\10\include\10.0.16299.0\ucrt"
@@ -218,12 +218,12 @@
 /I "C:\Program Files (x86)\Windows Kits\10\include\10.0.16299.0\winrt"
 /D_HAS_EXCEPTIONS=0
 /D_HAS_EXCEPTIONS=0
-/FI"D:\Projects\Escape\Intermediate\Build\Win64\EscapeServer\Shipping\Engine\SharedPCH.Engine.h"
-/Yu"D:\Projects\Escape\Intermediate\Build\Win64\EscapeServer\Shipping\Engine\SharedPCH.Engine.h"
-/Fp"D:\Projects\Escape\Intermediate\Build\Win64\EscapeServer\Shipping\Engine\SharedPCH.Engine.h.pch"
-"D:\Projects\Escape\Plugins\Crasheye\Intermediate\Build\Win64\EscapeServer\Shipping\Crasheye\Module.Crasheye.gen.cpp"
-/FI"D:\Projects\Escape\Plugins\Crasheye\Intermediate\Build\Win64\EscapeServer\Shipping\Crasheye\Definitions.Crasheye.h"
-/Fo"D:\Projects\Escape\Plugins\Crasheye\Intermediate\Build\Win64\EscapeServer\Shipping\Crasheye\Module.Crasheye.gen.cpp.obj"
+/FI"D:\Projects\Escape\Escape\Intermediate\Build\Win64\EscapeServer\Shipping\Engine\SharedPCH.Engine.h"
+/Yu"D:\Projects\Escape\Escape\Intermediate\Build\Win64\EscapeServer\Shipping\Engine\SharedPCH.Engine.h"
+/Fp"D:\Projects\Escape\Escape\Intermediate\Build\Win64\EscapeServer\Shipping\Engine\SharedPCH.Engine.h.pch"
+"D:\Projects\Escape\Escape\Plugins\Crasheye\Intermediate\Build\Win64\EscapeServer\Shipping\Crasheye\Module.Crasheye.gen.cpp"
+/FI"D:\Projects\Escape\Escape\Plugins\Crasheye\Intermediate\Build\Win64\EscapeServer\Shipping\Crasheye\Definitions.Crasheye.h"
+/Fo"D:\Projects\Escape\Escape\Plugins\Crasheye\Intermediate\Build\Win64\EscapeServer\Shipping\Crasheye\Module.Crasheye.gen.cpp.obj"
 /TP
 /GR-
 /W4

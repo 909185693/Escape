@@ -12,26 +12,26 @@
 
 AEscapeGameMode_Game::AEscapeGameMode_Game(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
-	, MinPlayers(2)
+	, MinPlayers(1)
 	, MaxPlayers(5)
 {
-	// ÉèÖÃÄ¬ÈÏ½ÇÉ«Àà
+	// è®¾ç½®é»˜è®¤è§’è‰²ç±»
 	static ConstructorHelpers::FClassFinder<APawn> DefaultPawnClassFinder(TEXT("/Game/Blueprints/Character/EscapeCharacter_Kwang"));
 	if (DefaultPawnClassFinder.Succeeded())
 	{
 		DefaultPawnClass = DefaultPawnClassFinder.Class;
 	}
 
-	// ÉèÖÃÍæ¼Ò×´Ì¬Àà
+	// è®¾ç½®ç©å®¶çŠ¶æ€ç±»
 	PlayerStateClass = AEscapePlayerState_Game::StaticClass();
 
-	// ÉèÖÃ½ÇÉ«¿ØÖÆÀà
+	// è®¾ç½®è§’è‰²æ§åˆ¶ç±»
 	PlayerControllerClass = AEscapePlayerController_Game::StaticClass();
 
-	// ÉèÖÃHUDÀà
+	// è®¾ç½®HUDç±»
 	HUDClass = AEscapeHUD_Game::StaticClass();
 
-	// ÉèÖÃÓÎÏ·×´Ì¬Àà
+	// è®¾ç½®æ¸¸æˆçŠ¶æ€ç±»
 	GameStateClass = AEscapeGameState::StaticClass();
 }
 

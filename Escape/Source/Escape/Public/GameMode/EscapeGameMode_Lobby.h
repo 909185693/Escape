@@ -7,8 +7,6 @@
 #include "EscapeGameMode_Lobby.generated.h"
 
 
-class UEscapeServer;
-
 /**
  * 
  */
@@ -24,14 +22,4 @@ class ESCAPE_API AEscapeGameMode_Lobby : public AGameModeBase
 	 * @warning: this is called before actors' PreInitializeComponents.
 	 */
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
-
-protected:
-	UPROPERTY(Transient)
-	class UEscapeServer* EscapeServer;
-
-	UPROPERTY(Config)
-	TSubclassOf<UEscapeServer> EscapeServerClass;
-
-	UPROPERTY(Config)
-	FString EscapeServerClassName;	
 };

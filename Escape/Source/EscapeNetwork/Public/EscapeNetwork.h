@@ -4,6 +4,4 @@
 
 #include "CoreMinimal.h"
 #include "EscapeNetworkModule.h"
-#include "EscapeNetworkDelegates.h"
-#include "EscapeServer.h"
 #include "EscapeClient.h"

@@ -56,3 +56,9 @@ Escape/Content/ParagonKwang/Characters/Heroes/Kwang/Materials
 Escape/Content/ParagonKwang/Characters/Heroes/Kwang/Skins
 Escape/Content/ParagonKwang/Characters/Heroes/Kwang/Sounds
 Escape/Content/ParagonKwang/Characters/Heroes/Kwang/Textures
+
+#Server
+WindowsServer
+EscapeServer/x64
+EscapeServer/EscapeServer/x64
+

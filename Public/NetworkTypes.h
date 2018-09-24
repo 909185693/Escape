@@ -1,29 +1,22 @@
-// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
-
 #pragma once
 
-#define ESCAPELOGICSERVER_PACKAGE 0
-#define ESCAPEDEDICATEDSERVER_PACKAGE 0
-#define ESCAPECLIENT_PACKAGE 0
-
-
-enum ELogicCode : uint16
+enum ELogicCode : unsigned short int
 {
 #ifndef DEFINE_LOGIC_CODE
 #define DEFINE_LOGIC_CODE(Name, Value, Desc) \
 Name = Value,
 #endif //DEFINE_LOGIC_CODE
-#include "EscapeLogicCode.h"
+#include "LogicCode.h"
 #undef DEFINE_LOGIC_CODE
 };
 
-enum EErrorCode : uint16
+enum EErrorCode : unsigned short int
 {
 #ifndef DEFINE_ERROR_CODE
 #define DEFINE_ERROR_CODE(Name, Value, Desc) \
 Name = Value,
 #endif //DEFINE_ERROR_CODE
-#include "EscapeErrorCode.h"
+#include "ErrorCode.h"
 #undef DEFINE_ERROR_CODE
 };
 
@@ -32,7 +25,7 @@ struct FDataHeader
 {
 	ELogicCode	Code;
 	EErrorCode	Error;
-	int32		Size;
+	int			Size;
 	char		Valid[6];
 
 	bool IsValid() const
@@ -45,7 +38,7 @@ struct FDataHeader
 			Valid[5] == 'E';
 	};
 
-	void Init(ELogicCode InCode, EErrorCode InError, int32 InSize)
+	void Init(ELogicCode InCode, EErrorCode InError, int InSize)
 	{
 		Valid[0] = 'E';
 		Valid[1] = 'S';
@@ -68,7 +61,7 @@ struct FUserLogin
 
 struct FUser
 {
-	int32	ID;
+	int		ID;
 	char	Nickname[20];
 };
 
@@ -79,7 +72,7 @@ struct FClientTravel
 
 struct FInvitation
 {
-	int32 UserID;
+	int	 UserID;
 };
 
 enum EMatchState
@@ -94,14 +87,9 @@ enum EMatchState
 
 struct FDedicatedServer
 {
-	FDedicatedServer()
-	{
-		FMemory::Memzero(this, sizeof(FDedicatedServer));
-	}
-
-	int32	Port;
-	char	IP[15];
-	char	Guid[128];
-	int32	MinPlayers;
-	int32	MaxPlayers;
+	int						Port;
+	char					IP[15];
+	char					Guid[128];
+	unsigned short int		MinPlayers;
+	unsigned short int		MaxPlayers;
 };

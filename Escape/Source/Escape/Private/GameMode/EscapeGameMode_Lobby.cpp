@@ -9,47 +9,22 @@
 
 AEscapeGameMode_Lobby::AEscapeGameMode_Lobby(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
-	, EscapeServerClassName(TEXT("/Script/EscapeNetwork.EscapeServer"))
 {
-	// ÉèÖÃÄ¬ÈÏ½ÇÉ«Àà
+	// è®¾ç½®é»˜è®¤è§’è‰²ç±»
 	static ConstructorHelpers::FClassFinder<APawn> DefaultPawnClassFinder(TEXT("/Game/Blueprints/Character/EscapeCharacter_Lobby"));
 	if (DefaultPawnClassFinder.Succeeded())
 	{
 		DefaultPawnClass = DefaultPawnClassFinder.Class;
 	}
 
-	// ÉèÖÃÍæ¼Ò×´Ì¬Àà
+	// è®¾ç½®ç©å®¶çŠ¶æ€ç±»
 	PlayerStateClass = AEscapePlayerState_Lobby::StaticClass();
 
-	// ÉèÖÃ½ÇÉ«¿ØÖÆÀà
+	// è®¾ç½®è§’è‰²æ§åˆ¶ç±»
 	PlayerControllerClass = AEscapePlayerController_Lobby::StaticClass();
 }
 
 void AEscapeGameMode_Lobby::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
 {
 	Super::InitGame(MapName, Options, ErrorMessage);
-
-#if ESCAPE_BUILD_SERVER
-	if (GetNetMode() == NM_DedicatedServer)
-	{
-		EscapeServerClass = LoadClass<UEscapeServer>(NULL, *EscapeServerClassName, NULL, LOAD_None, NULL);
-
-		if (EscapeServerClass)
-		{
-			if (EscapeServer == nullptr)
-			{
-				EscapeServer = NewObject<UEscapeServer>(GetTransientPackage(), EscapeServerClass);
-			}
-
-			if (EscapeServer != nullptr)
-			{
-				EscapeServer->Register(Cast<UEscapeEngine>(GetGameInstance()->GetEngine()));
-			}
-		}
-		else
-		{
-			UE_LOG(LogEscape, Error, TEXT("Failed to load class '%s'"), *EscapeServerClassName);
-		}
-	}
-#endif
 }
