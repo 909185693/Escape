@@ -39,7 +39,7 @@
 *.exp
 
 # Folders
-.vs
+Escape/.vs
 Escape/DerivedDataCache
 Escape/Intermediate
 Escape/Saved
@@ -60,5 +60,6 @@ Escape/Content/ParagonKwang/Characters/Heroes/Kwang/Textures
 #Server
 WindowsServer
 EscapeServer/x64
+EscapeServer/.vs
 EscapeServer/EscapeServer/x64
 
