@@ -42,14 +42,14 @@ void UEscapeClient::TickDispatch(float DeltaTime)
 
 					bShouldConnected = false;
 
-					AddMessage(nullptr, ELogicCode::CONNECTION, NETWORK_ERROR);
+					AddMessage(LC_CONNECTION, EC_NETWORKERROR);
 				}
 				break;
 			case ESocketConnectionState::SCS_Connected:
 				ConnectCount = 0;
 				bIsConnected = true;
 				bShouldConnected = false;
-				AddMessage(nullptr, ELogicCode::CONNECTION, EErrorCode::NONE);
+				AddMessage(LC_CONNECTION, EC_NONE);
 				break;
 			}
 		}
@@ -88,26 +88,26 @@ void UEscapeClient::Process()
 		if (RecvFrom(Socket, Data, Code, Error))
 		{
 			bool bSeriousError = false;
-			if (Error == INVALID_DATA)
+			if (Error == EC_INVALIDDATA)
 			{
 				bSeriousError = true;
 
-				AddMessage(nullptr, ELogicCode::CONNECTION, INVALID_DATA);
+				AddMessage(LC_CONNECTION, EC_INVALIDDATA);
 			}
-			else if (Error == NETWORK_ERROR)
+			else if (Error == EC_NETWORKERROR)
 			{
 				if (++ConnectCount > MaxConnectCount)
 				{
 					bSeriousError = true;
 
-					AddMessage(nullptr, ELogicCode::CONNECTION, NETWORK_ERROR);
+					AddMessage(LC_CONNECTION, EC_NETWORKERROR);
 				}
 			}
 			else
 			{
 				ConnectCount = 0;
 
-				AddMessage(Data, Code, Error);
+				AddMessage(Code, Error, Data);
 			}
 
 			if (bSeriousError)
@@ -123,9 +123,9 @@ void UEscapeClient::Send(ELogicCode Code, int32 DataSize, void* Data)
 	if (bIsConnected)
 	{
 		check(Socket);
-		if (!SendTo(Socket, Code, EErrorCode::NONE, DataSize, Data))
+		if (!SendTo(Socket, Code, EC_NONE, DataSize, Data))
 		{
-			AddMessage(nullptr, ELogicCode::CONNECTION, EErrorCode::NETWORK_ERROR);
+			AddMessage(LC_CONNECTION, EC_NETWORKERROR);
 		}
 	}
 }
@@ -162,7 +162,7 @@ void UEscapeClient::BeginDestroy()
 	MessagesCallback.Empty();
 }
 
-void UEscapeClient::AddMessage(void* Data, ELogicCode Code, EErrorCode Error)
+void UEscapeClient::AddMessage(ELogicCode Code, EErrorCode Error, void* Data)
 {
 	MessageQueue.Enqueue(FMessageData(Data, Code, Error));
 

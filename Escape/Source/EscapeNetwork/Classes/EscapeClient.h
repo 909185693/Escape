@@ -11,7 +11,7 @@ class ESCAPENETWORK_API UEscapeClient : public UEscapeNetworkBase
 {
 	GENERATED_UCLASS_BODY()
 
-	virtual bool Register(UEscapeEngine* InEngine) override;
+		virtual bool Register(UEscapeEngine* InEngine) override;
 	virtual void Process() override;
 
 	/// EscapeClient
@@ -39,7 +39,7 @@ protected:
 	typedef TSharedPtr<FClientMessageCallback> FClientMessageCallbackPtr;
 
 	TArray<FClientMessageCallbackPtr> MessagesCallback;
-
+	
 	template <typename UserClass>
 	using FClientMessageCallbackTwoParamsPtr = void(UserClass::*)(void*, EErrorCode);
 
@@ -58,7 +58,7 @@ public:
 	void ClearMessageCallback(UObject* Object)
 	{
 		TArray<FClientMessageCallbackPtr>::TIterator It(MessagesCallback);
-		for ( ; It; ++It)
+		for (; It; ++It)
 		{
 			FClientMessageCallbackPtr CallbackPtr = *It;
 			if (CallbackPtr->Object == Object)
@@ -82,8 +82,8 @@ protected:
 
 		FMessageData()
 			: Data(nullptr)
-			, Code(ELogicCode::INVALID)
-			, Error(EErrorCode::NONE)
+			, Code(LC_INVALID)
+			, Error(EC_NONE)
 		{
 
 		}
@@ -97,19 +97,19 @@ protected:
 
 	TQueue<FMessageData, EQueueMode::Mpsc> MessageQueue;
 
-	virtual void AddMessage(void* Data, ELogicCode Code, EErrorCode Error);
+	void AddMessage(ELogicCode Code, EErrorCode Error, void* Data = nullptr);
 
 protected:
 	UPROPERTY(Config)
-	FString ServerIP;
+		FString ServerIP;
 
 	UPROPERTY(Config)
-	int32 ServerPort;
+		int32 ServerPort;
 
 	int32 ConnectCount;
 
 	UPROPERTY(Config)
-	int32 MaxConnectCount;
+		int32 MaxConnectCount;
 
 	bool bShouldConnected;
 

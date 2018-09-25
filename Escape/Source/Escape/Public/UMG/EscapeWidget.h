@@ -13,8 +13,8 @@ UENUM(BlueprintType)
 enum ENetworkConnection
 {
 	Network_Success,
-	Network_Error = EErrorCode::NETWORK_ERROR,
-	Network_Invalid = EErrorCode::INVALID_DATA
+	Network_Error = EC_NETWORKERROR,
+	Network_Invalid = EC_INVALIDDATA
 };
 
 UCLASS()

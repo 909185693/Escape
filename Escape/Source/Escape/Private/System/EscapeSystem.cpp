@@ -15,7 +15,7 @@ void UEscapeSystem::Register(UEscapeClient* EscapeClient)
 	{
 		EscapeUser = MakeShareable(new FEscapeUser());
 
-		EscapeClient->AddMessageCallback(ELogicCode::USER_LOGIN, this, &UEscapeSystem::UpdateEscapeUser);
+		EscapeClient->AddMessageCallback(LC_USERLOGIN, this, &UEscapeSystem::UpdateEscapeUser);
 	}
 }
 

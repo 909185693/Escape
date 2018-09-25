@@ -182,7 +182,7 @@ void AEscapeGameMode_Game::SyncNumPlayers() const
 	{
 		int32 NewNumPlayers = NumPlayers;
 
-		EscapeClient->Send(ELogicCode::NUMPLAYERS, sizeof(NumPlayers), &NewNumPlayers);
+		EscapeClient->Send(LC_NUMPLAYERS, sizeof(NumPlayers), &NewNumPlayers);
 	}
 }
 
@@ -217,7 +217,7 @@ void AEscapeGameMode_Game::SyncMatchState() const
 			NewMatchState = EMatchState::Aborted;
 		}
 
-		EscapeClient->Send(ELogicCode::MATCH_STATE, sizeof(NewMatchState), &NewMatchState);
+		EscapeClient->Send(LC_MATCHSTATE, sizeof(NewMatchState), &NewMatchState);
 	}
 }
 

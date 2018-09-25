@@ -71,8 +71,8 @@ void AEscapeGameSession::RegisterServer()
 			UEscapeEngine* EscapeEngine = GameInstance ? Cast<UEscapeEngine>(GameInstance->GetEngine()) : nullptr;
 
 			EscapeClient->Register(EscapeEngine);
-			EscapeClient->AddMessageCallback(ELogicCode::CONNECTION, this, &AEscapeGameSession::NotifyConnection);
-			EscapeClient->AddMessageCallback(ELogicCode::REGISTER_SERVER, this, &AEscapeGameSession::NotifyRegisterServer);
+			EscapeClient->AddMessageCallback(LC_CONNECTION, this, &AEscapeGameSession::NotifyConnection);
+			EscapeClient->AddMessageCallback(LC_REGISTERSERVER, this, &AEscapeGameSession::NotifyRegisterServer);
 		}
 	}
 	else
@@ -90,7 +90,7 @@ UEscapeClient* AEscapeGameSession::GetEscapeClient() const
 #if ESCAPE_BUILD_SERVER
 void AEscapeGameSession::NotifyConnection(void* Data, EErrorCode Error)
 {
-	if (Error == EErrorCode::NONE)
+	if (Error == EC_NONE)
 	{
 		if (EscapeClient != nullptr)
 		{
@@ -110,7 +110,7 @@ void AEscapeGameSession::NotifyConnection(void* Data, EErrorCode Error)
 			FPlatformString::Strncpy(DedicatedServer.IP, "127.0.0.1", sizeof(DedicatedServer.IP));
 			FPlatformString::Strncpy(DedicatedServer.Guid, TCHAR_TO_ANSI(*Guid), sizeof(DedicatedServer.Guid));
 
-			EscapeClient->Send(ELogicCode::REGISTER_SERVER, sizeof(FDedicatedServer), &DedicatedServer);
+			EscapeClient->Send(LC_REGISTERSERVER, sizeof(FDedicatedServer), &DedicatedServer);
 
 			UE_LOG(LogEscape, Log, TEXT("Start register this dedicated server to logic server Guid[%s] %s:%d"), *Guid, *URL.Host, URL.Port);
 		}

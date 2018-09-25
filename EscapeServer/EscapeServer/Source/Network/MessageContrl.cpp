@@ -9,13 +9,13 @@ CMessageContrl::CMessageContrl(CServer* InServer)
 	assert(Server);
 
 	//Server->AddToParallelTasks(this);
-	Server->AddCallback(ELogicCode::USER_LOGIN, this, &CMessageContrl::NotifyUserLogin);
-	Server->AddCallback(ELogicCode::MATCH_GAME, this, &CMessageContrl::NotifyMatchGame);
-	Server->AddCallback(ELogicCode::CANCEL_MATCH, this, &CMessageContrl::NotifyCancelGame);
-	Server->AddCallback(ELogicCode::CONNECTION, this, &CMessageContrl::NotifyConnection);
-	Server->AddCallback(ELogicCode::REGISTER_SERVER, this, &CMessageContrl::NotifyRegisterServer);
-	Server->AddCallback(ELogicCode::MATCH_STATE, this, &CMessageContrl::NotifyMatchState);
-	Server->AddCallback(ELogicCode::NUMPLAYERS, this, &CMessageContrl::NotifyNumPlayers);
+	Server->AddCallback(LC_USERLOGIN, this, &CMessageContrl::NotifyUserLogin);
+	Server->AddCallback(LC_MATCHGAME, this, &CMessageContrl::NotifyMatchGame);
+	Server->AddCallback(LC_CANCELMATCH, this, &CMessageContrl::NotifyCancelGame);
+	Server->AddCallback(LC_CONNECTION, this, &CMessageContrl::NotifyConnection);
+	Server->AddCallback(LC_REGISTERSERVER, this, &CMessageContrl::NotifyRegisterServer);
+	Server->AddCallback(LC_MATCHSTATE, this, &CMessageContrl::NotifyMatchState);
+	Server->AddCallback(LC_NUMPLAYERS, this, &CMessageContrl::NotifyNumPlayers);
 }
 
 CMessageContrl::~CMessageContrl()
@@ -34,7 +34,7 @@ CMessageContrl::~CMessageContrl()
 
 void CMessageContrl::NotifyConnection(shared_ptr<FConnection> Connection, void* Data, EErrorCode Error)
 {
-	if (Error != EErrorCode::NONE)
+	if (Error != EC_NONE)
 	{
 		MatchConnections.remove(Connection);
 		PendingConnections.remove(Connection);
@@ -62,11 +62,11 @@ void CMessageContrl::NotifyUserLogin(shared_ptr<FConnection> Connection, void* D
 			FUser SendData;
 			SendData.ID = 10086;
 			strcpy_s(SendData.Nickname, "中文测试Test");
-			Server->SendTo(Connection->Socket, ELogicCode::USER_LOGIN, EErrorCode::NONE, sizeof(FUser), &SendData);
+			Server->SendTo(Connection->Socket, LC_USERLOGIN, EC_NONE, sizeof(FUser), &SendData);
 		}
 		else
 		{
-			Server->SendTo(Connection->Socket, ELogicCode::USER_LOGIN, EErrorCode::PASSWORD_ERROR);
+			Server->SendTo(Connection->Socket, LC_USERLOGIN, EC_PASSWORDERROR);
 		}
 	}
 }
@@ -196,6 +196,19 @@ void CMessageContrl::NotifyNumPlayers(shared_ptr<FConnection> Connection, void* 
 
 void CMessageContrl::ClientTravel()
 {
+	const int MinStartupPlayers = 2;
+	if (MatchConnections.size() >= MinStartupPlayers)
+	{
+		StartupDedicatedServer();
+
+		list<shared_ptr<FConnection>>::const_iterator It = MatchConnections.begin();
+		for (int Index = 0; Index < MinStartupPlayers && It != MatchConnections.end(); ++Index)
+		{
+			PendingConnections.push_back(*It);
+			It = MatchConnections.erase(It);
+		}
+	}
+
 	for (shared_ptr<FDedicatedServerInfo> DedicatedServerInfo : DedicatedServerInfoSessions)
 	{
 		/// 服务器状态
@@ -219,7 +232,7 @@ void CMessageContrl::ClientTravel()
 		/// 匹配玩家
 		if (DedicatedServerInfo->bIsRegister &&
 			DedicatedServerInfo->NumPlayers < DedicatedServerInfo->MaxPlayers &&
-			DedicatedServerInfo->NumPlayers + MatchConnections.size() + PendingConnections.size() >= DedicatedServerInfo->MinPlayers)
+			(int)(DedicatedServerInfo->NumPlayers + MatchConnections.size() + PendingConnections.size()) >= DedicatedServerInfo->MinPlayers)
 		{
 			FClientTravel Travel;
 			char URL[64];
@@ -233,7 +246,7 @@ void CMessageContrl::ClientTravel()
 
 				PendingConnections.erase(It++);
 
-				Server->SendTo(ClientConnection->Socket, ELogicCode::CLIENT_TRAVEL, EErrorCode::NONE, sizeof(FClientTravel), &Travel);
+				Server->SendTo(ClientConnection->Socket, LC_CLIENTTRAVEL, EC_NONE, sizeof(FClientTravel), &Travel);
 
 				if (++DedicatedServerInfo->NumPlayers >= DedicatedServerInfo->MaxPlayers)
 				{
@@ -247,26 +260,13 @@ void CMessageContrl::ClientTravel()
 
 				MatchConnections.erase(It++);
 
-				Server->SendTo(ClientConnection->Socket, ELogicCode::CLIENT_TRAVEL, EErrorCode::NONE, sizeof(FClientTravel), &Travel);
+				Server->SendTo(ClientConnection->Socket, LC_CLIENTTRAVEL, EC_NONE, sizeof(FClientTravel), &Travel);
 
 				if (++DedicatedServerInfo->NumPlayers >= DedicatedServerInfo->MaxPlayers)
 				{
 					break;
 				}
 			}
-		}
-	}
-
-	const int MinStartupPlayers = 2;
-	if (MatchConnections.size() >= MinStartupPlayers)
-	{
-		StartupDedicatedServer();
-
-		list<shared_ptr<FConnection>>::const_iterator It = MatchConnections.begin();
-		for (int Index = 0; Index < MinStartupPlayers && It != MatchConnections.end(); ++Index)
-		{
-			PendingConnections.push_back(*It);
-			It = MatchConnections.erase(It);
 		}
 	}
 }

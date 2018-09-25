@@ -68,17 +68,17 @@ void CServer::Process()
 		{
 			void* Data = nullptr;
 
-			ELogicCode Code = ELogicCode::INVALID;
-			EErrorCode Error = EErrorCode::NONE;
+			ELogicCode Code = LC_INVALID;
+			EErrorCode Error = EC_NONE;
 
 			if (RecvFrom(Connection->Socket, Data, Code, Error))
 			{
 				bool bSeriousError = false;
-				if (Error == INVALID_DATA)
+				if (Error == EC_INVALIDDATA)
 				{
 					bSeriousError = true;
 				}
-				else if (Error == NETWORK_ERROR)
+				else if (Error == EC_NETWORKERROR)
 				{
 					if (++Connection->NetworkErrorCount > MaxNetworkErrorCount)
 					{
@@ -109,7 +109,7 @@ void CServer::Process()
 			{
 				if (Connection == *It)
 				{
-					ExecuteCallback(Connection, ELogicCode::CONNECTION, EErrorCode::NETWORK_ERROR, nullptr);
+					ExecuteCallback(Connection, LC_CONNECTION, EC_NETWORKERROR, nullptr);
 
 					closesocket(Connection->Socket);
 					Connection->Socket = NULL;
@@ -216,8 +216,8 @@ struct timeval Timeout = { 0, 200 };
 struct fd_set Rfds;
 bool CServer::RecvFrom(SOCKET RecvSocket, void*& OutData, ELogicCode& OutCode, EErrorCode& OutError)
 {
-	OutCode = ELogicCode::INVALID;
-	OutError = EErrorCode::NONE;
+	OutCode = LC_INVALID;
+	OutError = EC_NONE;
 
 	FD_ZERO(&Rfds);
 	FD_SET(RecvSocket, &Rfds);
@@ -225,7 +225,7 @@ bool CServer::RecvFrom(SOCKET RecvSocket, void*& OutData, ELogicCode& OutCode, E
 	switch (select(0, &Rfds, NULL, NULL, &Timeout))
 	{
 	case SOCKET_ERROR:
-		OutError = EErrorCode::NETWORK_ERROR;
+		OutError = EC_NETWORKERROR;
 		return true;
 	case 0:
 		break;
@@ -242,7 +242,7 @@ bool CServer::RecvFrom(SOCKET RecvSocket, void*& OutData, ELogicCode& OutCode, E
 
 				if (HeaderSize != BytesRead || !DataHander->IsValid())
 				{
-					OutError = EErrorCode::INVALID_DATA;
+					OutError = EC_INVALIDDATA;
 
 					return true;
 				}
@@ -259,7 +259,7 @@ bool CServer::RecvFrom(SOCKET RecvSocket, void*& OutData, ELogicCode& OutCode, E
 						BytesRead = recv(RecvSocket, (char*)RecvData, DataHander->Size, NULL);
 						if (BytesRead == SOCKET_ERROR)
 						{
-							OutError = EErrorCode::NETWORK_ERROR;
+							OutError = EC_NETWORKERROR;
 
 							return true;
 						}
@@ -272,14 +272,14 @@ bool CServer::RecvFrom(SOCKET RecvSocket, void*& OutData, ELogicCode& OutCode, E
 						}
 					}
 
-					OutError = EErrorCode::NETWORK_ERROR;
+					OutError = EC_NETWORKERROR;
 				}
 
 				return true;
 			}
 			else
 			{
-				OutError = EErrorCode::NETWORK_ERROR;
+				OutError = EC_NETWORKERROR;
 
 				return true;
 			}

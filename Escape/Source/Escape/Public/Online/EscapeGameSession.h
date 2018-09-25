@@ -14,6 +14,7 @@ class ESCAPE_API AEscapeGameSession : public AGameSession
 {
 	GENERATED_UCLASS_BODY()
 	
+	/** Called once this actor has been deleted */
 	virtual void Destroyed() override;
 
 	/** Initialize options based on passed in options string */

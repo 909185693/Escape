@@ -25,7 +25,7 @@ void AEscapePlayerController::BeginPlay()
 	EscapeClient = GameInstance ? GameInstance->GetEscapeClient() : nullptr;
 	if (EscapeClient != nullptr)
 	{
-		EscapeClient->AddMessageCallback(ELogicCode::CLIENT_TRAVEL, this, &AEscapePlayerController::NotifyClientTravel);
+		EscapeClient->AddMessageCallback(LC_CLIENTTRAVEL, this, &AEscapePlayerController::NotifyClientTravel);
 	}
 }
 

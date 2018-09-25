@@ -32,11 +32,14 @@ class UEscapeNetworkBase : public UObject
 	virtual void BeginDestroy() override;
 
 protected:
+	/** Game engine */
 	UPROPERTY(Transient)
 	UEscapeEngine* Engine;
 	
+	/** Online socket */
 	FSocket* Socket;
 
+	/** Online socket subsystem */
 	ISocketSubsystem* SocketSubsystem;
 
 	/** Online async task runnable */

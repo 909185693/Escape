@@ -87,9 +87,9 @@ bool UEscapeNetworkBase::SendTo(FSocket* SendSocket, ELogicCode Code, EErrorCode
 static const FTimespan WaitTime(2000);
 bool UEscapeNetworkBase::RecvFrom(FSocket* RecvSocket, void*& OutData, ELogicCode& OutCode, EErrorCode& OutError)
 {
-	OutCode = ELogicCode::INVALID;
+	OutCode = LC_INVALID;
 
-	OutError = EErrorCode::NONE;
+	OutError = EC_NONE;
 
 	if (!RecvSocket->Wait(ESocketWaitConditions::WaitForRead, WaitTime))
 	{
@@ -106,7 +106,7 @@ bool UEscapeNetworkBase::RecvFrom(FSocket* RecvSocket, void*& OutData, ELogicCod
 
 	if (HeaderSize != BytesRead || !DataHander->IsValid())
 	{
-		OutError = EErrorCode::INVALID_DATA;
+		OutError = EC_INVALIDDATA;
 
 		return true;
 	}
@@ -132,7 +132,7 @@ bool UEscapeNetworkBase::RecvFrom(FSocket* RecvSocket, void*& OutData, ELogicCod
 			}
 		}
 		
-		OutError = EErrorCode::NETWORK_ERROR;
+		OutError = EC_NETWORKERROR;
 
 		return false;
 	}

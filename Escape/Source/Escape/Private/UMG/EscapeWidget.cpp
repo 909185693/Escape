@@ -91,7 +91,7 @@ void UEscapeWidget::RegisterMessageCallback()
 {
 	if (EscapeClient != nullptr)
 	{
-		EscapeClient->AddMessageCallback(ELogicCode::CONNECTION, this, &UEscapeWidget::NotifyConnection);
+		EscapeClient->AddMessageCallback(LC_CONNECTION, this, &UEscapeWidget::NotifyConnection);
 	}
 }
 
