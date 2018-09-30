@@ -1,16 +1,14 @@
 #pragma once
 
 #include <stdio.h>
-#include <winsock2.h>
 #include <memory>
 #include <list>
 #include <vector>
 #include <thread>
 #include <mutex>
 #include <process.h>
+#include "ODSocket.h"
 #include "NetworkTypes.h"
-
-#pragma comment(lib,"ws2_32.lib")
 
 using namespace std;
 
@@ -19,7 +17,7 @@ class CMessageContrl;
 struct FConnection
 {
 public:
-	FConnection(SOCKET InSocket)
+	FConnection(ODSocket InSocket)
 		: Socket(InSocket)
 		, NetworkErrorCount(0)
 	{
@@ -33,12 +31,7 @@ public:
 
 	}
 
-	bool operator==(const FConnection& Other) const
-	{
-		return Socket == Other.Socket;
-	}
-
-	SOCKET Socket;
+	ODSocket Socket;
 
 	unsigned int NetworkErrorCount;
 };
@@ -52,7 +45,7 @@ public:
 	~CServer();
 
 private:
-	SOCKET Socket;
+	ODSocket Socket;
 	shared_ptr<CMessageContrl> CMessageContrlPtr;
 	list<shared_ptr<FConnection>> Connections;
 	list<shared_ptr<FConnection>> ClosedConnections;
@@ -65,8 +58,8 @@ protected:
 
 public:
 	bool Register();
-	bool SendTo(SOCKET SendSocket, ELogicCode Code, EErrorCode Error, int DataSize = 0, void* Data = nullptr);
-	bool RecvFrom(SOCKET RecvSocket, void*& OutData, ELogicCode& OutCode, EErrorCode& OutError);
+	bool SendTo(ODSocket SendSocket, ELogicCode Code, EErrorCode Error, int DataSize = 0, void* Data = nullptr);
+	bool RecvFrom(ODSocket RecvSocket, void*& OutData, ELogicCode& OutCode, EErrorCode& OutError);
 	void CloseConnection(shared_ptr<FConnection> Connection);
 
 protected:

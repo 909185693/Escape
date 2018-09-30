@@ -23,7 +23,10 @@ public class Escape : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[] {
             "Crasheye",
-            "EscapeNetwork"
+            "EscapeNetwork",
+            "GameplayAbilities",
+            "GameplayTags",
+            "GameplayTasks"
         });
 
 		// Uncomment if you are using Slate UI

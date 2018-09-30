@@ -6,7 +6,7 @@
 	{
 		"MajorVersion": 4,
 		"MinorVersion": 20,
-		"PatchVersion": 2,
+		"PatchVersion": 3,
 		"Changelist": 0,
 		"CompatibleChangelist": 4212847,
 		"IsLicenseeVersion": 0,
@@ -3480,6 +3480,14 @@
 			"Type": "SymbolFile"
 		},
 		{
+			"Path": "$(EngineDir)/Plugins/Runtime/GameplayAbilities/Binaries/Win64/UE4Editor-GameplayAbilities.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Runtime/GameplayAbilities/Binaries/Win64/UE4Editor-GameplayAbilities.pdb",
+			"Type": "SymbolFile"
+		},
+		{
 			"Path": "$(EngineDir)/Binaries/Win64/UE4Editor.version",
 			"Type": "BuildResource"
 		},
@@ -3773,6 +3781,10 @@
 		},
 		{
 			"Path": "$(EngineDir)/Binaries/Win64/Lumin/UE4Editor.modules",
+			"Type": "RequiredResource"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Runtime/GameplayAbilities/Binaries/Win64/UE4Editor.modules",
 			"Type": "RequiredResource"
 		}
 	],

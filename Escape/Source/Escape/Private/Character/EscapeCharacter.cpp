@@ -4,6 +4,8 @@
 #include "Escape.h"
 #include "EscapeGameMode_Game.h"
 #include "EscapePlayerController_Game.h"
+#include "EscapeAttributeSet.h"
+#include "EscapeAbilitySystemComponent.h"
 #include "EscapeCharacterMovementComponent.h"
 #include "EscapeWeapon.h"
 #include "Camera/CameraComponent.h"
@@ -23,6 +25,13 @@ AEscapeCharacter::AEscapeCharacter(const class FObjectInitializer& ObjectInitial
 	, TurnInPlaceDelay(0.f)
 {
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.f);
+
+	// Create ability system component, and set it to be explicitly replicated
+	AbilitySystemComponent = CreateDefaultSubobject<UEscapeAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
+	AbilitySystemComponent->SetIsReplicated(true);
+
+	// Create the attribute set, this replicates by default
+	AttributeSet = CreateDefaultSubobject<UEscapeAttributeSet>(TEXT("AttributeSet"));
 
 	// 摄像机杆
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
@@ -86,6 +95,11 @@ void AEscapeCharacter::BeginPlay()
 class UCapsuleComponent* AEscapeCharacter::GetWeaponCollision() const
 {
 	return Weapon ? Weapon->GetCapsuleComponent() : nullptr;
+}
+
+UAbilitySystemComponent* AEscapeCharacter::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
 }
 
 void AEscapeCharacter::EquipWeapon(TSoftClassPtr<AEscapeWeapon> NewWeaponClass)
@@ -587,6 +601,89 @@ void AEscapeCharacter::ServerSetCharactorRotation_Implementation(const FRotator&
 {
 	TargetRotation = NewTargetRotation;
 	CharacterRotation = NewCharactorRotation;
+}
+
+bool AEscapeCharacter::IsAlive() const
+{
+	return GetHealth() > 0.f;
+}
+
+float AEscapeCharacter::GetHealth() const
+{
+	return AttributeSet->GetHealth();
+}
+
+float AEscapeCharacter::GetMaxHealth() const
+{
+	return AttributeSet->GetMaxHealth();
+}
+
+float AEscapeCharacter::GetMana() const
+{
+	return AttributeSet->GetMana();
+}
+
+float AEscapeCharacter::GetMaxMana() const
+{
+	return AttributeSet->GetMaxMana();
+}
+
+float AEscapeCharacter::GetMoveSpeed() const
+{
+	return AttributeSet->GetMoveSpeed();
+}
+
+int32 AEscapeCharacter::GetCharacterLevel() const
+{
+	//return CharacterLevel;
+	return 0;
+}
+
+bool AEscapeCharacter::SetCharacterLevel(int32 NewLevel)
+{
+	//if (CharacterLevel != NewLevel && NewLevel > 0)
+	//{
+	//	// Our level changed so we need to refresh abilities
+	//	RemoveStartupGameplayAbilities();
+	//	CharacterLevel = NewLevel;
+	//	AddStartupGameplayAbilities();
+
+	//	return true;
+	//}
+	return false;
+}
+
+void AEscapeCharacter::HandleDamage(float DamageAmount, const FHitResult& HitInfo, const struct FGameplayTagContainer& DamageTags, AEscapeCharacter* InstigatorPawn, AActor* DamageCauser)
+{
+	OnDamaged(DamageAmount, HitInfo, DamageTags, InstigatorPawn, DamageCauser);
+}
+
+void AEscapeCharacter::HandleHealthChanged(float DeltaValue, const struct FGameplayTagContainer& EventTags)
+{
+	// We only call the BP callback if this is not the initial ability setup
+	if (bAbilitiesInitialized)
+	{
+		OnHealthChanged(DeltaValue, EventTags);
+	}
+}
+
+void AEscapeCharacter::HandleManaChanged(float DeltaValue, const struct FGameplayTagContainer& EventTags)
+{
+	if (bAbilitiesInitialized)
+	{
+		OnManaChanged(DeltaValue, EventTags);
+	}
+}
+
+void AEscapeCharacter::HandleMoveSpeedChanged(float DeltaValue, const struct FGameplayTagContainer& EventTags)
+{
+	// Update the character movement's walk speed
+	GetCharacterMovement()->MaxWalkSpeed = GetMoveSpeed();
+
+	if (bAbilitiesInitialized)
+	{
+		OnMoveSpeedChanged(DeltaValue, EventTags);
+	}
 }
 
 void AEscapeCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const

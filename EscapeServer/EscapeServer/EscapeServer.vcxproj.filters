@@ -30,6 +30,9 @@
     <ClCompile Include="Source\Network\MessageContrl.cpp">
       <Filter>源文件\Network</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Network\ODSocket.cpp">
+      <Filter>源文件\Network</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Header\Network\Server.h">
@@ -37,6 +40,9 @@
     </ClInclude>
     <ClInclude Include="Source\Network\MessageContrl.h">
       <Filter>源文件\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\Network\ODSocket.h">
+      <Filter>头文件\Network</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

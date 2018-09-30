@@ -13,12 +13,12 @@ CServer::~CServer()
 {
 	bProcess = false;
 
-	closesocket(Socket);
+	Socket.Close();
 
 	/// 关闭连接
 	for (shared_ptr<FConnection> Connection : Connections)
 	{
-		closesocket(Connection->Socket);
+		Connection->Socket.Close();
 		Connection->Socket = NULL;
 	}
 
@@ -29,7 +29,7 @@ CServer::~CServer()
 		{
 			if (Connection == *It)
 			{
-				closesocket(Connection->Socket);
+				Connection->Socket.Close();
 				Connection->Socket = NULL;
 
 				It = Connections.erase(It);
@@ -41,9 +41,9 @@ CServer::~CServer()
 		}
 	}
 
-	CMessageContrlPtr.reset();
+	ODSocket::Clean();
 
-	WSACleanup();
+	CMessageContrlPtr.reset();
 }
 
 void CServer::Process()
@@ -134,43 +134,32 @@ void CServer::Process()
 
 bool CServer::Register()
 {
-	WORD SockVersion = MAKEWORD(2, 2);
-	WSADATA WsaData;
-	if (WSAStartup(SockVersion, &WsaData) != 0)
+	ODSocket::Init();
+	
+	if (!Socket.Create(AF_INET, SOCK_STREAM, 0))
 	{
-		return 0;
-	}
-
-	Socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (Socket == INVALID_SOCKET)
-	{
-		printf("socket error!\r\n");
+		printf("Socket create error!\r\n");
 
 		return false;
 	}
 
-	sockaddr_in Addr;
-	Addr.sin_family = AF_INET;
-	Addr.sin_port = htons(8800);
-	Addr.sin_addr.S_un.S_addr = INADDR_ANY;
-	if (::bind(Socket, (LPSOCKADDR)&Addr, sizeof(Addr)) == SOCKET_ERROR)
+	if (!Socket.Bind(8800))
 	{
-		printf("bind error !\r\n");
+		printf("Socket bind error !\r\n");
 
 		return false;
 	}
 
-	if (::listen(Socket, 0) == SOCKET_ERROR)
+	if (!Socket.Listen(0))
 	{
-		printf("listen error !\r\n");
+		printf("Socket listen error !\r\n");
 
 		return false;
 	}
-
-	int iMode = 1;
-	if (::ioctlsocket(Socket, FIONBIO, (u_long FAR*) &iMode) == SOCKET_ERROR)
+	
+	if (!Socket.NonBlocking())
 	{
-		printf("ioctlsocket failed!\r\n");
+		printf("Socket non blocking !\r\n");
 
 		return false;
 	}
@@ -182,10 +171,16 @@ bool CServer::Register()
 
 	printf("Startup server.\r\n");
 
+	char IP[20];
+	if (ODSocket::DnsParse("http:://www.baidu.com", IP))
+	{
+		printf_s("IP : %s", IP);
+	}
+
 	return true;
 }
 
-bool CServer::SendTo(SOCKET SendSocket, ELogicCode Code, EErrorCode Error, int DataSize, void* Data)
+bool CServer::SendTo(ODSocket SendSocket, ELogicCode Code, EErrorCode Error, int DataSize, void* Data)
 {
 	int Count = DataSize + sizeof(FDataHeader);
 	void* SendData = malloc(Count);
@@ -198,7 +193,7 @@ bool CServer::SendTo(SOCKET SendSocket, ELogicCode Code, EErrorCode Error, int D
 		memcpy((void*)(DataHeader + 1), Data, DataSize);
 	}
 
-	int BytesSent = send(SendSocket, (char*)SendData, Count, NULL);
+	int BytesSent = Socket.Send((char*)SendData, Count);
 
 	free(SendData);
 
@@ -214,7 +209,7 @@ bool CServer::SendTo(SOCKET SendSocket, ELogicCode Code, EErrorCode Error, int D
 
 struct timeval Timeout = { 0, 200 };
 struct fd_set Rfds;
-bool CServer::RecvFrom(SOCKET RecvSocket, void*& OutData, ELogicCode& OutCode, EErrorCode& OutError)
+bool CServer::RecvFrom(ODSocket RecvSocket, void*& OutData, ELogicCode& OutCode, EErrorCode& OutError)
 {
 	OutCode = LC_INVALID;
 	OutError = EC_NONE;
@@ -235,7 +230,7 @@ bool CServer::RecvFrom(SOCKET RecvSocket, void*& OutData, ELogicCode& OutCode, E
 			const int HeaderSize = sizeof(FDataHeader);
 			char HeaderData[HeaderSize];
 
-			int BytesRead = recv(RecvSocket, HeaderData, HeaderSize, NULL);
+			int BytesRead = RecvSocket.Recv(HeaderData, HeaderSize, NULL);
 			if (BytesRead != SOCKET_ERROR)
 			{
 				FDataHeader* DataHander = (FDataHeader*)HeaderData;
@@ -256,7 +251,7 @@ bool CServer::RecvFrom(SOCKET RecvSocket, void*& OutData, ELogicCode& OutCode, E
 
 					while (BytesRead > 0)
 					{
-						BytesRead = recv(RecvSocket, (char*)RecvData, DataHander->Size, NULL);
+						BytesRead = RecvSocket.Recv((char*)RecvData, DataHander->Size, NULL);
 						if (BytesRead == SOCKET_ERROR)
 						{
 							OutError = EC_NETWORKERROR;

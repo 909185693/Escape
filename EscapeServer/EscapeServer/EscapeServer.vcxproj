@@ -80,7 +80,7 @@
     <IncludePath>../EscapeServer/Header;../../Public;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>../EscapeServer/Header;../../Public;$(IncludePath)</IncludePath>
+    <IncludePath>../../Public;../EscapeServer/Header;../EscapeServer/Header/Network;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -124,6 +124,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <DisableSpecificWarnings>4819</DisableSpecificWarnings>
+      <PreprocessorDefinitions>WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -133,9 +134,11 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Source\Network\MessageContrl.cpp" />
+    <ClCompile Include="Source\Network\ODSocket.cpp" />
     <ClCompile Include="Source\Network\Server.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Header\Network\ODSocket.h" />
     <ClInclude Include="Header\Network\Server.h" />
     <ClInclude Include="Source\Network\MessageContrl.h" />
   </ItemGroup>
