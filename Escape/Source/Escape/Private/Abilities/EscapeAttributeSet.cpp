@@ -1,7 +1,6 @@
 // Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 
 #include "EscapeAttributeSet.h"
-//#include "Abilities/EscapeAbilitySystemComponent.h"
 #include "EscapeCharacter.h"
 #include "UnrealNetwork.h"
 #include "GameplayEffect.h"
@@ -31,6 +30,7 @@ void UEscapeAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	DOREPLIFETIME(UEscapeAttributeSet, AttackPower);
 	DOREPLIFETIME(UEscapeAttributeSet, DefensePower);
 	DOREPLIFETIME(UEscapeAttributeSet, MoveSpeed);
+	DOREPLIFETIME(UEscapeAttributeSet, AttackSpeed);
 }
 
 void UEscapeAttributeSet::OnRep_Health()
@@ -66,6 +66,11 @@ void UEscapeAttributeSet::OnRep_DefensePower()
 void UEscapeAttributeSet::OnRep_MoveSpeed()
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UEscapeAttributeSet, MoveSpeed);
+}
+
+void UEscapeAttributeSet::OnRep_AttackSpeed()
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UEscapeAttributeSet, AttackSpeed);
 }
 
 void UEscapeAttributeSet::AdjustAttributeForMaxChange(FGameplayAttributeData& AffectedAttribute, const FGameplayAttributeData& MaxAttribute, float NewMaxValue, const FGameplayAttribute& AffectedAttributeProperty)

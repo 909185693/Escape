@@ -70,7 +70,7 @@ void AEscapeGameSession::RegisterServer()
 			UGameInstance* GameInstance = GetGameInstance();
 			UEscapeEngine* EscapeEngine = GameInstance ? Cast<UEscapeEngine>(GameInstance->GetEngine()) : nullptr;
 
-			EscapeClient->Register(EscapeEngine);
+			EscapeClient->Register();
 			EscapeClient->AddMessageCallback(LC_CONNECTION, this, &AEscapeGameSession::NotifyConnection);
 			EscapeClient->AddMessageCallback(LC_REGISTERSERVER, this, &AEscapeGameSession::NotifyRegisterServer);
 		}

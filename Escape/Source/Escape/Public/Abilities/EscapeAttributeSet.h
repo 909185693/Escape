@@ -61,6 +61,11 @@ public:
 	FGameplayAttributeData MoveSpeed;
 	ATTRIBUTE_ACCESSORS(UEscapeAttributeSet, MoveSpeed)
 
+	/** AttackSpeed affects how fast characters can attack */
+	UPROPERTY(BlueprintReadOnly, Category = "MoveSpeed", ReplicatedUsing = OnRep_AttackSpeed)
+	FGameplayAttributeData AttackSpeed;
+	ATTRIBUTE_ACCESSORS(UEscapeAttributeSet, AttackSpeed)
+
 	/** Damage is a 'temporary' attribute used by the DamageExecution to calculate final damage, which then turns into -Health */
 	UPROPERTY(BlueprintReadOnly, Category = "Mana", meta = (HideFromLevelInfos))
 	FGameplayAttributeData Damage;
@@ -91,4 +96,7 @@ protected:
 
 	UFUNCTION()
 	virtual void OnRep_MoveSpeed();
+
+	UFUNCTION()
+	virtual void OnRep_AttackSpeed();
 };

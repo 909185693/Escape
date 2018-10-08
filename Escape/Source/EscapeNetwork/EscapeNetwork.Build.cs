@@ -32,7 +32,6 @@ public class EscapeNetwork : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
             {
-                "Escape",
                 "Core",
                 "CoreUObject",
 				"Engine",

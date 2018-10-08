@@ -13,7 +13,7 @@ UEscapeNetworkBase::UEscapeNetworkBase(const FObjectInitializer& ObjectInitializ
 
 }
 
-bool UEscapeNetworkBase::Register(UEscapeEngine* InEngine)
+bool UEscapeNetworkBase::Register()
 {
 	FString Error;
 	if (!InitBase(Error))
@@ -22,11 +22,9 @@ bool UEscapeNetworkBase::Register(UEscapeEngine* InEngine)
 		return false;
 	}
 
-	Engine = InEngine;
-	if (Engine != nullptr)
-	{
-		TickDispatchDelegateHandle = Engine->OnTickDispatch().AddUObject(this, &UEscapeNetworkBase::TickDispatch);
-	}
+	// Register delegate for ticker callback
+	TickDelegate = FTickerDelegate::CreateUObject(this, &UEscapeNetworkBase::Tick);
+	TickDelegateHandle = FTicker::GetCoreTicker().AddTicker(TickDelegate);
 
 	OnlineAsyncTaskThreadRunnable = new FEscapeOnlineAsyncTaskManager(this);
 	check(OnlineAsyncTaskThreadRunnable);
@@ -140,11 +138,6 @@ bool UEscapeNetworkBase::RecvFrom(FSocket* RecvSocket, void*& OutData, ELogicCod
 	return true;
 }
 
-UEscapeEngine* UEscapeNetworkBase::GetEngine() const
-{
-	return Engine;
-}
-
 void UEscapeNetworkBase::AddToParallelTasks(FOnlineAsyncTask* NewTask)
 {
 	if (OnlineAsyncTaskThreadRunnable != nullptr)
@@ -157,10 +150,8 @@ void UEscapeNetworkBase::BeginDestroy()
 {
 	Super::BeginDestroy();
 
-	if (Engine != nullptr)
-	{
-		Engine->OnTickDispatch().Remove(TickDispatchDelegateHandle);
-	}
+	// Unregister ticker delegate
+	FTicker::GetCoreTicker().RemoveTicker(TickDelegateHandle);
 
 	if (OnlineAsyncTaskThread)
 	{

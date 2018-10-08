@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
 #include "GameFramework/Character.h"
+#include "EscapeTypes.h"
 #include "EscapeCharacter.generated.h"
 
 
@@ -51,17 +52,6 @@ protected:
 	/** Overridable native event for when play begins for this actor. */
 	virtual void BeginPlay() override;
 
-	/**
-	 * Apply damage to this actor.
-	 * @see https://www.unrealengine.com/blog/damage-in-ue4
-	 * @param DamageAmount		How much damage to apply
-	 * @param DamageEvent		Data package that fully describes the damage received.
-	 * @param EventInstigator	The Controller responsible for the damage.
-	 * @param DamageCauser		The Actor that directly caused the damage (e.g. the projectile that exploded, the rock that landed on you)
-	 * @return					The amount of damage actually applied.
-	 */
-	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
-
 	/** switch to ragdoll */
 	virtual void SetRagdollPhysics();
 
@@ -89,16 +79,6 @@ protected:
 	 *	@param	DeltaSeconds	Game time elapsed during last frame modified by the time dilation
 	 */
 	virtual void Tick(float DeltaTime) override;
-		
-protected:
-	UPROPERTY(EditAnywhere, Category = "Property")
-	float AttackSpeed;
-
-	UPROPERTY(EditAnywhere, Replicated, Category = "Property")
-	float Health;
-
-	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Property")
-	float MaxHealth;
 	
 public:
 	class AEscapeWeapon* GetWeapon() const { return Weapon; }
@@ -274,6 +254,10 @@ protected:
 	UPROPERTY()
 	int32 bAbilitiesInitialized;
 
+	/** Map of slot to ability granted by that slot. I may refactor this later */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Inventory)
+	TMap<FEscapeItemSlot, FGameplayAbilitySpecHandle> SlottedAbilities;
+
 public:
 	/** Returns current pawn is alive */
 	UFUNCTION(BlueprintCallable)
@@ -299,6 +283,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual float GetMoveSpeed() const;
 
+	/** Returns current movement speed */
+	UFUNCTION(BlueprintCallable)
+	virtual float GetAttackSpeed() const;
+
 	/** Returns the character level that is passed to the ability system */
 	UFUNCTION(BlueprintCallable)
 	virtual int32 GetCharacterLevel() const;
@@ -306,6 +294,34 @@ public:
 	/** Modifies the character level, this may change abilities. Returns true on success */
 	UFUNCTION(BlueprintCallable)
 	virtual bool SetCharacterLevel(int32 NewLevel);
+
+	/**
+	 * Attempts to activate any ability in the specified item slot. Will return false if no activatable ability found or activation fails
+	 * Returns true if it thinks it activated, but it may return false positives due to failure later in activation.
+	 * If bAllowRemoteActivation is true, it will remotely activate local/server abilities, if false it will only try to locally activate the ability
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Abilities")
+	bool ActivateAbilitiesWithItemSlot(FEscapeItemSlot ItemSlot, bool bAllowRemoteActivation = true);
+
+	/** Returns a list of active abilities bound to the item slot. This only returns if the ability is currently running */
+	UFUNCTION(BlueprintCallable, Category = "Abilities")
+	void GetActiveAbilitiesWithItemSlot(FEscapeItemSlot ItemSlot, TArray<UEscapeGameplayAbility*>& ActiveAbilities);
+
+	/**
+	 * Attempts to activate all abilities that match the specified tags
+	 * Returns true if it thinks it activated, but it may return false positives due to failure later in activation.
+	 * If bAllowRemoteActivation is true, it will remotely activate local/server abilities, if false it will only try to locally activate the ability
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Abilities")
+	bool ActivateAbilitiesWithTags(FGameplayTagContainer AbilityTags, bool bAllowRemoteActivation = true);
+
+	/** Returns a list of active abilities matching the specified tags. This only returns if the ability is currently running */
+	UFUNCTION(BlueprintCallable, Category = "Abilities")
+	void GetActiveAbilitiesWithTags(FGameplayTagContainer AbilityTags, TArray<UEscapeGameplayAbility*>& ActiveAbilities);
+
+	/** Returns total time and remaining time for cooldown tags. Returns false if no active cooldowns found */
+	UFUNCTION(BlueprintCallable, Category = "Abilities")
+	bool GetCooldownRemainingForTag(FGameplayTagContainer CooldownTags, float& TimeRemaining, float& CooldownDuration);
 
 	// Called from EscapeAttributeSet, these call BP events above
 	virtual void HandleDamage(float DamageAmount, const FHitResult& HitInfo, const struct FGameplayTagContainer& DamageTags, AEscapeCharacter* InstigatorCharacter, AActor* DamageCauser);

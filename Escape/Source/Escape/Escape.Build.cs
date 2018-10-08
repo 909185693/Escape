@@ -26,7 +26,7 @@ public class Escape : ModuleRules
             "EscapeNetwork",
             "GameplayAbilities",
             "GameplayTags",
-            "GameplayTasks"
+            "GameplayTasks",
         });
 
 		// Uncomment if you are using Slate UI

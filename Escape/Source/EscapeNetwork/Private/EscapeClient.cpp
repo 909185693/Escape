@@ -13,14 +13,14 @@ UEscapeClient::UEscapeClient(const FObjectInitializer& ObjectInitializer)
 
 }
 
-bool UEscapeClient::Register(UEscapeEngine* InEngine)
+bool UEscapeClient::Register()
 {
-	bShouldConnected = Super::Register(InEngine);
+	bShouldConnected = Super::Register();
 	
 	return bShouldConnected;
 }
 
-void UEscapeClient::TickDispatch(float DeltaTime)
+bool UEscapeClient::Tick(float DeltaTime)
 {
 	if (Socket != nullptr)
 	{
@@ -71,6 +71,8 @@ void UEscapeClient::TickDispatch(float DeltaTime)
 			FMemory::Free(MessageData.Data);
 		}
 	}
+
+	return true;
 }
 
 void UEscapeClient::Process()

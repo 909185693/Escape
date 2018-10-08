@@ -5,10 +5,9 @@
 #include "Object.h"
 #include "Sockets.h"
 #include "IPAddress.h"
+#include "NetworkTypes.h"
 #include "OnlineSubsystem.h"
 #include "SocketSubsystem.h"
-#include "NetworkTypes.h"
-#include "EscapeEngine.h"
 #include "EscapeNetworkModule.h"
 #include "EscapeOnlineAsyncTaskManager.h"
 #include "EscapeNetworkBase.generated.h"
@@ -19,23 +18,19 @@ class UEscapeNetworkBase : public UObject
 {
 	GENERATED_UCLASS_BODY()
 
-	virtual bool Register(UEscapeEngine* InEngine);
+	virtual bool Register();
 	virtual bool InitBase(FString& Error);
 	virtual bool SendTo(FSocket* Socket, ELogicCode Code, EErrorCode Error, int32 DataSize = 0, void* Data = nullptr);
 	virtual bool RecvFrom(FSocket* Socket, void*& OutData, ELogicCode& OutCode, EErrorCode& OutError);
-	virtual void TickDispatch(float DeltaTime) PURE_VIRTUAL(UEscapeNetworkBase::TickDispatch, );
-	virtual void Process() PURE_VIRTUAL(UEscapeNetworkBase::Process, );
 	virtual void AddToParallelTasks(FOnlineAsyncTask* NewTask);
-	virtual class UEscapeEngine* GetEngine() const;
+
+	virtual bool Tick(float DeltaTime) { return true; }
+	virtual void Process() {}
 
 	/// UObject 
 	virtual void BeginDestroy() override;
 
-protected:
-	/** Game engine */
-	UPROPERTY(Transient)
-	UEscapeEngine* Engine;
-	
+protected:	
 	/** Online socket */
 	FSocket* Socket;
 
@@ -48,6 +43,9 @@ protected:
 	/** Online async task thread */
 	class FRunnableThread* OnlineAsyncTaskThread;
 
-	/** Handles to various registered delegates */
-	FDelegateHandle TickDispatchDelegateHandle;
+	/** Delegate for callbacks to Tick */
+	FTickerDelegate TickDelegate;
+
+	/** Handle to various registered delegates */
+	FDelegateHandle TickDelegateHandle;
 };

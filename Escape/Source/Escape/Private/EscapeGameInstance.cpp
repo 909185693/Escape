@@ -37,7 +37,7 @@ void UEscapeGameInstance::Init()
 
 			if (EscapeClient != nullptr)
 			{
-				EscapeClient->Register(Cast<UEscapeEngine>(GetEngine()));
+				EscapeClient->Register();
 
 				EscapeSystem = NewObject<UEscapeSystem>(GetTransientPackage(), UEscapeSystem::StaticClass());
 				EscapeSystem->Register(EscapeClient);

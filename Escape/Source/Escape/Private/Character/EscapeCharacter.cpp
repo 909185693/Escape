@@ -21,7 +21,6 @@
 
 AEscapeCharacter::AEscapeCharacter(const class FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UEscapeCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
-	, AttackSpeed(1.f)
 	, TurnInPlaceDelay(0.f)
 {
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.f);
@@ -51,7 +50,6 @@ AEscapeCharacter::AEscapeCharacter(const class FObjectInitializer& ObjectInitial
 		FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 	}
 
-	Health = 1000.f;
 	DamagedPauseFPSTime = 0.1f;
 
 	LaunchSpeed = 1800.f;
@@ -89,7 +87,6 @@ void AEscapeCharacter::BeginPlay()
 
 	TargetRotation = ActorRotation;
 	CharacterRotation = ActorRotation;
-	MaxHealth = Health;
 }
 
 class UCapsuleComponent* AEscapeCharacter::GetWeaponCollision() const
@@ -155,36 +152,6 @@ TEnumAsByte<ECardinalDirection::Type> AEscapeCharacter::ConvertDirection(float N
 	{
 		return ECardinalDirection::Backwards;
 	}
-}
-
-float AEscapeCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
-{
-	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-
-	bool bIsCrit = FMath::FRand() <= 0.2f;
-
-	ActualDamage = (1.f + FMath::FRand() * 0.2f) * ActualDamage * (bIsCrit ? 2.f : 1.f);
-
-	Health = FMath::Max(0.f, Health - ActualDamage);
-
-	APawn* InstigatorPawn = EventInstigator ? EventInstigator->GetPawn() : nullptr;
-
-	FHitResult HitResult;
-	FVector ImpulseDir;
-
-	DamageEvent.GetBestHitInfo(this, InstigatorPawn, HitResult, ImpulseDir);
-
-	const bool bKilled = !IsAlive();
-
-	PlayHit(ActualDamage, bIsCrit, bKilled, InstigatorPawn, DamageCauser, HitResult);
-
-	AEscapeGameMode_Game* GameMode = GetWorld()->GetAuthGameMode<AEscapeGameMode_Game>();
-	if (GameMode != nullptr)
-	{
-		GameMode->NotifyTakeDamage(ActualDamage, bKilled, this, EventInstigator);
-	}
-
-	return ActualDamage;
 }
 
 void AEscapeCharacter::SetRagdollPhysics()
@@ -325,6 +292,8 @@ void AEscapeCharacter::Attack()
 		if (ComboTable.IsValidIndex(AttackCount))
 		{
 			DamagedClear();
+
+			const float AttackSpeed = GetAttackSpeed();
 
 			PlayAnimMontage(ComboTable[AttackCount].Montage, AttackSpeed);
 		}
@@ -633,6 +602,11 @@ float AEscapeCharacter::GetMoveSpeed() const
 	return AttributeSet->GetMoveSpeed();
 }
 
+float AEscapeCharacter::GetAttackSpeed() const
+{
+	return AttributeSet->GetAttackSpeed();
+}
+
 int32 AEscapeCharacter::GetCharacterLevel() const
 {
 	//return CharacterLevel;
@@ -650,6 +624,88 @@ bool AEscapeCharacter::SetCharacterLevel(int32 NewLevel)
 
 	//	return true;
 	//}
+	return false;
+}
+
+bool AEscapeCharacter::ActivateAbilitiesWithItemSlot(FEscapeItemSlot ItemSlot, bool bAllowRemoteActivation)
+{
+	FGameplayAbilitySpecHandle* FoundHandle = SlottedAbilities.Find(ItemSlot);
+
+	if (FoundHandle && AbilitySystemComponent)
+	{
+		return AbilitySystemComponent->TryActivateAbility(*FoundHandle, bAllowRemoteActivation);
+	}
+
+	return false;
+}
+
+void AEscapeCharacter::GetActiveAbilitiesWithItemSlot(FEscapeItemSlot ItemSlot, TArray<UEscapeGameplayAbility*>& ActiveAbilities)
+{
+	FGameplayAbilitySpecHandle* FoundHandle = SlottedAbilities.Find(ItemSlot);
+
+	if (FoundHandle && AbilitySystemComponent)
+	{
+		FGameplayAbilitySpec* FoundSpec = AbilitySystemComponent->FindAbilitySpecFromHandle(*FoundHandle);
+
+		if (FoundSpec)
+		{
+			TArray<UGameplayAbility*> AbilityInstances = FoundSpec->GetAbilityInstances();
+
+			// Find all ability instances executed from this slot
+			for (UGameplayAbility* ActiveAbility : AbilityInstances)
+			{
+				ActiveAbilities.Add(Cast<UEscapeGameplayAbility>(ActiveAbility));
+			}
+		}
+	}
+}
+
+bool AEscapeCharacter::ActivateAbilitiesWithTags(FGameplayTagContainer AbilityTags, bool bAllowRemoteActivation)
+{
+	if (AbilitySystemComponent)
+	{
+		return AbilitySystemComponent->TryActivateAbilitiesByTag(AbilityTags, bAllowRemoteActivation);
+	}
+
+	return false;
+}
+
+void AEscapeCharacter::GetActiveAbilitiesWithTags(FGameplayTagContainer AbilityTags, TArray<UEscapeGameplayAbility*>& ActiveAbilities)
+{
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->GetActiveAbilitiesWithTags(AbilityTags, ActiveAbilities);
+	}
+}
+
+bool AEscapeCharacter::GetCooldownRemainingForTag(FGameplayTagContainer CooldownTags, float& TimeRemaining, float& CooldownDuration)
+{
+	if (AbilitySystemComponent && CooldownTags.Num() > 0)
+	{
+		TimeRemaining = 0.f;
+		CooldownDuration = 0.f;
+
+		FGameplayEffectQuery const Query = FGameplayEffectQuery::MakeQuery_MatchAnyOwningTags(CooldownTags);
+		TArray< TPair<float, float> > DurationAndTimeRemaining = AbilitySystemComponent->GetActiveEffectsTimeRemainingAndDuration(Query);
+		if (DurationAndTimeRemaining.Num() > 0)
+		{
+			int32 BestIdx = 0;
+			float LongestTime = DurationAndTimeRemaining[0].Key;
+			for (int32 Idx = 1; Idx < DurationAndTimeRemaining.Num(); ++Idx)
+			{
+				if (DurationAndTimeRemaining[Idx].Key > LongestTime)
+				{
+					LongestTime = DurationAndTimeRemaining[Idx].Key;
+					BestIdx = Idx;
+				}
+			}
+
+			TimeRemaining = DurationAndTimeRemaining[BestIdx].Key;
+			CooldownDuration = DurationAndTimeRemaining[BestIdx].Value;
+
+			return true;
+		}
+	}
 	return false;
 }
 
@@ -686,10 +742,7 @@ void AEscapeCharacter::HandleMoveSpeedChanged(float DeltaValue, const struct FGa
 	}
 }
 
-void AEscapeCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
+void AEscapeCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(AEscapeCharacter, Health);
-	DOREPLIFETIME(AEscapeCharacter, MaxHealth);
 }
